@@ -39,6 +39,19 @@ overrides, and the calibration format. This file owns only the procedure.
 If a task category is already listed explicitly in the policy, that listing wins
 — score it anyway, but say so when the score disagrees.
 
+Then read `${CLAUDE_PROJECT_DIR}/.claude/model-calibration.jsonl` if it exists.
+It is absent on a fresh project; that is normal, and you proceed on the policy
+alone. When it exists, look only at entries whose `category` matches this task:
+
+- **Three or more entries with `escalated: true`** → the policy routes this
+  category too cheaply. Recommend one tier up and say the log drove it.
+- **Three or more entries with `escalated: false` and `corrections: 0` at Opus
+  or above** → routed too expensively. Recommend one tier down.
+- **Fewer than three, or mixed** → not yet a signal. Ignore it and route on the
+  score.
+
+Logged evidence outranks the score; it does not outrank a hard override.
+
 ## 2. Check the hard overrides first
 
 If the task matches any entry under **Hard overrides** in the policy, skip the
@@ -129,7 +142,17 @@ Escalate if:
 - <a second signal>
 
 Suggested command: `claude --model <alias> --effort <level>`
+
+Calibration line (append after the task, with the real outcome filled in):
+{"date":"<today>","category":"<slug>","model":"<alias>","effort":"<level or null>","escalated":null,"corrections":null,"minutes":null,"tests":null,"rework":null,"note":"scored N/15"}
 ```
+
+Emit the calibration line every time, with `date`, `category`, `model`, `effort`,
+and the score in `note` already filled in and the outcome fields left `null` —
+those are only knowable after the task runs. Reuse an existing `category` slug
+from the log whenever one fits; inventing a near-duplicate slug is what stops the
+log from ever reaching the three-entry threshold. **Do not write the file** —
+`Write` is disallowed here by design, and the user decides what goes in the log.
 
 Two conditional sections, each included **only** when its condition holds:
 

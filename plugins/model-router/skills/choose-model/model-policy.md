@@ -193,22 +193,45 @@ repeatedly switching a long-running main conversation.
 
 ## Calibration
 
-Benchmarks are a prior; your own completed tasks are evidence. Append one JSON
-object per line to `${CLAUDE_SKILL_DIR}/calibration.jsonl`:
+Benchmarks are a prior; your own completed tasks are evidence.
+
+**The log lives at `${CLAUDE_PROJECT_DIR}/.claude/model-calibration.jsonl`** — in
+the project, not beside this file. A plugin's own directory is replaced on every
+update and is documented as ephemeral, so a log kept there would be silently
+wiped the first time the plugin is upgraded. The project path also keeps the
+history next to the codebase whose routing it describes, which is the scope that
+actually matters: routing that fits an Oracle-backed service will not fit a
+static site.
+
+The skill **never writes this file.** It is an advisor with `Write` disallowed,
+and that restriction is worth more than the convenience of self-logging. Instead
+it reads the log when present and emits a ready-to-append line; you decide
+whether the entry is honest:
+
+```sh
+mkdir -p .claude
+# paste the line the skill emitted
+echo '{"date":"2026-07-28",...}' >> .claude/model-calibration.jsonl
+```
+
+One JSON object per line. See `calibration.example.jsonl` next to this file for a
+populated sample.
 
 ```json
-{"date":"2026-07-28","category":"oracle-isolation","model":"opus","effort":"high","escalated":false,"corrections":2,"minutes":24,"tests":"pass","rework":false,"note":"scoring said 11/15, matched"}
+{"date":"2026-07-28","category":"oracle-isolation","model":"opus","effort":"high","escalated":false,"corrections":2,"minutes":24,"tests":"pass","rework":false,"note":"scored 11/15, matched"}
 ```
 
 | Field | Meaning |
 | --- | --- |
-| `category` | Short task-category slug, reused across entries |
-| `model` / `effort` | What was actually started with |
+| `date` | ISO date the task ran |
+| `category` | Short task-category slug, reused across entries — this is the join key |
+| `model` / `effort` | What was actually started with, not what was recommended |
 | `escalated` | Whether a stronger model or effort was needed mid-task |
 | `corrections` | Number of user corrections during the task |
 | `minutes` | Wall-clock duration |
 | `tests` | `pass`, `fail`, or `none` |
 | `rework` | Whether the result required architectural rework afterward |
+| `note` | Free text; recording the score and whether it matched is the most useful thing to put here |
 
 Revise the routing tables above when a category accumulates entries pointing the
 same way — repeated `escalated: true` means the entry is routed too cheaply;
