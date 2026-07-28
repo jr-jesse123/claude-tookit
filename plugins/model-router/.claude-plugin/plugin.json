@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "model-router",
+  "displayName": "Model Router",
+  "description": "Recommends the cheapest Claude model, effort level, and execution shape that will complete a task reliably, from a versioned routing policy.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["model-selection", "effort", "cost", "routing"]
+}

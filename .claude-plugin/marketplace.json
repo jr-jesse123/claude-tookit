@@ -19,6 +19,17 @@
       }
     },
     {
+      "name": "model-router",
+      "source": "./plugins/model-router",
+      "description": "Recommends the cheapest Claude model, effort level, and execution shape that will complete a task reliably, from a versioned routing policy.",
+      "category": "productivity",
+      "keywords": ["model-selection", "effort", "cost", "routing"],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "devops-tools",
       "source": "./plugins/devops-tools",
       "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",
