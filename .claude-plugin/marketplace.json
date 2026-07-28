@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "jr-claude-toolkit",
+  "description": "Plugins de produtividade para Claude Code: skills, agents, commands e hooks.",
+  "owner": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "plugins": [
+    {
+      "name": "code-review",
+      "source": "./plugins/code-review",
+      "description": "Fast, focused review of uncommitted changes plus a security-focused subagent.",
+      "category": "quality",
+      "keywords": ["review", "quality", "security", "git"],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
+      "name": "devops-tools",
+      "source": "./plugins/devops-tools",
+      "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",
+      "category": "devops",
+      "keywords": ["deploy", "ci", "changelog", "safety"],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    }
+  ]
+}

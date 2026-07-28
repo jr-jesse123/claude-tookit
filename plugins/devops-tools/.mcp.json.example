@@ -1,0 +1,19 @@
+{
+  "_comment": "Rename this file to .mcp.json to ship an MCP server with the plugin. Claude Code loads .mcp.json from the plugin root automatically and asks the user to approve each server. Use ${CLAUDE_PLUGIN_ROOT} for every path inside the plugin — plugins run from a cache directory, not from this repo.",
+  "mcpServers": {
+    "example-stdio": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/example/index.js"],
+      "env": {
+        "DATA_DIR": "${CLAUDE_PLUGIN_ROOT}/data"
+      }
+    },
+    "example-http": {
+      "type": "http",
+      "url": "https://mcp.example.com/v1",
+      "headers": {
+        "Authorization": "Bearer ${EXAMPLE_API_TOKEN}"
+      }
+    }
+  }
+}

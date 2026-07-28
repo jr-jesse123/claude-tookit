@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "devops-tools",
+  "displayName": "DevOps Tools",
+  "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["deploy", "ci", "changelog", "safety"]
+}
