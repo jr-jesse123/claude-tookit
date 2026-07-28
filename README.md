@@ -31,6 +31,19 @@ Para atualizar quando este repo mudar:
 | skill | `/code-review:quick-review` | Revisa as mudanças não commitadas: correção, edge cases, sobras de debug, contratos quebrados, testes faltando. |
 | agent | `code-review:security-reviewer` | Subagente que audita injection, authn/authz, segredos, path traversal, desserialização e cripto. Só lê — nunca edita. |
 
+### `model-router`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/model-router:choose-model` | Recomenda o modelo, o `--effort` e a forma de execução mais baratos que dão conta da tarefa. Pontua 5 dimensões (novidade, horizonte, força do oráculo, blast radius, escala de contexto) e aplica uma regra de decisão explícita. |
+| referência | `model-policy.md` | Fonte única da política: papéis dos modelos, escada de effort, roteamento por categoria, overrides de risco, formato do log de calibração. |
+
+A skill lê a política via `${CLAUDE_SKILL_DIR}` — para mudar roteamento, edite só
+[`model-policy.md`](plugins/model-router/skills/choose-model/model-policy.md). A skill
+contém apenas o procedimento, sem critérios de modelo duplicados.
+
+Só recomenda; nunca executa (`Edit`/`Write` estão em `disallowed-tools`).
+
 ### `devops-tools`
 
 | Componente | Nome | O que faz |
@@ -53,6 +66,11 @@ claude-tookit/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── skills/quick-review/SKILL.md
 │   │   └── agents/security-reviewer.md
+│   ├── model-router/
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/choose-model/
+│   │       ├── SKILL.md
+│   │       └── model-policy.md      # arquivo de apoio, lido via ${CLAUDE_SKILL_DIR}
 │   └── devops-tools/
 │       ├── .claude-plugin/plugin.json
 │       ├── skills/deploy-check/SKILL.md
