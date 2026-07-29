@@ -44,6 +44,22 @@ contém apenas o procedimento, sem critérios de modelo duplicados.
 
 Só recomenda; nunca executa (`Edit`/`Write` estão em `disallowed-tools`).
 
+### `git-narrator`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/git-narrator:narrate` | **Fase 1 — planejamento.** Analisa a branch, fatia as mudanças (docs de intenção → domínio+testes → suporte+testes → wiring+E2E), detecta explorações add→remove e pergunta o destino de cada uma (ADR, par reconstruído, ou descartar). Apresenta o plano e só delega após aprovação. |
+| agent | `git-narrator:executor` | **Fase 2 — execução.** Roda o protocolo: backup ref, `reset --soft`, staging fatiado, gate de build/testes por commit, e a verificação de que a árvore final é byte-idêntica. Sem `Edit`/`Write`. |
+| referência | `execution-protocol.md` | O contrato dos gates, compartilhado pelas duas fases. |
+
+Três decisões de desenho que valem conhecer antes de usar:
+
+- **Reconstrói, não rebaseia.** `reset --soft` até a merge-base e recommit fatiado. Sem conflitos por construção, e o invariante fica verificável: `git diff <backup> HEAD` tem que ser vazio, ou aborta.
+- **Todo commit compila.** Testes viajam junto com o código que testam — separar quebraria `git bisect`, que é justamente quem consome esse histórico. Gate configurável: `build` (padrão), `scoped`, `full`.
+- **Gate vermelho é erro de fatiamento, não de código.** A árvore é imutável; a única correção é mover arquivo entre fatias. Até 3 rodadas, depois funde os dois commits.
+
+Aborto sempre restaura do backup ref, e o relatório traz o comando de restore mesmo quando dá certo.
+
 ### `devops-tools`
 
 | Componente | Nome | O que faz |

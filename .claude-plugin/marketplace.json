@@ -30,6 +30,17 @@
       }
     },
     {
+      "name": "git-narrator",
+      "source": "./plugins/git-narrator",
+      "description": "Re-narrates a feature branch before merge: rebuilds messy exploratory history into a semantic commit sequence, with a byte-identical final tree and per-commit build gates.",
+      "category": "git",
+      "keywords": ["git", "history", "rebase", "commits", "review"],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "devops-tools",
       "source": "./plugins/devops-tools",
       "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",
