@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "comment-curator",
+  "displayName": "Comment Curator",
+  "description": "Lifecycle review of code comments: verifies them against the code they describe, deletes noise, keeps load-bearing constraints. Diff-scoped by default, path-scoped on demand.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["comments", "code-quality", "cleanup", "review"]
+}

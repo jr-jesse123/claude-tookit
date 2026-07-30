@@ -60,6 +60,20 @@ Três decisões de desenho que valem conhecer antes de usar:
 
 Aborto sempre restaura do backup ref, e o relatório traz o comando de restore mesmo quando dá certo.
 
+### `comment-curator`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/comment-curator:curate` | Revisa o ciclo de vida dos comentários — no diff atual (default) ou num arquivo/pasta que você passar. Três vereditos: **stale** (contradiz o código — corrige ou remove, sempre com citação da contradição), **delete** (ruído: narração, código comentado, artefatos de sessão LLM), **keep** (restrições que o código não consegue expressar). Nada é editado antes de você aprovar a tabela de vereditos. |
+
+Regras que valem conhecer: na dúvida, mantém (delete errado perde conhecimento;
+keep errado custa uma linha); doc comments de API pública são contrato e nunca
+saem por redundância; headers de licença, pragmas e arquivos gerados são
+intocáveis; em modo caminho, comentário humano antigo tem prior de manutenção
+(`git log -L` distingue origem humana de LLM). Depois de editar, auto-diff
+confirma que só linhas de comentário mudaram, e o build do projeto (se
+descobrível) confirma que nada funcional saiu junto.
+
 ### `devops-tools`
 
 | Componente | Nome | O que faz |
@@ -86,7 +100,17 @@ claude-tookit/
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/choose-model/
 │   │       ├── SKILL.md
-│   │       └── model-policy.md      # arquivo de apoio, lido via ${CLAUDE_SKILL_DIR}
+│   │       ├── model-policy.md      # arquivo de apoio, lido via ${CLAUDE_SKILL_DIR}
+│   │       └── calibration.example.jsonl
+│   ├── git-narrator/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/narrate/
+│   │   │   ├── SKILL.md             # fase 1: análise e plano
+│   │   │   └── execution-protocol.md
+│   │   └── agents/executor.md       # fase 2: execução mecânica
+│   ├── comment-curator/
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/curate/SKILL.md
 │   └── devops-tools/
 │       ├── .claude-plugin/plugin.json
 │       ├── skills/deploy-check/SKILL.md
