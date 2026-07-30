@@ -41,6 +41,17 @@
       }
     },
     {
+      "name": "comment-curator",
+      "source": "./plugins/comment-curator",
+      "description": "Lifecycle review of code comments: verifies them against the code they describe, deletes noise, keeps load-bearing constraints. Diff-scoped by default, path-scoped on demand.",
+      "category": "quality",
+      "keywords": ["comments", "code-quality", "cleanup", "review"],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "devops-tools",
       "source": "./plugins/devops-tools",
       "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",
