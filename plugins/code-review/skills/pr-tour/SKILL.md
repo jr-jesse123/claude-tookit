@@ -84,6 +84,31 @@ vs "what does the hot spot look like inside?") and carries a one-line title
 naming that question. If two diagrams answer the same question, keep one. The
 criterion is clarity, never quantity.
 
+**Picking the type.** The reviewer's question selects the diagram — dense
+procedural blocks in the diff deserve the type that matches their shape:
+
+| Complexity in the diff | Reviewer's question | Diagram |
+| --- | --- | --- |
+| Structure: new modules, dependencies, wiring | who depends on whom? | `flowchart` |
+| Imperative procedure; runtime interaction between components | in what order? who calls whom? | `sequenceDiagram` — `alt`/`loop`/`par` for branches, retries, parallelism |
+| Lifecycle, entity status, flags, retry/backoff | what states exist, what triggers each transition? | `stateDiagram-v2` |
+| Schema, migrations, data model | how do the entities relate? | `erDiagram` |
+| Contracts between types (inheritance, composition) | what is the contract between types? | `classDiagram` |
+| Dense conditional logic (validation, routing, dispatch) | which path does the input take? | `flowchart` with decision nodes |
+| Broad diff touching many loosely related areas | what areas does this change touch? | `mindmap` |
+| Phased work: rollout, migration steps, deprecation | what happens in which phase? | `timeline` |
+
+A `sequenceDiagram` needs two or more participants exchanging messages — a
+single-actor linear procedure reads better as the numbered list it already
+is. A state machine hiding in scattered `if`s is the case most worth drawing:
+it is exactly where a reviewer gets lost reading a diff.
+
+The tour's first goal is the reviewer's own comprehension, above PR-page
+rendering — pick whichever type fits, including `mindmap` and `timeline`,
+when it is the right tool for that situation. Only if the user says they will
+paste the tour into GitHub, note that `mindmap`/`timeline` render less
+reliably there and offer a `flowchart`/list fallback.
+
 ## Report — reading order
 
 Per group, a numbered list. Each entry has three parts:
