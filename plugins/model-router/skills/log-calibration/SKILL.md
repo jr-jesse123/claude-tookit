@@ -19,7 +19,7 @@ disallowed-tools:
 Append one entry to `${CLAUDE_PROJECT_DIR}/.claude/model-calibration.jsonl`
 describing how the task that just finished actually went. The schema and the
 thresholds that consume this log live in the choose-model skill's
-`model-policy.md` — this skill only records, it never routes.
+`calibration.md` — this skill only records, it never routes.
 
 **The one rule: outcomes come from evidence, not optimism.** Every field you
 fill must be traceable to something that happened in this session. If you
@@ -33,7 +33,8 @@ From the current session, determine:
 | Field | Where it comes from |
 | --- | --- |
 | `category` | Read the existing log first (`.claude/model-calibration.jsonl`) and **reuse a slug** when one fits — inventing near-duplicate slugs is what stops categories from ever reaching the three-entry threshold. If the advisor ran, its calibration command names the slug it chose. |
-| `model` / `effort` | What the task **actually started with**, not what was recommended. Omit `effort` for haiku. |
+| `provider` | `anthropic` (default) or `openai` — the provider of the model the task ran on. |
+| `model` / `effort` | What the task **actually started with**, not what was recommended. Omit `effort` for models that take none (haiku); each provider has its own level names — log the literal level used. |
 | `escalated` | `true` only if a stronger model or higher effort was actually needed mid-task (the user switched, or the work had to be redone on a stronger tier). |
 | `corrections` | Count the user turns that corrected your work — wrong approach, wrong output, missed requirement. Clarifications and scope additions are not corrections. |
 | `minutes` | Wall-clock duration if it is evident or the user tells you. Omit otherwise. |
@@ -54,7 +55,8 @@ field before touching the file:
 
 ```sh
 python3 "${CLAUDE_SKILL_DIR}/log-calibration.py" \
-  --category "<slug>" --model <alias> --effort <level> \
+  --provider <anthropic|openai> --category "<slug>" \
+  --model <alias> --effort <level> \
   --escalated <true|false> --corrections <n> --minutes <n> \
   --tests <pass|fail|none> --rework <true|false> \
   --note "<free text>"

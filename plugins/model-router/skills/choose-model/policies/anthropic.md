@@ -1,13 +1,26 @@
-# Claude Code model routing policy
+# Anthropic provider policy
 
-Last reviewed: 2026-07-28
+Last reviewed: 2026-08-05
 
-This file is the **single source of truth for routing decisions**. `SKILL.md` owns
-the procedure for applying it; it deliberately contains no model criteria of its
-own. When routing changes, change it here only.
+This file is the **routing data for the Anthropic provider**. `SKILL.md` owns
+the rubric, the tier layer, and the procedure; this file maps Anthropic models
+onto the tiers and carries everything model-specific. When Anthropic routing
+changes, change it here only.
 
 Treat this as policy, not as a claim about model capability. Update it when your
-own logged evidence contradicts it — see [Calibration](#calibration).
+own logged evidence contradicts it — see `../calibration.md`.
+
+## Tier mapping
+
+| Tier | Model | Notes |
+| --- | --- | --- |
+| mechanical | `haiku` | 200K context — disqualified when input approaches it |
+| workhorse | `sonnet` | |
+| frontier | `opus` | |
+| exceptional | `fable` | Costs exactly 2× Opus per token — that ratio is the whole economic argument |
+
+`claude-opus-4-8` sits outside the ladder: regression comparison, compatibility
+with an already-evaluated workflow, and the documented refusal fallback only.
 
 ## Baseline
 
@@ -20,8 +33,6 @@ own logged evidence contradicts it — see [Calibration](#calibration).
 | `claude-opus-4-8` | Regression and compatibility only | `high` | 1M | $5 / $25 |
 
 Prices as of 2026-07-28; Sonnet has a promotional $2/$10 rate through 2026-08-31.
-**Fable costs exactly 2× Opus per token** — that ratio is the whole economic
-argument for the top of the ladder, so keep it in view when recommending it.
 
 > **Do not pass `--effort` with `haiku`.** Haiku 4.5 does not accept the effort
 > parameter; the four other rows accept `low`, `medium`, `high`, `xhigh`, `max`.
@@ -38,6 +49,19 @@ argument for the top of the ladder, so keep it in view when recommending it.
 | `high` | Judgment is the bottleneck; the Opus default |
 | `xhigh` | **Coding and agentic work on Opus**, and long execution horizons |
 | `max` | Correctness matters more than cost, and the task is not latency-sensitive. Prone to overthinking on simple work — never a default |
+
+### Horizon → effort mapping
+
+Applied to the level the rubric's dimension 2 produces:
+
+| Horizon | Sonnet | Opus |
+| --- | --- | --- |
+| 0–1 | `medium` | `high` |
+| 2 | `high` | `xhigh` |
+| 3 | `high` | `xhigh`, or `max` when correctness dominates cost |
+
+Coding and agentic work on Opus starts at `xhigh` regardless of horizon — that
+is the policy's starting point, not an escalation.
 
 Escalating effort is cheaper than escalating model. Exhaust the ladder within a
 tier before moving up a tier, **except** when the bottleneck is judgment rather
@@ -124,7 +148,7 @@ also the documented fallback target when Opus 5 declines a request — see
 
 ## Escalation ladder
 
-Apply in order unless a [hard override](#hard-overrides) fires.
+Apply in order unless a hard override (see `SKILL.md` step 2) fires.
 
 1. Haiku for obviously mechanical work.
 2. Sonnet `medium` for normal development.
@@ -146,20 +170,6 @@ architectural understanding is the bottleneck; when the cheaper model reaches
 plausible but shallow conclusions repeatedly; when the problem is substantially
 novel; or when there is hidden semantic or operational risk.
 
-## Hard overrides
-
-Go straight to Opus `high` or above, skipping the scoring in `SKILL.md`, when the
-task involves:
-
-- possible data loss or corruption;
-- concurrency or transaction semantics;
-- security boundaries;
-- a production migration;
-- distributed consistency;
-- a weak or misleading test oracle;
-- irreversible architectural consequences;
-- unfamiliar compiler or runtime behavior.
-
 ## Refusals on security-adjacent work
 
 Opus 5 and Fable 5 ship elevated cybersecurity safeguards and can decline a
@@ -177,6 +187,10 @@ organizations configured for zero retention.
 
 ## Execution-shape notes
 
+Suggested command shape: `claude --model <alias> --effort <level>` (omit
+`--effort` for haiku). Anthropic models run natively in Claude Code — no
+harness switch, and the session's prompt cache survives.
+
 Two Opus 5 behaviors change which shape is worth recommending:
 
 - **It verifies its own work unprompted.** Do not recommend a separate
@@ -190,62 +204,3 @@ Two Opus 5 behaviors change which shape is worth recommending:
 Switching the model of a running conversation invalidates its prompt cache and
 re-reads the history at full price. Prefer a new session or a subagent over
 repeatedly switching a long-running main conversation.
-
-## Calibration
-
-Benchmarks are a prior; your own completed tasks are evidence.
-
-**The log lives at `${CLAUDE_PROJECT_DIR}/.claude/model-calibration.jsonl`** — in
-the project, not beside this file. A plugin's own directory is replaced on every
-update and is documented as ephemeral, so a log kept there would be silently
-wiped the first time the plugin is upgraded. The project path also keeps the
-history next to the codebase whose routing it describes, which is the scope that
-actually matters: routing that fits an Oracle-backed service will not fit a
-static site.
-
-The advisor **never writes this file.** It runs before the task, and every
-outcome field (`escalated`, `corrections`, `tests`, …) is only knowable after
-the task ends — so an entry written at recommendation time cannot be honest.
-The advisor reads the log when present and emits a ready-to-run logging
-command with the outcome flags left as placeholders.
-
-**Recording an entry — in order of preference:**
-
-1. **`/log-calibration`** (same plugin) — invoke at the end of the task. It
-   fills the outcome fields from what actually happened in the session, shows
-   you the entry for confirmation, and appends via the bundled
-   `log-calibration.py` script. The script is the plugin's only write path:
-   append-only, fixed to `.claude/model-calibration.jsonl`, and it validates
-   every field against this schema before writing — which is why it can be
-   allowlisted on its own without granting a blanket `Write` permission.
-2. **Run the emitted command yourself**, filling in the placeholders.
-3. **Manual append** (no plugin available):
-
-```sh
-mkdir -p .claude
-echo '{"date":"2026-07-28",...}' >> .claude/model-calibration.jsonl
-```
-
-One JSON object per line. See `calibration.example.jsonl` next to this file for a
-populated sample.
-
-```json
-{"date":"2026-07-28","category":"oracle-isolation","model":"opus","effort":"high","escalated":false,"corrections":2,"minutes":24,"tests":"pass","rework":false,"note":"scored 11/15, matched"}
-```
-
-| Field | Meaning |
-| --- | --- |
-| `date` | ISO date the task ran |
-| `category` | Short task-category slug, reused across entries — this is the join key |
-| `model` / `effort` | What was actually started with, not what was recommended |
-| `escalated` | Whether a stronger model or effort was needed mid-task |
-| `corrections` | Number of user corrections during the task |
-| `minutes` | Wall-clock duration |
-| `tests` | `pass`, `fail`, or `none` |
-| `rework` | Whether the result required architectural rework afterward |
-| `note` | Free text; recording the score and whether it matched is the most useful thing to put here |
-
-Revise the routing tables above when a category accumulates entries pointing the
-same way — repeated `escalated: true` means the entry is routed too cheaply;
-repeated `escalated: false` with zero corrections at a high tier means it is
-routed too expensively. One surprising task is noise; five in a category are not.
