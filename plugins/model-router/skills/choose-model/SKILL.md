@@ -102,6 +102,27 @@ Score only these. Each is one line of justification in the output.
 | 4 | **Blast radius** | Local and easily reversible | Normal application defect | Cross-layer, or production/data risk | Failure could silently corrupt behavior or data |
 | 5 | **Context scale** | Small and self-contained | Normal repository exploration | Large codebase or long history | Very large or multi-repository |
 
+### Sizing an agent definition (design-time use)
+
+When the input is an agent definition rather than a single task — the `model:`
+field of a Claude Code subagent, a Managed Agent config, a Codex agent — the
+same rubric applies with three adjustments:
+
+- **Score the distribution, not one task.** Rate the agent's *common hard
+  case*: the task it exists to get right, not the rare worst case and not the
+  average. A review agent that mostly sees trivial diffs but must catch subtle
+  semantic defects scores on the subtle defect — that is the job.
+- **The execution shape is predetermined** — the agent definition *is* the
+  shape. Output `Execution shape: predetermined (agent definition)` and spend
+  the recommendation on tier and effort; the suggested command becomes the
+  config line to put in the definition (e.g. `model: sonnet`, or the provider
+  policy's equivalent).
+- **Use the agent's name as the calibration `category` slug.** Design-time
+  choices multiply across every future invocation, and this closes the loop on
+  them: three clean entries at the frontier tier for that slug is the log
+  telling you to downgrade the definition's model field; three escalations is
+  the log telling you to upgrade it.
+
 ## 4. Decision rule → capability tier
 
 Providers are compared through four abstract tiers; each policy maps its own
