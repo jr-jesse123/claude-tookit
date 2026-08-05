@@ -24,6 +24,10 @@ Decide which diff to tour, in this order:
    as a branch name instead.
 2. `$ARGUMENTS` is a branch → diff it against the merge-base with the default
    branch: `git diff $(git symbolic-ref refs/remotes/origin/HEAD)...<branch>`.
+   If the symbolic ref is not set in this clone, fall back to `origin/main`,
+   then `origin/master`. Run `git fetch origin` first when the remote refs
+   look stale — a stale base silently drags already-merged work into the
+   tour.
 3. No argument → same as 2, with the current branch.
 
 Also gather `git log --oneline` and `git diff --stat` for the same range. Use
@@ -40,14 +44,19 @@ The diff alone rarely shows how pieces relate — read before you narrate.
 1. Tag each changed file with a role: **contract** (types, schemas,
    interfaces, public API), **core logic**, **wiring** (call sites, routes,
    DI, config), **tests**, **generated** (lockfiles, snapshots, build
-   output).
+   output). These roles are a lens, not a form — for a diff that is mostly
+   docs, config, or prose, substitute roles that fit (e.g. spec, procedure,
+   example, manifest).
 2. With Read and Grep, trace the connections *among the changed files*: which
    changed function is called by which changed caller, which new type flows
    into which consumer. This graph drives both the narrative and the order.
 3. Split into independent groups. Two files belong to the same group only if
    one calls, imports, or tests the other — directly or through another
    changed file. A feature, an unrelated refactor, and a dependency bump are
-   three groups.
+   three groups. Docs and metadata that call nothing (README, manifests,
+   changelogs) join the group they describe; when one such file spans several
+   groups, put those files in a final housekeeping group instead of forcing
+   them into one.
 
 ## Report — how the changes connect
 
