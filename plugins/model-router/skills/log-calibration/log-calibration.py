@@ -66,6 +66,8 @@ def main() -> int:
     parser.add_argument("--escalated", required=True, type=bool_flag, metavar="{true,false}", help="a stronger model or effort was needed mid-task")
     parser.add_argument("--corrections", required=True, type=non_negative_int, help="number of user corrections during the task")
     parser.add_argument("--minutes", type=non_negative_int, help="wall-clock duration; omit if unknown")
+    parser.add_argument("--tokens-in", type=non_negative_int, help="input tokens consumed (e.g. from /cost); omit if unknown")
+    parser.add_argument("--tokens-out", type=non_negative_int, help="output tokens generated, thinking included; omit if unknown")
     parser.add_argument("--tests", required=True, choices=TESTS)
     parser.add_argument("--rework", required=True, type=bool_flag, metavar="{true,false}", help="the result needed architectural rework afterward")
     parser.add_argument("--note", required=True, help="free text; include the advisor's score and whether it matched")
@@ -108,6 +110,8 @@ def main() -> int:
         "escalated": args.escalated,
         "corrections": args.corrections,
         "minutes": args.minutes,
+        "tokens_in": args.tokens_in,
+        "tokens_out": args.tokens_out,
         "tests": args.tests,
         "rework": args.rework,
         "note": args.note,

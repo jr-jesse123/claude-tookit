@@ -206,6 +206,29 @@ entries confirm or demote these like any prior.
   the exceptional-tier answer when even Opus's window discipline is the
   binding constraint.
 
+## Token economics (input)
+
+Output volume is steerable (effort, `max_tokens`, prompting) and is therefore
+not legislated here — the calibration log measures it per category instead.
+Input-side token density is not steerable; these notes exist so the price
+tie-break (SKILL.md step 5.2) uses real counts:
+
+- **Tokenizers differ within this provider.** Sonnet 5's tokenizer produces
+  ~30% more tokens than Sonnet 4.6's for the same text; the Opus 4.7+/Fable
+  tokenizer runs ~1×–1.35× vs pre-4.7 models. `[vendor]` A count measured on
+  one model is invalid on another — re-measure, never scale by feel.
+- **Measure, don't estimate.** `count_tokens` is model-specific and cheap.
+  When price decides a cross-provider or cross-tier tie on an input-heavy
+  task, run the actual input through each candidate's counter before
+  comparing — one API call per candidate beats any multiplier.
+- **Caching bends the effective input rate by ~10×.** Cache reads bill at
+  ~0.1× base input; an input-heavy session with a warm cache pays a fraction
+  of sticker. This compounds with ecosystem affinity (step 5.3): the provider
+  whose harness already holds the session's cache wins input-heavy ties
+  almost by default.
+- **No long-context surcharge** at 1M (see Context behavior) — the input rate
+  is flat where OpenAI's is reportedly not.
+
 ## Refusals on security-adjacent work
 
 Opus 5 and Fable 5 ship elevated cybersecurity safeguards and can decline a

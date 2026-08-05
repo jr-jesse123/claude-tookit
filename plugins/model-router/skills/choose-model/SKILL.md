@@ -159,6 +159,11 @@ name which rule decided in the output:
 2. **Price.** $/MTok at the tier — the only directly comparable axis across
    providers. Compare the blended cost for the task's expected shape
    (input-heavy exploration vs output-heavy generation), not just the sticker.
+   For input-heavy tasks the sticker alone is wrong twice: tokenizers differ
+   across models and providers (the same file yields different counts — never
+   reuse a count measured on another model), and caching/surcharge rules bend
+   the effective input rate. See each policy's **Token economics** section;
+   when a multiplier is unknown, say so instead of faking precision.
 3. **Ecosystem affinity.** Prefer the provider whose harness the session is
    already running in. Claude Code executes only Claude models — recommending
    an OpenAI model implies a different harness (Codex CLI, a Responses API

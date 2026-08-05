@@ -38,6 +38,7 @@ From the current session, determine:
 | `escalated` | `true` only if a stronger model or higher effort was actually needed mid-task (the user switched, or the work had to be redone on a stronger tier). |
 | `corrections` | Count the user turns that corrected your work — wrong approach, wrong output, missed requirement. Clarifications and scope additions are not corrections. |
 | `minutes` | Wall-clock duration if it is evident or the user tells you. Omit otherwise. |
+| `tokens_in` / `tokens_out` | From `/cost` or the harness's usage display, if available. Omit otherwise — never estimate token counts. |
 | `tests` | `pass` / `fail` from the last relevant test run in the session; `none` if nothing was run. |
 | `rework` | `true` only if the result required architectural rework afterward. |
 | `note` | Include the advisor's score (`"scored N/15"`) if a choose-model recommendation exists in the conversation, and whether the recommendation matched reality. `$ARGUMENTS`, if provided, goes here too. |
