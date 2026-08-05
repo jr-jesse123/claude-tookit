@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "code-review",
   "displayName": "Code Review",
-  "description": "Fast, focused review of uncommitted changes plus a security-focused subagent.",
+  "description": "Fast, focused review of uncommitted changes, a guided PR reading tour, plus a security-focused subagent.",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"
