@@ -35,14 +35,19 @@ Para atualizar quando este repo mudar:
 
 | Componente | Nome | O que faz |
 | --- | --- | --- |
-| skill | `/model-router:choose-model` | Recomenda o modelo, o `--effort` e a forma de execução mais baratos que dão conta da tarefa. Pontua 5 dimensões (novidade, horizonte, força do oráculo, blast radius, escala de contexto) e aplica uma regra de decisão explícita. |
-| referência | `model-policy.md` | Fonte única da política: papéis dos modelos, escada de effort, roteamento por categoria, overrides de risco, formato do log de calibração. |
+| skill | `/model-router:choose-model` | Recomenda o modelo, o effort e a forma de execução mais baratos que dão conta da tarefa, entre os provedores aceitos (Anthropic e OpenAI). Pontua 5 dimensões (novidade, horizonte, força do oráculo, blast radius, escala de contexto), converte em um tier abstrato e deixa cada policy de provedor nomear o candidato. Pesquisa online opcional (`--research`) quando policy e log não cobrem o caso. |
+| skill | `/model-router:log-calibration` | Invocada ao fim da tarefa: preenche os outcomes a partir da sessão, confirma com você e faz append no log via script validado — o único caminho de escrita do plugin. |
+| referência | `policies/anthropic.md`, `policies/openai.md` | Uma policy por provedor: mapeamento de tiers, escada de effort, preços, categorias, notas de execução. Carregadas por progressive disclosure — só as dos provedores aceitos entram no contexto. |
+| referência | `calibration.md` | Schema do log de calibração e regras de threshold — o único comparador cross-provider que o plugin confia. |
 
-A skill lê a política via `${CLAUDE_SKILL_DIR}` — para mudar roteamento, edite só
-[`model-policy.md`](plugins/model-router/skills/choose-model/model-policy.md). A skill
-contém apenas o procedimento, sem critérios de modelo duplicados.
+Provedores aceitos vêm de `--providers=` no argumento ou de
+`.claude/model-router.json` no projeto (default: só `anthropic`). Para mudar
+roteamento, edite a policy do provedor — a skill contém apenas o procedimento,
+sem critérios de modelo duplicados.
 
-Só recomenda; nunca executa (`Edit`/`Write` estão em `disallowed-tools`).
+O advisor só recomenda; nunca executa (`Edit`/`Write` em `disallowed-tools`). O
+log em `.claude/model-calibration.jsonl` acumula evidência real por categoria e
+provedor, e passa por cima da policy quando 3 entradas apontam na mesma direção.
 
 ### `git-narrator`
 
@@ -98,10 +103,16 @@ claude-tookit/
 │   │   └── agents/security-reviewer.md
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json
-│   │   └── skills/choose-model/
+│   │   ├── skills/choose-model/
+│   │   │   ├── SKILL.md
+│   │   │   ├── policies/            # uma por provedor, lidas via ${CLAUDE_SKILL_DIR}
+│   │   │   │   ├── anthropic.md
+│   │   │   │   └── openai.md
+│   │   │   ├── calibration.md
+│   │   │   └── calibration.example.jsonl
+│   │   └── skills/log-calibration/
 │   │       ├── SKILL.md
-│   │       ├── model-policy.md      # arquivo de apoio, lido via ${CLAUDE_SKILL_DIR}
-│   │       └── calibration.example.jsonl
+│   │       └── log-calibration.py   # único caminho de escrita (append-only)
 │   ├── git-narrator/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── skills/narrate/
