@@ -29,6 +29,7 @@ Para atualizar quando este repo mudar:
 | Componente | Nome | O que faz |
 | --- | --- | --- |
 | skill | `/code-review:quick-review` | Revisa as mudanças não commitadas: correção, edge cases, sobras de debug, contratos quebrados, testes faltando. |
+| skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
 | agent | `code-review:security-reviewer` | Subagente que audita injection, authn/authz, segredos, path traversal, desserialização e cripto. Só lê — nunca edita. |
 
 ### `model-router`
@@ -100,6 +101,7 @@ claude-tookit/
 │   ├── code-review/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── skills/quick-review/SKILL.md
+│   │   ├── skills/pr-tour/SKILL.md
 │   │   └── agents/security-reviewer.md
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json
