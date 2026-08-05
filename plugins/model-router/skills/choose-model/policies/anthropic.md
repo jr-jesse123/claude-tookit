@@ -170,6 +170,42 @@ architectural understanding is the bottleneck; when the cheaper model reaches
 plausible but shallow conclusions repeatedly; when the problem is substantially
 novel; or when there is hidden semantic or operational risk.
 
+## Context behavior
+
+Seeded 2026-08-05; same provenance tags as the OpenAI policy (`[vendor]` =
+Anthropic's claims/evals, `[reported]` = independent sources). Calibration
+entries confirm or demote these like any prior.
+
+- **Hard limits.** Haiku 200K (the disqualifier above); Sonnet, Opus, and
+  Fable 1M — **at flat pricing, with no long-context surcharge** since
+  Opus 4.7. `[vendor]` That is a structural advantage over OpenAI's reported
+  >~270K surcharge (see `openai.md` → Baseline) when comparing prices on
+  context-heavy work.
+- **Effective vs. advertised.** Industry-wide long-context evals (NVIDIA
+  RULER family) put most models' *effective* context at ~50–65% of nominal —
+  a model advertising 200K typically turns unreliable around 130K.
+  `[reported]` This is a cross-model prior, not a Claude-specific
+  measurement. Practical rule: when dimension 5 scores 3 **and** the input
+  alone fills more than about half the candidate's window, treat the
+  candidate as one tier weaker than nominal unless log evidence says
+  otherwise.
+- **Frontier tier holds up at high fill.** Launch-era MRCR v2 (8 identical
+  needles across 1M tokens, requiring sequential reasoning): ~76% for the
+  Opus line, described by Anthropic as a qualitative shift in usable
+  context `[vendor]`; independent commentary placed it among the only
+  models viable on that eval. `[reported]` Prior: high-fill retrieval and
+  cross-file consistency belong to Opus or above, not Sonnet.
+- **Compaction is itself a degradation mode.** Server-side compaction (beta)
+  summarizes earlier context, triggering by default around 150K tokens.
+  `[vendor]` For tasks whose working set must stay *verbatim* — citation,
+  auditing, cross-file consistency over a large diff — summarization loses
+  exactly what the task needs: score dimension 5 up and prefer the frontier
+  tier over relying on compaction.
+- **Fable's context coherence.** Very long autonomous execution where context
+  coherence is the main risk is already Fable's category (above) — that is
+  the exceptional-tier answer when even Opus's window discipline is the
+  binding constraint.
+
 ## Refusals on security-adjacent work
 
 Opus 5 and Fable 5 ship elevated cybersecurity safeguards and can decline a
