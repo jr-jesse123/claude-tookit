@@ -203,14 +203,26 @@ history next to the codebase whose routing it describes, which is the scope that
 actually matters: routing that fits an Oracle-backed service will not fit a
 static site.
 
-The skill **never writes this file.** It is an advisor with `Write` disallowed,
-and that restriction is worth more than the convenience of self-logging. Instead
-it reads the log when present and emits a ready-to-append line; you decide
-whether the entry is honest:
+The advisor **never writes this file.** It runs before the task, and every
+outcome field (`escalated`, `corrections`, `tests`, …) is only knowable after
+the task ends — so an entry written at recommendation time cannot be honest.
+The advisor reads the log when present and emits a ready-to-run logging
+command with the outcome flags left as placeholders.
+
+**Recording an entry — in order of preference:**
+
+1. **`/log-calibration`** (same plugin) — invoke at the end of the task. It
+   fills the outcome fields from what actually happened in the session, shows
+   you the entry for confirmation, and appends via the bundled
+   `log-calibration.py` script. The script is the plugin's only write path:
+   append-only, fixed to `.claude/model-calibration.jsonl`, and it validates
+   every field against this schema before writing — which is why it can be
+   allowlisted on its own without granting a blanket `Write` permission.
+2. **Run the emitted command yourself**, filling in the placeholders.
+3. **Manual append** (no plugin available):
 
 ```sh
 mkdir -p .claude
-# paste the line the skill emitted
 echo '{"date":"2026-07-28",...}' >> .claude/model-calibration.jsonl
 ```
 

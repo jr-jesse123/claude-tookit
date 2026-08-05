@@ -143,16 +143,22 @@ Escalate if:
 
 Suggested command: `claude --model <alias> --effort <level>`
 
-Calibration line (append after the task, with the real outcome filled in):
-{"date":"<today>","category":"<slug>","model":"<alias>","effort":"<level or null>","escalated":null,"corrections":null,"minutes":null,"tests":null,"rework":null,"note":"scored N/15"}
+Calibration (run after the task, with the real outcomes filled in — or invoke
+/log-calibration to have them filled from the session):
+python3 "${CLAUDE_SKILL_DIR}/../log-calibration/log-calibration.py" \
+  --category "<slug>" --model <alias> --effort <level, omit for haiku> \
+  --note "scored N/15" \
+  --escalated <?> --corrections <?> --minutes <?> --tests <?> --rework <?>
 ```
 
-Emit the calibration line every time, with `date`, `category`, `model`, `effort`,
-and the score in `note` already filled in and the outcome fields left `null` —
-those are only knowable after the task runs. Reuse an existing `category` slug
-from the log whenever one fits; inventing a near-duplicate slug is what stops the
-log from ever reaching the three-entry threshold. **Do not write the file** —
-`Write` is disallowed here by design, and the user decides what goes in the log.
+Emit the calibration command every time, with `category`, `model`, `effort`,
+and the score in `--note` already filled in and the outcome flags left as `<?>`
+placeholders — those are only knowable after the task runs. Reuse an existing
+`category` slug from the log whenever one fits; inventing a near-duplicate slug
+is what stops the log from ever reaching the three-entry threshold. **Do not
+run the command and do not write the log** — `Write` is disallowed here by
+design, this skill runs before the task, and logging belongs to the
+`log-calibration` skill (or the user) after the task ends.
 
 Two conditional sections, each included **only** when its condition holds:
 
