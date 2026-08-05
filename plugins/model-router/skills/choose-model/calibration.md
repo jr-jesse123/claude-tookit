@@ -57,6 +57,7 @@ for a populated sample.
 | `escalated` | Whether a stronger model or effort was needed mid-task |
 | `corrections` | Number of user corrections during the task |
 | `minutes` | Wall-clock duration |
+| `tokens_in` / `tokens_out` | Optional token usage (e.g. from `/cost`). `tokens_out` includes thinking. These turn the policies' token-economics priors into measured per-category numbers — the blended-cost tie-break (SKILL.md step 5.2) prefers them over any prior. `null` when unknown. |
 | `tests` | `pass`, `fail`, or `none` |
 | `rework` | Whether the result required architectural rework afterward |
 | `note` | Free text; recording the advisor's score and whether it matched is the most useful thing to put here |

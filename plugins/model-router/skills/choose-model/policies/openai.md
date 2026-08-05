@@ -118,6 +118,28 @@ from your own log.
   step 5, it never decides a cross-provider tie. It earns Sol the frontier
   slot *within* this policy, nothing more.
 
+## Token economics (input)
+
+Output volume is steerable (`reasoning_effort`, prompting) and is measured by
+the calibration log, not legislated here. Input-side notes for the price
+tie-break (SKILL.md step 5.2):
+
+- **Different tokenizer family from Claude.** The same file yields different
+  token counts on GPT and Claude models — a count measured on one provider is
+  meaningless on the other. Measure per candidate (tiktoken for OpenAI
+  models, `count_tokens` for Anthropic) before letting price decide a tie on
+  input-heavy work.
+- **Long-context surcharge.** The reported >~270K input surcharge (2× input /
+  1.5× output for the session — see Baseline, *(reported — verify)*) is an
+  input-side cost cliff with no Anthropic equivalent. Confirm it before
+  routing context-heavy work here on price grounds.
+- **Cached-input rates exist** (a $0.50/MTok cached-input rate was reported
+  for GPT-5.5 *(reported — verify)*; GPT-5.6 added explicit prompt-caching
+  controls `[vendor]`). Like the Anthropic cache-read discount, a warm cache
+  can dominate the sticker comparison on repeated-context work — but caches
+  never transfer across providers, which reinforces ecosystem affinity
+  (step 5.3).
+
 ## Effort vs. model
 
 Same principle as the Anthropic policy: raise `reasoning_effort` first when the
