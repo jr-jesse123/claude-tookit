@@ -73,11 +73,50 @@ measured behavior. Retune it from calibration entries as they accumulate.
 
 ## Routing by task category
 
-**No per-category routing yet.** This provider was added without local
-evidence; route on the score and the tier mapping above, and let categories
-earn their way in through the calibration log (three entries pointing the same
-way, per `../calibration.md`). Do not copy the Anthropic category lists here —
-they encode observed behavior of Anthropic models, not of these.
+**Every row below is a research-seeded prior, not observed behavior.**
+Seeded 2026-08-05 from the GPT-5.6 launch material (`[vendor]` =
+openai.com's own claims or evals; `[reported]` = independent reviews,
+2026-07/08 — vellum.ai, coderabbit.ai, datastudios.org). A seeded row never
+outranks calibration evidence: three log entries pointing against a row
+delete or demote it, and three confirming it drop the provenance tag. The
+Anthropic policy's stack-specific categories (F#, HTMX, Oracle…) were **not**
+copied — those encode observed Anthropic behavior; equivalents here must come
+from your own log.
+
+### Luna (`none`/`low`)
+
+- Intent classification, routing, lightweight extraction, schema conversion —
+  `reasoning_effort: none` for latency and stable formatting. `[reported]`
+- High-volume pipelines and operational triage where unit cost dominates. `[reported]`
+- Implement well-specified changes, write and run tests, evaluate results —
+  when a stronger model already produced the plan (see the Sol plan → Luna
+  implement pattern under Execution-shape notes). `[vendor]`
+- Mechanical coding above its price point: 62.7% SWE-Bench Pro, 84.7%
+  Terminal-Bench 2.1 in OpenAI's own evals. `[vendor]`
+
+> **Luna long-context cliff.** Independent long-context evals report a drop to
+> ~41% with degradation from roughly 300K input tokens (summarizing instead of
+> citing). `[reported]` Analogous to the Anthropic policy's Haiku-200K rule:
+> a context-heavy task is disqualified from Luna regardless of how mechanical
+> it is — route to Terra.
+
+### Terra (`medium`/`high`)
+
+- Everyday implementation on an existing pattern.
+- Repeatable extraction, classification, and reformatting where output quality
+  matters more than Luna's unit cost. `[reported]`
+- First-pass summaries and straightforward customer-service operations. `[reported]`
+- Long-context recall tasks that Luna's cliff disqualifies. `[reported]`
+
+### Sol (`high`/`xhigh`)
+
+- Long-horizon agentic coding; resolving uncertainty and defining the plan
+  before cheaper models implement. `[vendor]`
+- Frontier reasoning and deep-research work. `[vendor]`
+- Claimed state of the art on the Artificial Analysis Coding Agent Index at
+  launch. `[vendor]` — a cross-provider marketing claim; per `SKILL.md`
+  step 5, it never decides a cross-provider tie. It earns Sol the frontier
+  slot *within* this policy, nothing more.
 
 ## Effort vs. model
 
@@ -104,6 +143,13 @@ Suggested command shapes:
 Multi-agent orchestration on the Responses API is in beta *(reported —
 verify)*; treat agent-team shapes on this provider as experimental and
 recommend a cap on fan-out, as with any orchestrated shape.
+
+**Plan-then-delegate is this provider's documented advisor-plus-implementer
+shape:** OpenAI's own launch guidance describes using Sol to resolve
+uncertainty and define the plan, then Luna to implement well-specified
+changes, run tests, and evaluate results (openai.com, 2026-07-09). When the
+rubric lands on frontier for planning but the implementation is bounded,
+recommend this split instead of running Sol end to end.
 
 ## Refusal and policy notes
 
