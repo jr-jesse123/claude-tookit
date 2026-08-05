@@ -14,6 +14,7 @@ allowed-tools:
   - Bash(git blame *)
   - Bash(git rev-parse *)
   - Bash(git symbolic-ref *)
+  - Bash(python3 *extract-candidates.py*)
 ---
 
 # Curate comments
@@ -42,9 +43,32 @@ noisy to be touched.
 
 ## 2. Inventory — and what is never touched
 
-Read the in-scope files and list their comments: line comments, block comments,
-and doc comments (`///`, `/** */`, docstrings), by reading — not by regex alone
-(a `https://` inside a string is not a comment).
+Build the candidate list with the bundled script — it is deterministic about
+coverage and emits the exact `file:line` numbers the verdict table and the
+`git log -L` checks depend on:
+
+- **Diff mode:** pipe each diff from step 1 through it —
+  `git diff | python3 "${CLAUDE_SKILL_DIR}/extract-candidates.py"`, then the
+  same for `git diff --cached` (or the branch diff).
+- **Path mode:** `python3 "${CLAUDE_SKILL_DIR}/extract-candidates.py" <files…>`.
+
+Output is `path:line	flag	text`, one candidate per line (`+` added, `=`
+context, `.` file scan); the candidate count goes to stderr.
+
+The script is tuned for near-zero false negatives, so it emits *candidates*,
+not comments — a `https://` inside a string will be flagged. The inventory is
+what survives your reading, in both directions:
+
+- **Confirm every candidate in context** before it gets a verdict; discard
+  flagged lines that are not comments.
+- **Read around flagged delimiters** (`/*`, `"""`): the middle lines of block
+  comments and docstrings carry no marker of their own, and a diff hunk can
+  begin inside one.
+- A comment you notice while reading that the script missed still enters the
+  inventory — the script bounds what you must check, not what you may find.
+
+The inventory covers line comments, block comments, and doc comments (`///`,
+`/** */`, docstrings).
 
 **Off-limits, regardless of content.** These are functional, not prose:
 
