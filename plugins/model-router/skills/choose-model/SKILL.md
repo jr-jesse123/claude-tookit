@@ -171,6 +171,15 @@ Exactly one:
 | **Agent team** | Genuinely independent workstreams justify the coordination overhead |
 | **Autonomous long run** | Exceptional long-horizon task, per the provider's exceptional-tier notes |
 
+**You are running in a forked context, not in the calling session.** This
+skill executes on its own configured model (`model: sonnet` in the
+frontmatter), so your own identity says nothing about the session that invoked
+you. Never conclude "the current session runs sonnet" — or recommend "New
+session" to reach a stronger model — from what model *you* are. Determine the
+calling session's model from the conversation context; when it is genuinely
+unknown, say so and make the shape conditional: "Current session if it already
+runs <model>; otherwise <shape>."
+
 When the recommended model is not from the harness the session runs in,
 "Current session" is unavailable — the shape must name the actual harness
 (Codex CLI, API script, other agent) and account for the switch cost from
