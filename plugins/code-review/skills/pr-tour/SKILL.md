@@ -71,9 +71,10 @@ This paragraph is the answer to "what do these changes do together?" — if the
 reviewer reads nothing else, this must be enough to start.
 
 **Diagrams.** Default is a single Mermaid `flowchart`: nodes are the changed
-modules, edges are call or data flow between them, new nodes marked distinctly
-from modified ones. Skip the diagram entirely when the group touches only 1–2
-files — the paragraph covers it.
+modules, edges are call or data flow between them, with added, modified, and
+removed elements painted distinctly (see *Painting the diff* below). Skip the
+diagram entirely when the group touches only 1–2 files — the paragraph covers
+it.
 
 Multiple diagrams are an explicit option when distinct perspectives or zoom
 levels help more than one picture can — for example, an overview `flowchart`
@@ -97,6 +98,7 @@ procedural blocks in the diff deserve the type that matches their shape:
 | Dense conditional logic (validation, routing, dispatch) | which path does the input take? | `flowchart` with decision nodes |
 | Broad diff touching many loosely related areas | what areas does this change touch? | `mindmap` |
 | Phased work: rollout, migration steps, deprecation | what happens in which phase? | `timeline` |
+| Restructuring where the topology itself is the story | how was it wired before vs after? | painted before/after pair of `flowchart`s — see *Painting the diff* |
 
 A `sequenceDiagram` needs two or more participants exchanging messages — a
 single-actor linear procedure reads better as the numbered list it already
@@ -108,6 +110,30 @@ rendering — pick whichever type fits, including `mindmap` and `timeline`,
 when it is the right tool for that situation. Only if the user says they will
 paste the tour into GitHub, note that `mindmap`/`timeline` render less
 reliably there and offer a `flowchart`/list fallback.
+
+**Painting the diff.** Structural diagrams carry the diff in their styling.
+The default is one *painted delta*: draw the union of before and after, with
+added elements solid and thicker (`classDef added`, ⊕ in the label), removed
+elements dashed (`classDef removed`, ⊖), and untouched context dimmed gray.
+Paint edges with `linkStyle` to match.
+
+When a restructuring changes the topology so much that the delta becomes a
+tangle of marks (sync calls → event queue, monolith chain → workers), draw a
+*painted before/after pair* instead: the "before" diagram paints what leaves,
+the "after" paints what arrives, and the untouched nodes appear in both with
+the same name, position, and dimmed style — they are the anchors the eye uses
+to compare the two shapes. Never ship an unpainted pair: side-by-side
+diagrams without painted diffs push the visual diffing onto the reviewer.
+
+Painting rules:
+
+- Color is never the only signal. Pair it with stroke style (dashed vs
+  solid/thick) and ⊕/⊖ markers, so the diagram survives color-blind readers
+  and renderers that drop styles.
+- `linkStyle` targets edges by index — paint edges last, once the edge list
+  is final, and check the indices one by one.
+- Light fills need an explicit dark text color (e.g. `color:#111`) so labels
+  stay readable on dark themes.
 
 ## Report — reading order
 
