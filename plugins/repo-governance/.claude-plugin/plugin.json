@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "repo-governance",
+  "displayName": "Repository Governance",
+  "description": "Plans and applies repeatable GitHub repository governance: protected linear default branches, PR-only integration, automatic Copilot review, and repository-specific quality gates.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["github", "repository", "ruleset", "governance", "branch-protection", "copilot"]
+}
