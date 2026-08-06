@@ -71,9 +71,10 @@ This paragraph is the answer to "what do these changes do together?" — if the
 reviewer reads nothing else, this must be enough to start.
 
 **Diagrams.** Default is a single Mermaid `flowchart`: nodes are the changed
-modules, edges are call or data flow between them, new nodes marked distinctly
-from modified ones. Skip the diagram entirely when the group touches only 1–2
-files — the paragraph covers it.
+modules plus any untouched neighbors needed as context (dimmed), edges are
+call or data flow between them, with added, modified, and removed elements
+painted distinctly (see *Painting the diff* below). Skip the diagram entirely
+when the group touches only 1–2 files — the paragraph covers it.
 
 Multiple diagrams are an explicit option when distinct perspectives or zoom
 levels help more than one picture can — for example, an overview `flowchart`
@@ -83,6 +84,77 @@ different question ("who depends on whom?" vs "in what order does it happen?"
 vs "what does the hot spot look like inside?") and carries a one-line title
 naming that question. If two diagrams answer the same question, keep one. The
 criterion is clarity, never quantity.
+
+**Picking the type.** The reviewer's question selects the diagram — dense
+procedural blocks in the diff deserve the type that matches their shape:
+
+| Complexity in the diff | Reviewer's question | Diagram |
+| --- | --- | --- |
+| Structure: new modules, dependencies, wiring | who depends on whom? | `flowchart` |
+| Imperative procedure; runtime interaction between components | in what order? who calls whom? | `sequenceDiagram` — `alt`/`loop`/`par` for branches, retries, parallelism |
+| Lifecycle, entity status, flags, retry/backoff | what states exist, what triggers each transition? | `stateDiagram-v2` |
+| Schema, migrations, data model | how do the entities relate? | `erDiagram` |
+| Contracts between types (inheritance, composition) | what is the contract between types? | `classDiagram` |
+| Dense conditional logic (validation, routing, dispatch) | which path does the input take? | `flowchart` with decision nodes |
+| Broad diff touching many loosely related areas | what areas does this change touch? | `mindmap` |
+| Phased work: rollout, migration steps, deprecation | what happens in which phase? | `timeline` |
+| Restructuring where the topology itself is the story | how was it wired before vs after? | painted before/after pair of `flowchart`s — see *Painting the diff* |
+
+A `sequenceDiagram` needs two or more participants exchanging messages — a
+single-actor linear procedure reads better as the numbered list it already
+is. A state machine hiding in scattered `if`s is the case most worth drawing:
+it is exactly where a reviewer gets lost reading a diff.
+
+The tour's first goal is the reviewer's own comprehension, above PR-page
+rendering — pick whichever type fits, including `mindmap` and `timeline`,
+when it is the right tool for that situation. Only if the user says they will
+paste the tour into GitHub, note that `mindmap`/`timeline` render less
+reliably there and offer a `flowchart`/list fallback.
+
+**Anchoring nodes.** Every node is named after a real path — `billing/charge.ts`,
+never "Billing Service"; a node that stands for a piece smaller than a file
+carries the symbol too: `charge() · billing/charge.ts`. The same file name in
+the diagram and in the reading order is what lets the eye jump between the
+two. Line numbers stay out of diagrams — they shift on every push, and their
+home is the reading-order entry, where `path:line` is clickable — with one
+exception: a changed hunk buried in a large file may anchor its node as
+`charge() · billing/charge.ts:L142`, noting the line is valid at the branch's
+current HEAD.
+
+**Painting the diff.** Structural diagrams carry the diff in their styling.
+The default is one *painted delta*: draw the union of before and after, with
+added elements solid and thicker (`classDef added`, ⊕ in the label), removed
+elements dashed (`classDef removed`, ⊖), modified elements in the default
+styling — undimmed and unmarked, the baseline the exceptions stand out from —
+and untouched context dimmed gray. Paint edges with `linkStyle` to match: an
+edge that exists only before the change is removed, only after is added.
+
+When a restructuring changes the topology so much that the delta becomes a
+tangle of marks (sync calls → event queue, monolith chain → workers), draw a
+*painted before/after pair* instead: the "before" diagram paints what leaves,
+the "after" paints what arrives, and the untouched nodes appear in both with
+the same name, position, and dimmed style — they are the anchors the eye uses
+to compare the two shapes. Never ship an unpainted pair: side-by-side
+diagrams without painted diffs push the visual diffing onto the reviewer.
+
+Painting rules:
+
+- Color is never the only signal. Pair it with stroke style (dashed vs
+  solid/thick) and ⊕/⊖ markers, so the diagram survives color-blind readers
+  and renderers that drop styles.
+- `linkStyle` targets edges by index — paint edges last, once the edge list
+  is final, and check the indices one by one.
+- Light fills need an explicit dark text color (e.g. `color:#111`) so labels
+  stay readable on dark themes.
+
+**Examples — read only what you selected.** Few-shot references live in
+`${CLAUDE_SKILL_DIR}/examples/`, one file per diagram type: `flowchart.md`
+(painted delta + before/after pair), `sequence.md`, `state.md`,
+`er-class.md`, `mindmap-timeline.md` — plus `prose.md` for the narrative and
+reading order at three PR sizes (small, medium, large with group splits).
+After the selector has picked the type(s), read the matching file(s) and
+`prose.md`; never read the whole folder. They are format references, not
+templates — size the real tour to the real diff.
 
 ## Report — reading order
 
@@ -97,7 +169,9 @@ Per group, a numbered list. Each entry has three parts:
 - **Why here** — the reason this file sits at this position in the order.
 - **Look at** — the one or two things that matter in this file, concrete
   ("signature of `charge()` changed — check its callers follow") rather than
-  generic ("review the logic").
+  generic ("review the logic"). Anchor precise spots as `path:line` — this is
+  where line numbers belong, clickable and cheap to update, not in the
+  diagrams.
 
 Default ordering, to adapt whenever the actual flow disagrees: contracts
 first, then core logic following the data flow, then wiring and call sites,
