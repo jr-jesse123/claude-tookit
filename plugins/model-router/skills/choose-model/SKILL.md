@@ -195,7 +195,7 @@ Exactly one:
 | **Parallel scouts** | Several independent searches or analyses, on a mechanical- or workhorse-tier model |
 | **Advisor plus implementer** | A frontier model analyzes and reviews; a workhorse model implements |
 | **Agent team** | Genuinely independent workstreams justify the coordination overhead |
-| **Orchestrated workflow** | Exhaustiveness or adversarial verification justifies structured multi-agent fan-out: diverse finder lenses, independent verification of each finding, judge panels. Typically oracle weakness ≥ 2 with blast radius ≥ 2, or context scale 3 |
+| **Orchestrated workflow** | Exhaustiveness or adversarial verification justifies structured multi-agent fan-out: diverse finder lenses, independent verification of each finding, judge panels. Typically Oracle weakness ≥ 2 with Blast radius ≥ 2, or Context scale = 3 |
 | **Autonomous long run** | Exceptional long-horizon task, per the provider's exceptional-tier notes |
 
 **Orchestrated workflow buys coverage and confidence, not intelligence** — the
