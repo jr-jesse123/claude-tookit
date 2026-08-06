@@ -2,7 +2,6 @@
 name: pr-shape-review
 description: Review a feature branch before publication and recommend the smallest coherent linear-history shape: squash, recomposed commits, split PRs, or stacked PRs. Use when deciding how a branch should enter main, especially after agentic or exploratory development.
 argument-hint: "[base branch, defaults to the repo default branch]"
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Grep
