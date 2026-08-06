@@ -2,12 +2,12 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "git-narrator",
   "displayName": "Git Narrator",
-  "description": "Re-narrates a feature branch before merge: rebuilds messy exploratory history into a semantic commit sequence, with a byte-identical final tree and per-commit build gates.",
+  "description": "Curates linear Git history: recommends the semantic shape of a PR, then can rebuild messy exploratory commits into a verified, byte-identical sequence.",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"
   },
   "repository": "https://github.com/jr-jesse123/claude-tookit",
   "license": "MIT",
-  "keywords": ["git", "history", "rebase", "commits", "review"]
+  "keywords": ["git", "history", "pull-request", "squash", "rebase", "commits", "review"]
 }
