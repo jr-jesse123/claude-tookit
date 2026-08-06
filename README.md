@@ -101,7 +101,9 @@ claude-tookit/
 │   ├── code-review/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── skills/quick-review/SKILL.md
-│   │   ├── skills/pr-tour/SKILL.md
+│   │   ├── skills/pr-tour/
+│   │   │   ├── SKILL.md
+│   │   │   └── examples/            # few-shot por tipo de diagrama + prosa, via ${CLAUDE_SKILL_DIR}
 │   │   └── agents/security-reviewer.md
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json

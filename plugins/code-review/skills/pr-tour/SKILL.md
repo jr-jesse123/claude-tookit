@@ -145,6 +145,15 @@ Painting rules:
 - Light fills need an explicit dark text color (e.g. `color:#111`) so labels
   stay readable on dark themes.
 
+**Examples — read only what you selected.** Few-shot references live in
+`${CLAUDE_SKILL_DIR}/examples/`, one file per diagram type: `flowchart.md`
+(painted delta + before/after pair), `sequence.md`, `state.md`,
+`er-class.md`, `mindmap-timeline.md` — plus `prose.md` for the narrative and
+reading order at three PR sizes (small, medium, large with group splits).
+After the selector has picked the type(s), read the matching file(s) and
+`prose.md`; never read the whole folder. They are format references, not
+templates — size the real tour to the real diff.
+
 ## Report — reading order
 
 Per group, a numbered list. Each entry has three parts:
