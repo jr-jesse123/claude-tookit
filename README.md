@@ -99,6 +99,20 @@ Decisões de desenho que valem conhecer:
   banimento de palavras vazias (`fix`, `wip`, `stuff`…), com o termo
   distintivo na frente para sobreviver a truncamento e busca por prefixo.
 
+### `output-styler`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/output-styler:restyle` | Reescreve o último output (ou um texto/arquivo apontado) em um ou mais estilos nomeados, lado a lado, para comparação: `bluf` (resposta primeiro — BLUF/Minto), `plain` (linguagem simples — ISO 24495-1), `docs` (documentação de desenvolvedor — Google/Microsoft), `ste` (técnico controlado — ASD-STE100), `eli5` (só palavras comuns + uma analogia) e `visual` (Mermaid/tabelas). `all` gera todos; `--score` anexa métricas de legibilidade. |
+| referência | `styles/*.md` | Um arquivo por estilo (regras + exemplo antes/depois), carregado por progressive disclosure — só os estilos pedidos entram no contexto. |
+
+Invariantes que valem conhecer: os *fatos* são congelados — restyle muda forma,
+nunca conteúdo, e cortes forçados pelo estilo viram uma linha *Omitted:* em vez
+de sumirem em silêncio. O alvo fica fixado no texto original entre invocações
+(comparar estilos exige a mesma base). Quando você declara um vencedor, a skill
+oferece registrar a preferência no `CLAUDE.md` do projeto — é assim que o
+experimento vira o estilo padrão daquele repositório.
+
 ### `devops-tools`
 
 | Componente | Nome | O que faz |
@@ -148,6 +162,11 @@ claude-tookit/
 │   ├── sessions/
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/name/SKILL.md
+│   ├── output-styler/
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/restyle/
+│   │       ├── SKILL.md
+│   │       └── styles/              # um por estilo, lidos via ${CLAUDE_SKILL_DIR}
 │   └── devops-tools/
 │       ├── .claude-plugin/plugin.json
 │       ├── skills/deploy-check/SKILL.md

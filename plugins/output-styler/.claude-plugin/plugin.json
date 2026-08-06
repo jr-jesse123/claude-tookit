@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "output-styler",
+  "displayName": "Output Styler",
+  "description": "Rewrites the last response in one or more named writing styles (STE, plain language, BLUF, ELI5, dev docs, visual) for side-by-side comparison, with optional readability scores and per-project style preferences.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["writing", "style", "plain-language", "ste", "readability", "communication"]
+}
