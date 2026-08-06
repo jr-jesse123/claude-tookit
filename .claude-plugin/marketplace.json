@@ -92,6 +92,22 @@
       }
     },
     {
+      "name": "sessions",
+      "source": "./plugins/sessions",
+      "description": "Session organization helpers: distills the current session into a short, searchable resume handle and hands back the /rename command to apply it.",
+      "category": "productivity",
+      "keywords": [
+        "sessions",
+        "naming",
+        "resume",
+        "organization"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "output-styler",
       "source": "./plugins/output-styler",
       "description": "Rewrites the last response in one or more named writing styles (STE, plain language, BLUF, ELI5, dev docs, visual) for side-by-side comparison, with optional readability scores and per-project style preferences.",
