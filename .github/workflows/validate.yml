@@ -19,10 +19,10 @@ jobs:
       - name: Validate marketplace and plugins
         run: node scripts/validate-marketplace.mjs
 
-      - name: Check hook scripts are syntactically valid
+      - name: Check shipped Python helpers are syntactically valid
         run: |
           shopt -s nullglob globstar
-          for f in plugins/**/scripts/*.py; do
+          for f in plugins/**/*.py; do
             echo "checking $f"
             python3 -m py_compile "$f"
           done

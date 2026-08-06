@@ -75,6 +75,23 @@
       }
     },
     {
+      "name": "repo-governance",
+      "source": "./plugins/repo-governance",
+      "description": "Plans and applies a repeatable GitHub repository standard: protected linear history, PR-only integration, automatic Copilot review, and optional quality gates.",
+      "category": "devops",
+      "keywords": [
+        "github",
+        "ruleset",
+        "governance",
+        "branch-protection",
+        "copilot"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "devops-tools",
       "source": "./plugins/devops-tools",
       "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",
