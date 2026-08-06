@@ -71,10 +71,10 @@ This paragraph is the answer to "what do these changes do together?" — if the
 reviewer reads nothing else, this must be enough to start.
 
 **Diagrams.** Default is a single Mermaid `flowchart`: nodes are the changed
-modules, edges are call or data flow between them, with added, modified, and
-removed elements painted distinctly (see *Painting the diff* below). Skip the
-diagram entirely when the group touches only 1–2 files — the paragraph covers
-it.
+modules plus any untouched neighbors needed as context (dimmed), edges are
+call or data flow between them, with added, modified, and removed elements
+painted distinctly (see *Painting the diff* below). Skip the diagram entirely
+when the group touches only 1–2 files — the paragraph covers it.
 
 Multiple diagrams are an explicit option when distinct perspectives or zoom
 levels help more than one picture can — for example, an overview `flowchart`
@@ -124,8 +124,10 @@ current HEAD.
 **Painting the diff.** Structural diagrams carry the diff in their styling.
 The default is one *painted delta*: draw the union of before and after, with
 added elements solid and thicker (`classDef added`, ⊕ in the label), removed
-elements dashed (`classDef removed`, ⊖), and untouched context dimmed gray.
-Paint edges with `linkStyle` to match.
+elements dashed (`classDef removed`, ⊖), modified elements in the default
+styling — undimmed and unmarked, the baseline the exceptions stand out from —
+and untouched context dimmed gray. Paint edges with `linkStyle` to match: an
+edge that exists only before the change is removed, only after is added.
 
 When a restructuring changes the topology so much that the delta becomes a
 tangle of marks (sync calls → event queue, monolith chain → workers), draw a

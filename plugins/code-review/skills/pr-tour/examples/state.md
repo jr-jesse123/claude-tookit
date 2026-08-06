@@ -7,6 +7,7 @@ transitions the diff adds or removes.
 
 ```mermaid
 stateDiagram-v2
+    state "Refunded ⊕" as Refunded
     [*] --> Pending
     Pending --> Paid: charge ok
     Pending --> Failed: gateway error
@@ -19,7 +20,9 @@ stateDiagram-v2
     class Refunded added
 ```
 
-- New states take `classDef added`; new/removed transitions are marked ⊕/⊖ in
+- New states take `classDef added` *and* ⊕ in the displayed name
+  (`state "Refunded ⊕" as Refunded`) — some renderers drop state styles, so
+  color is never the only signal. New/removed transitions are marked ⊕/⊖ in
   the transition label (edges cannot be classDef-styled here).
 - Anchor the machine to code in the surrounding prose: "implemented across
   `billing/charge.ts:77` and `billing/refund.ts:31`" — not inside the
