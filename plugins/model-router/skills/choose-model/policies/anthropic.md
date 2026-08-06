@@ -260,6 +260,30 @@ Two Opus 5 behaviors change which shape is worth recommending:
   team on Opus, recommend a cap alongside it. Unbounded fan-out multiplies cost
   and latency without a matching gain.
 
+### Orchestrated workflow → ultracode
+
+In Claude Code the **Orchestrated workflow** shape materializes as Workflow
+orchestration, which requires explicit user opt-in: the keyword `ultracode` in
+the task prompt (or enabled session-wide). The suggested command is the task
+prompt itself with the keyword included — the router's recommendation is the
+moment that opt-in becomes a deliberate decision rather than a reflex.
+
+- **Cost model.** A workflow spawns anywhere from a handful to dozens of
+  agents; expect roughly 5–20× the tokens of a solo run depending on fan-out
+  and verification depth. The tier multiplier stacks on top: an orchestrated
+  workflow on Opus costs Opus prices per agent.
+- **When it clears the bar.** Audits and reviews where a miss is expensive
+  (adversarial verification, loop-until-dry), work larger than one context
+  window (mass migrations, codebase-wide sweeps), and decisions wanting
+  independent perspectives (judge panels). These map to the rubric signals in
+  `SKILL.md` step 7 — do not recommend it on tier alone.
+- **When it does not.** Ordinary implementation, single-file debugging, or
+  anything a solo run plus its tests already verifies. Opus verifies its own
+  work unprompted (above), so a workflow whose only job is "check the answer
+  again" is redundant spend.
+- **Cap the fan-out.** As with subagents, recommend a bound (finder count,
+  verification votes, loop rounds) alongside the shape.
+
 Switching the model of a running conversation invalidates its prompt cache and
 re-reads the history at full price. Prefer a new session or a subagent over
 repeatedly switching a long-running main conversation.
