@@ -111,6 +111,16 @@ when it is the right tool for that situation. Only if the user says they will
 paste the tour into GitHub, note that `mindmap`/`timeline` render less
 reliably there and offer a `flowchart`/list fallback.
 
+**Anchoring nodes.** Every node is named after a real path — `billing/charge.ts`,
+never "Billing Service"; a node that stands for a piece smaller than a file
+carries the symbol too: `charge() · billing/charge.ts`. The same file name in
+the diagram and in the reading order is what lets the eye jump between the
+two. Line numbers stay out of diagrams — they shift on every push, and their
+home is the reading-order entry, where `path:line` is clickable — with one
+exception: a changed hunk buried in a large file may anchor its node as
+`charge() · billing/charge.ts:L142`, noting the line is valid at the branch's
+current HEAD.
+
 **Painting the diff.** Structural diagrams carry the diff in their styling.
 The default is one *painted delta*: draw the union of before and after, with
 added elements solid and thicker (`classDef added`, ⊕ in the label), removed
@@ -148,7 +158,9 @@ Per group, a numbered list. Each entry has three parts:
 - **Why here** — the reason this file sits at this position in the order.
 - **Look at** — the one or two things that matter in this file, concrete
   ("signature of `charge()` changed — check its callers follow") rather than
-  generic ("review the logic").
+  generic ("review the logic"). Anchor precise spots as `path:line` — this is
+  where line numbers belong, clickable and cheap to update, not in the
+  diagrams.
 
 Default ordering, to adapt whenever the actual flow disagrees: contracts
 first, then core logic following the data flow, then wiring and call sites,
