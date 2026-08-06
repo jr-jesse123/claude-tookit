@@ -233,7 +233,8 @@ node scripts/validate-diagrams.mjs
 ```
 
 Sem dependências, Node 18+. Rodam no CI a cada push ([`validate.yml`](.github/workflows/validate.yml)).
-O `validate-diagrams.mjs` valida todo fence ` ```mermaid ` sob `plugins/` em duas
+O `validate-diagrams.mjs` valida todo bloco de código `mermaid` sob `plugins/`
+(inclusive indentado ou em blockquote) em duas
 camadas: sintaxe pelo parser oficial do Mermaid (via
 `npx @zabaca/mermaid-validate`, pulado com aviso se `npx` faltar ou com
 `--no-npx`) e checagens estruturais que o parser não faz — índice de

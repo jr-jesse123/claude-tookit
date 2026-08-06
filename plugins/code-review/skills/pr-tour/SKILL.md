@@ -147,12 +147,20 @@ Painting rules:
 - Light fills need an explicit dark text color (e.g. `color:#111`) so labels
   stay readable on dark themes.
 
-**Validate before presenting.** When `npx` is available, pipe each fence
-through the official mermaid parser before showing the tour:
-`echo "<fence body>" | npx --yes @zabaca/mermaid-validate -`. On failure, fix
-and re-validate; double-check `linkStyle` indices against the edge order,
-which the parser only partially covers. If `npx` is unavailable or offline,
-skip silently — never block the tour on validation.
+**Validate before presenting.** When `npx` is available, run each fence
+through the official mermaid parser before showing the tour — the command
+must start with `npx` (a leading `echo ... |` would not match the allowed
+tool prefix), so feed the body via heredoc:
+
+```
+npx --yes @zabaca/mermaid-validate - <<'DIAGRAM'
+<fence body>
+DIAGRAM
+```
+
+On failure, fix and re-validate; double-check `linkStyle` indices against the
+edge order, which the parser only partially covers. If `npx` is unavailable
+or offline, skip silently — never block the tour on validation.
 
 **Examples — read only what you selected.** Few-shot references live in
 `${CLAUDE_SKILL_DIR}/examples/`, one file per diagram type: `flowchart.md`

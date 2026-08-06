@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 // Validates every ```mermaid fence in markdown files under the given roots
-// (default: plugins/). Two layers:
+// (default: plugins/). Fences may be indented or blockquoted (`> ```mermaid`);
+// the leading prefix is stripped before validation. Two layers per fence:
 //
-//   1. Syntax — the official mermaid parser, via `npx @zabaca/mermaid-validate`
-//      run per file (its directory mode is unreliable). Skipped with a warning
-//      when npx is unavailable or --no-npx is passed.
+//   1. Syntax — the official mermaid parser, via
+//      `npx @zabaca/mermaid-validate -` fed the fence body on stdin, so both
+//      layers see exactly the same set of diagrams. Skipped with a warning
+//      only when npx is genuinely absent (ENOENT) or --no-npx is passed; any
+//      other spawn failure (timeout etc.) counts as an error, so CI cannot
+//      pass without the syntax layer having run.
 //   2. Structure — checks the parser cannot do, on flowcharts:
 //      - every `linkStyle N` index must be < the number of edges declared;
 //      - every `class A,B name` / `:::name` must reference a declared classDef.
 //
-// Edge counting covers the arrow forms the skill emits (-->, -.->, ==>, --x,
+// Edge counting covers the arrow forms the skills emit (-->, -.->, ==>, --x,
 // --o, chained or labeled); quoted labels are stripped first so arrows inside
 // text don't count. Zero dependencies, Node 18+.
 
@@ -36,13 +40,27 @@ function* mdFiles(dir) {
   }
 }
 
+// Line-based so an opening fence's indent/blockquote prefix can be stripped
+// from its body lines (a `> `-quoted diagram must reach the parser unquoted).
 function fences(text) {
   const out = [];
-  const re = /^```mermaid[ \t]*\n([\s\S]*?)^```/gm;
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    const line = text.slice(0, m.index).split("\n").length;
-    out.push({ body: m[1], line });
+  const lines = text.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const open = lines[i].match(/^([ \t>]*)```mermaid[ \t]*$/);
+    if (!open) continue;
+    const prefix = open[1];
+    const body = [];
+    let j = i + 1;
+    for (; j < lines.length; j++) {
+      if (/^[ \t>]*```[ \t]*$/.test(lines[j])) break;
+      body.push(
+        lines[j].startsWith(prefix)
+          ? lines[j].slice(prefix.length)
+          : lines[j].replace(/^[ \t>]+/, "")
+      );
+    }
+    out.push({ body: body.join("\n") + "\n", line: i + 1 });
+    i = j;
   }
   return out;
 }
@@ -79,20 +97,24 @@ function checkFlowchart(body, where) {
 }
 
 let npxAvailable = !noNpx;
-function syntaxCheck(file) {
+function syntaxCheck(body, where) {
   if (!npxAvailable) return;
   const res = spawnSync(
     "npx",
-    ["--yes", "@zabaca/mermaid-validate", "--quiet", file],
-    { encoding: "utf8", timeout: 120_000 }
+    ["--yes", "@zabaca/mermaid-validate", "--quiet", "-"],
+    { encoding: "utf8", input: body, timeout: 120_000 }
   );
   if (res.error) {
-    console.warn(`  ⚠ npx unavailable (${res.error.code}); skipping syntax layer`);
-    npxAvailable = false;
+    if (res.error.code === "ENOENT") {
+      console.warn("  ⚠ npx not found; skipping the syntax layer");
+      npxAvailable = false;
+    } else {
+      fail(`${where}: syntax check failed to run (${res.error.code ?? res.error.message})`);
+    }
     return;
   }
   if (res.status !== 0)
-    fail(`${file}: mermaid parser rejected a diagram\n${(res.stdout + res.stderr).trim()}`);
+    fail(`${where}: mermaid parser rejected the diagram\n${(res.stdout + res.stderr).trim()}`);
 }
 
 for (const root of roots) {
@@ -101,10 +123,11 @@ for (const root of roots) {
     if (blocks.length === 0) continue;
     console.log(`checking ${file} (${blocks.length} diagram(s))`);
     for (const { body, line } of blocks) {
+      const where = `${file}:${line}`;
       const type = body.trim().split(/\s/)[0];
-      if (/^(flowchart|graph)$/.test(type)) checkFlowchart(body, `${file}:${line}`);
+      if (/^(flowchart|graph)$/.test(type)) checkFlowchart(body, where);
+      syntaxCheck(body, where);
     }
-    syntaxCheck(file);
   }
 }
 
