@@ -92,6 +92,22 @@
       }
     },
     {
+      "name": "sessions",
+      "source": "./plugins/sessions",
+      "description": "Session organization helpers: distills the current session into a short, searchable resume handle and hands back the /rename command to apply it.",
+      "category": "productivity",
+      "keywords": [
+        "sessions",
+        "naming",
+        "resume",
+        "organization"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "devops-tools",
       "source": "./plugins/devops-tools",
       "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",

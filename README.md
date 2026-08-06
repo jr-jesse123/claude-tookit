@@ -80,6 +80,25 @@ intocáveis; em modo caminho, comentário humano antigo tem prior de manutençã
 confirma que só linhas de comentário mudaram, e o build do projeto (se
 descobrível) confirma que nada funcional saiu junto.
 
+### `sessions`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/sessions:name` | Destila a sessão atual num nome curto e buscável (kebab-case, 2–5 palavras) que funciona como handle de retomada — `claude --resume <nome>` sem aspas — e entrega o comando `/rename` pronto para colar. |
+
+Decisões de desenho que valem conhecer:
+
+- **Claude não renomeia sozinho.** Não existe ferramenta para isso; `/rename` só
+  funciona digitado pelo usuário. A skill nunca finge que renomeou — o
+  entregável é o nome + o comando pronto.
+- **O nome carrega só o que o picker não mostra.** O picker de `/resume` já
+  exibe branch, caminho do projeto e recência — então o nome não repete nada
+  disso e gasta as palavras em **intenção + objeto** (o objetivo da sessão, não
+  o passo atual).
+- **Formas por tipo de sessão** (feature, bug, pesquisa, review, rotina) e
+  banimento de palavras vazias (`fix`, `wip`, `stuff`…), com o termo
+  distintivo na frente para sobreviver a truncamento e busca por prefixo.
+
 ### `devops-tools`
 
 | Componente | Nome | O que faz |
@@ -126,6 +145,9 @@ claude-tookit/
 │   ├── comment-curator/
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/curate/SKILL.md
+│   ├── sessions/
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── skills/name/SKILL.md
 │   └── devops-tools/
 │       ├── .claude-plugin/plugin.json
 │       ├── skills/deploy-check/SKILL.md
