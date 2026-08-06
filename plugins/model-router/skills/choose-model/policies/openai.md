@@ -164,7 +164,11 @@ Suggested command shapes:
 
 Multi-agent orchestration on the Responses API is in beta *(reported —
 verify)*; treat agent-team shapes on this provider as experimental and
-recommend a cap on fan-out, as with any orchestrated shape.
+recommend a cap on fan-out, as with any orchestrated shape. The **Orchestrated
+workflow** shape falls under the same caveat: this provider has no native
+equivalent of Claude Code's workflow orchestration, so the shape implies a
+hand-built orchestration script on the Responses API — name that harness cost
+in the output, per `SKILL.md` step 5.3.
 
 **Plan-then-delegate is this provider's documented advisor-plus-implementer
 shape:** OpenAI's own launch guidance describes using Sol to resolve

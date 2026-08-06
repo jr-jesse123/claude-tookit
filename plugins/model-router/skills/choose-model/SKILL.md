@@ -195,7 +195,19 @@ Exactly one:
 | **Parallel scouts** | Several independent searches or analyses, on a mechanical- or workhorse-tier model |
 | **Advisor plus implementer** | A frontier model analyzes and reviews; a workhorse model implements |
 | **Agent team** | Genuinely independent workstreams justify the coordination overhead |
+| **Orchestrated workflow** | Exhaustiveness or adversarial verification justifies structured multi-agent fan-out: diverse finder lenses, independent verification of each finding, judge panels. Typically oracle weakness ≥ 2 with blast radius ≥ 2, or context scale 3 |
 | **Autonomous long run** | Exceptional long-horizon task, per the provider's exceptional-tier notes |
+
+**Orchestrated workflow buys coverage and confidence, not intelligence** — the
+agents run on the same models, so it never substitutes for a higher tier. It is
+also the most expensive shape: recommend it only when you can name what a
+single-agent run would miss (the analogue of the "Why not one tier cheaper"
+rule), and put that named miss in the Reasons section. Distinguish it from its
+neighbors: **Parallel scouts** parallelizes *search*, **Agent team**
+parallelizes *independent work*, an orchestrated workflow structures
+*verification and exhaustiveness* over one piece of work. Each accepted policy's
+Execution-shape notes say how — and whether — this shape is available in that
+provider's harness.
 
 **You are running in a forked context, not in the calling session.** This
 skill executes on its own configured model (`model: sonnet` in the
