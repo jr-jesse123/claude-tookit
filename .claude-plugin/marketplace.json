@@ -92,6 +92,24 @@
       }
     },
     {
+      "name": "output-styler",
+      "source": "./plugins/output-styler",
+      "description": "Rewrites the last response in one or more named writing styles (STE, plain language, BLUF, ELI5, dev docs, visual) for side-by-side comparison, with optional readability scores and per-project style preferences.",
+      "category": "productivity",
+      "keywords": [
+        "writing",
+        "style",
+        "plain-language",
+        "ste",
+        "readability",
+        "communication"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "devops-tools",
       "source": "./plugins/devops-tools",
       "description": "Pre-deploy checklist, changelog generation, and a guard hook against destructive shell commands.",
