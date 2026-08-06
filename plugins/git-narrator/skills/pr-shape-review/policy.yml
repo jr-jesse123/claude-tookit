@@ -1,0 +1,70 @@
+version: 1
+
+history:
+  require_linear: true
+  allow_merge_commits: false
+  default_shape: squash
+
+allowed_recommendations:
+  - squash
+  - recompose
+  - split
+  - stacked-split
+  - insufficient-context
+
+semantic_delivery:
+  require:
+    - clear_purpose
+    - observable_outcome
+    - coherent_review_boundary
+    - intelligible_revert_boundary
+    - no_known_broken_state
+
+recompose:
+  require:
+    - distinct_semantic_purpose_per_commit
+    - coherent_intermediate_state
+    - tests_travel_with_behavior
+    - permanent_navigation_value
+  permanent_navigation_value:
+    any_of:
+      - review
+      - bisect
+      - revert
+      - backport
+      - future_agent_comprehension
+
+split:
+  recommend_when:
+    - multiple_independently_valuable_deliveries
+    - unrelated_incidental_change
+
+stacked_split:
+  recommend_when:
+    - multiple_separately_reviewable_deliveries
+    - explicit_acyclic_dependency_order
+
+squash:
+  prefer_when:
+    - one_semantic_delivery
+    - operational_or_corrective_commits
+    - exploratory_commits
+    - invalid_or_unverified_intermediate_states
+    - ambiguous_permanent_value
+
+confidence:
+  high:
+    - intent_is_explicit
+    - boundaries_have_repository_evidence
+    - intermediate_validity_is_verified_when_relevant
+  medium:
+    - intent_is_inferred_from_multiple_consistent_signals
+    - some_verification_is_missing
+  low:
+    - intent_or_boundaries_are_materially_ambiguous
+
+safety:
+  mutate_repository: false
+  rewrite_history: false
+  create_or_push_branches: false
+  claim_unverified_checks_pass: false
