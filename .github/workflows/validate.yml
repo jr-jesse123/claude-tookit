@@ -19,6 +19,9 @@ jobs:
       - name: Validate marketplace and plugins
         run: node scripts/validate-marketplace.mjs
 
+      - name: Validate mermaid diagrams
+        run: node scripts/validate-diagrams.mjs
+
       - name: Check shipped Python helpers are syntactically valid
         run: |
           shopt -s nullglob globstar

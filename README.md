@@ -175,6 +175,7 @@ claude-tookit/
 │       ├── scripts/guard-destructive-commands.py
 │       └── .mcp.json.example
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
+├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml
 ```
 
@@ -228,9 +229,16 @@ complementa o validador deste repo (ele checa frontmatter contra o schema real).
 
 ```
 node scripts/validate-marketplace.mjs
+node scripts/validate-diagrams.mjs
 ```
 
-Sem dependências, Node 18+. Roda no CI a cada push ([`validate.yml`](.github/workflows/validate.yml)).
+Sem dependências, Node 18+. Rodam no CI a cada push ([`validate.yml`](.github/workflows/validate.yml)).
+O `validate-diagrams.mjs` valida todo fence ` ```mermaid ` sob `plugins/` em duas
+camadas: sintaxe pelo parser oficial do Mermaid (via
+`npx @zabaca/mermaid-validate`, pulado com aviso se `npx` faltar ou com
+`--no-npx`) e checagens estruturais que o parser não faz — índice de
+`linkStyle` dentro do número de arestas e `class`/`:::` apontando para
+`classDef` declarado.
 Verifica:
 
 - `marketplace.json` — JSON válido, `name` kebab-case e não reservado, `owner.name`, nomes de plugin únicos;

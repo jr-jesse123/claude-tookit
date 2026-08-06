@@ -2,7 +2,7 @@
 name: pr-tour
 description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help) and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
 argument-hint: [PR number/URL or branch; defaults to current branch vs default branch]
-allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Read, Grep, Glob
+allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
 
 # PR tour
@@ -146,6 +146,13 @@ Painting rules:
   is final, and check the indices one by one.
 - Light fills need an explicit dark text color (e.g. `color:#111`) so labels
   stay readable on dark themes.
+
+**Validate before presenting.** When `npx` is available, pipe each fence
+through the official mermaid parser before showing the tour:
+`echo "<fence body>" | npx --yes @zabaca/mermaid-validate -`. On failure, fix
+and re-validate; double-check `linkStyle` indices against the edge order,
+which the parser only partially covers. If `npx` is unavailable or offline,
+skip silently — never block the tour on validation.
 
 **Examples — read only what you selected.** Few-shot references live in
 `${CLAUDE_SKILL_DIR}/examples/`, one file per diagram type: `flowchart.md`
