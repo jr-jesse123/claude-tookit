@@ -77,25 +77,56 @@ def load_standard() -> dict[str, Any]:
     return standard
 
 
+def rule_by_type(ruleset: dict[str, Any] | None, rule_type: str) -> dict[str, Any] | None:
+    if not ruleset:
+        return None
+    return next(
+        (rule for rule in ruleset.get("rules", []) if rule.get("type") == rule_type),
+        None,
+    )
+
+
 def prepare_ruleset(
     raw: dict[str, Any],
+    current: dict[str, Any] | None,
     *,
     human_approvals: int | None,
-    required_checks: list[str],
+    required_checks: list[str] | None,
     review_drafts: bool | None,
 ) -> dict[str, Any]:
     ruleset = json.loads(json.dumps(raw))
+    pull_request = rule_by_type(ruleset, "pull_request")
+    current_pull_request = rule_by_type(current, "pull_request")
+    copilot_review = rule_by_type(ruleset, "copilot_code_review")
+    current_copilot_review = rule_by_type(current, "copilot_code_review")
+    current_status_checks = rule_by_type(current, "required_status_checks")
 
-    for rule in ruleset["rules"]:
-        if rule["type"] == "pull_request" and human_approvals is not None:
-            rule["parameters"]["required_approving_review_count"] = human_approvals
-        if rule["type"] == "copilot_code_review" and review_drafts is not None:
-            rule["parameters"]["review_draft_pull_requests"] = review_drafts
+    if pull_request:
+        if human_approvals is not None:
+            pull_request["parameters"]["required_approving_review_count"] = human_approvals
+        elif current_pull_request:
+            existing = current_pull_request.get("parameters", {}).get(
+                "required_approving_review_count"
+            )
+            if existing is not None:
+                pull_request["parameters"]["required_approving_review_count"] = existing
 
-    if required_checks:
-        ruleset["rules"] = [
-            rule for rule in ruleset["rules"] if rule["type"] != "required_status_checks"
-        ]
+    if copilot_review:
+        if review_drafts is not None:
+            copilot_review["parameters"]["review_draft_pull_requests"] = review_drafts
+        elif current_copilot_review:
+            existing = current_copilot_review.get("parameters", {}).get(
+                "review_draft_pull_requests"
+            )
+            if existing is not None:
+                copilot_review["parameters"]["review_draft_pull_requests"] = existing
+
+    ruleset["rules"] = [
+        rule for rule in ruleset["rules"] if rule["type"] != "required_status_checks"
+    ]
+    if required_checks is None and current_status_checks:
+        ruleset["rules"].append(current_status_checks)
+    elif required_checks:
         ruleset["rules"].append(
             {
                 "type": "required_status_checks",
@@ -154,20 +185,23 @@ def build_plan(
     standard: dict[str, Any],
     *,
     human_approvals: int | None,
-    required_checks: list[str],
+    required_checks: list[str] | None,
     review_drafts: bool | None,
 ) -> dict[str, Any]:
     current_repository = gh_api("GET", f"/repos/{repository}")
     desired_settings = standard["repository_settings"]
     current_settings = repository_settings_snapshot(current_repository, desired_settings)
 
+    ruleset_id, current_ruleset = find_ruleset(
+        repository, standard["ruleset"]["name"]
+    )
     desired_ruleset = prepare_ruleset(
         standard["ruleset"],
+        current_ruleset,
         human_approvals=human_approvals,
         required_checks=required_checks,
         review_drafts=review_drafts,
     )
-    ruleset_id, current_ruleset = find_ruleset(repository, desired_ruleset["name"])
 
     settings_changed = current_settings != desired_settings
     if current_ruleset is None:
@@ -193,13 +227,7 @@ def build_plan(
     }
 
 
-def apply_plan(plan: dict[str, Any]) -> None:
-    repository = plan["repository"]
-
-    if plan["repository_settings"]["action"] == "update":
-        gh_api("PATCH", f"/repos/{repository}", plan["repository_settings"]["desired"])
-
-    ruleset = plan["ruleset"]
+def apply_ruleset(repository: str, ruleset: dict[str, Any]) -> None:
     if ruleset["action"] == "create":
         gh_api("POST", f"/repos/{repository}/rulesets", ruleset["desired"])
     elif ruleset["action"] == "update":
@@ -208,6 +236,32 @@ def apply_plan(plan: dict[str, Any]) -> None:
             f"/repos/{repository}/rulesets/{ruleset['id']}",
             ruleset["desired"],
         )
+
+
+def apply_plan(plan: dict[str, Any]) -> None:
+    repository = plan["repository"]
+    settings = plan["repository_settings"]
+    settings_updated = settings["action"] == "update"
+
+    if settings_updated:
+        gh_api("PATCH", f"/repos/{repository}", settings["desired"])
+
+    try:
+        apply_ruleset(repository, plan["ruleset"])
+    except Exception as apply_error:
+        if not settings_updated:
+            raise
+        try:
+            gh_api("PATCH", f"/repos/{repository}", settings["current"])
+        except Exception as rollback_error:
+            raise CommandError(
+                f"ruleset update failed ({apply_error}); repository-settings "
+                f"rollback also failed ({rollback_error})"
+            ) from apply_error
+        raise CommandError(
+            f"ruleset update failed and repository settings were rolled back: "
+            f"{apply_error}"
+        ) from apply_error
 
 
 def parse_args() -> argparse.Namespace:
@@ -230,13 +284,25 @@ def parse_args() -> argparse.Namespace:
         type=int,
         choices=range(0, 7),
         metavar="0..6",
-        help="override the standard number of required human approvals",
+        help=(
+            "set required human approvals; when omitted, preserve this standard "
+            "ruleset's existing repository-specific value"
+        ),
     )
-    parser.add_argument(
+    checks_group = parser.add_mutually_exclusive_group()
+    checks_group.add_argument(
         "--required-check",
         action="append",
-        default=[],
-        help="require a status check by exact context name; repeat as needed",
+        default=None,
+        help=(
+            "replace required status checks with exact context names; repeat as "
+            "needed. When omitted, preserve existing checks."
+        ),
+    )
+    checks_group.add_argument(
+        "--clear-required-checks",
+        action="store_true",
+        help="remove required status checks from this standard ruleset",
     )
     draft_group = parser.add_mutually_exclusive_group()
     draft_group.add_argument(
@@ -266,11 +332,12 @@ def main() -> int:
             )
 
         standard = load_standard()
+        required_checks = [] if args.clear_required_checks else args.required_check
         plan = build_plan(
             repository,
             standard,
             human_approvals=args.human_approvals,
-            required_checks=args.required_check,
+            required_checks=required_checks,
             review_drafts=args.review_drafts,
         )
         print(json.dumps(plan, indent=2, sort_keys=True))
