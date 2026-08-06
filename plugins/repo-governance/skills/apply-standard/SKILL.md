@@ -1,7 +1,7 @@
 ---
 name: apply-standard
 description: Plan and apply a safe default GitHub repository governance standard: linear default-branch history, pull-request-only changes, no force pushes or deletion, automatic Copilot review, resolved review threads, clean merge defaults, and optional repository-specific status checks.
-argument-hint: "[owner/name] [--human-approvals N] [--required-check CONTEXT ...] [--review-drafts]"
+argument-hint: "[owner/name] [--human-approvals N] [--required-check CONTEXT ... | --clear-required-checks] [--review-drafts]"
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -50,6 +50,10 @@ resolving review threads still creates an integration boundary without
 deadlocking a solo repository. Team repositories should usually override this
 with `--human-approvals 1` or a stricter organization policy.
 
+On an existing `Standard default-branch governance` ruleset, omitted CLI options
+preserve repository-specific approval count, required status checks, and draft
+review preference. Removing or replacing those overrides must be explicit.
+
 ## 1. Resolve the target
 
 Use the first plain `owner/name` argument when supplied. Otherwise resolve the
@@ -70,6 +74,9 @@ repository.
 ### Required status checks
 
 Add `--required-check "<exact context>"` once per stable CI check that must pass.
+Supplying one or more replaces the checks managed by this standard ruleset.
+Omitting the option preserves existing checks. Use `--clear-required-checks`
+only when the user explicitly wants to remove them.
 
 Use only exact context names observed in the repository's existing successful
 checks or documented workflow contract. Never guess names: a nonexistent
@@ -87,18 +94,21 @@ set whose success means the PR is safe to integrate.
 
 ### Human approvals
 
-- Personal/solo repository: default `0`.
+- Personal/solo repository: creation default `0`.
 - Active team with independent review: usually `--human-approvals 1`.
 - Regulated or high-blast-radius repository: decide separately; do not infer a
   count from repository size.
 
-Copilot reviews are comments, not approvals, and do not satisfy a required human
-approval.
+Omitting `--human-approvals` preserves the existing value in this standard
+ruleset. Copilot reviews are comments, not approvals, and do not satisfy a
+required human approval.
 
 ### Draft review
 
 Use `--review-drafts` only when early feedback is worth the additional review
-runs and noise. The default reviews open PRs and every subsequent push.
+runs and noise. Use `--no-review-drafts` to turn it off explicitly. Omitting both
+preserves the existing preference; a new ruleset defaults to reviewing open PRs
+and every subsequent push, but not drafts.
 
 ## 3. Produce the plan
 
@@ -108,8 +118,8 @@ Select `python3` when available, otherwise `python`. Run without `--apply`:
 python3 "${CLAUDE_SKILL_DIR}/apply-standard.py" \
   --repo owner/name \
   [--human-approvals N] \
-  [--required-check "context"] \
-  [--review-drafts]
+  [--required-check "context" | --clear-required-checks] \
+  [--review-drafts | --no-review-drafts]
 ```
 
 The script returns:
@@ -160,7 +170,9 @@ python3 "${CLAUDE_SKILL_DIR}/apply-standard.py" \
 
 `--confirm-repo` must exactly equal the resolved target. The executor upserts
 the named ruleset rather than creating duplicates and patches only the declared
-repository settings.
+repository settings. If ruleset application fails after merge settings were
+changed, it attempts to restore the previous merge settings and reports both
+failures if rollback also fails.
 
 Run the plan command once more afterward. Success means every action reports
 `none`. Report any API rejection exactly; do not silently weaken the policy to
