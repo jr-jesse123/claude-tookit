@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "sessions",
+  "displayName": "Sessions",
+  "description": "Session organization helpers. Ships /sessions:name — distills the current session into a short, searchable resume handle and hands back the /rename command to apply it.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["sessions", "naming", "resume", "organization", "productivity"]
+}
