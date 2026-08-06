@@ -39,7 +39,7 @@ split:
     - multiple_independently_valuable_deliveries
     - unrelated_incidental_change
 
-stacked_split:
+stacked-split:
   recommend_when:
     - multiple_separately_reviewable_deliveries
     - explicit_acyclic_dependency_order
