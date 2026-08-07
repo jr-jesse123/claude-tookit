@@ -19,6 +19,9 @@ jobs:
       - name: Validate marketplace and plugins
         run: node scripts/validate-marketplace.mjs
 
+      # @zabaca/mermaid-validate ships a bun-target binary (#!/usr/bin/env bun)
+      - uses: oven-sh/setup-bun@v2
+
       - name: Validate mermaid diagrams
         run: node scripts/validate-diagrams.mjs
 
