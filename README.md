@@ -58,6 +58,7 @@ provedor, e passa por cima da policy quando 3 entradas apontam na mesma direçã
 | skill | `/git-narrator:narrate-wip` | **Modo forward.** Num ponto de pausa, transforma a working tree suja em 1–3 commits semânticos em vez de `git add -A && commit -m wip`. Mesmos eixos de fatiamento e trailers `Stage:`, gate de build opcional em worktree descartável. Sem rewrite, sem force-push — seguro em branch com PR em review. Arquivos podem ficar de fora de propósito (lista explícita no plano). |
 | agent | `git-narrator:executor` | **Fase 2 — execução.** Roda o protocolo: backup ref, `reset --soft`, staging fatiado, gate de build/testes por commit, e a verificação de que a árvore final é byte-idêntica. Sem `Edit`/`Write`. |
 | referência | `execution-protocol.md` | O contrato dos gates, compartilhado pelas duas fases. |
+| referência | `reference/narration-core.md` | O bloco comum às duas skills — descoberta de build/testes, eixos de fatiamento, trailers, gate em worktree, semântica de gate vermelho. Cada skill guarda só os próprios deltas. |
 
 Três decisões de desenho que valem conhecer antes de usar:
 
@@ -160,6 +161,7 @@ claude-tookit/
 │   │       └── log-calibration.py   # único caminho de escrita (append-only)
 │   ├── git-narrator/
 │   │   ├── .claude-plugin/plugin.json
+│   │   ├── reference/narration-core.md  # bloco comum às duas skills
 │   │   ├── skills/narrate/
 │   │   │   ├── SKILL.md             # fase 1: análise e plano
 │   │   │   └── execution-protocol.md

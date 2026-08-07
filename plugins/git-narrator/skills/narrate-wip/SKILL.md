@@ -30,9 +30,10 @@ mess at the source: at a natural pause point (a sub-task done, end of session,
 context switch), it turns the dirty working tree into a small sequence of
 semantic commits instead of one `wip` blob.
 
-What it shares with `narrate`: the slicing axes, the `Stage:` trailer
-vocabulary, the disposable-worktree build gate, and the rule that content is
-immutable — you regroup changes, never edit them.
+Read `${CLAUDE_PLUGIN_ROOT}/reference/narration-core.md` now — it holds
+everything the two modes share: build/test discovery, the slicing axes and
+layer order, the `Stage:` trailer, the disposable-worktree gate, and the
+gate-failure rules. This file states only what is specific to forward mode.
 
 What it deliberately does **not** share: there is no history rewrite, no
 `reset --hard`, no force-push, and no executor agent. Every operation is
@@ -64,10 +65,9 @@ Keep `backup` alive for the run: `git stash store -m "narrate-wip backup" <sha>`
 
 ## 2. Discover the build command
 
-Same sources as `narrate`: `package.json` scripts, `Makefile`,
-`pyproject.toml`, `*.csproj` / `*.sln`, `justfile`, `.github/workflows/`.
-Extract the cheapest full-tree check (compile/typecheck). Never invent
-commands; if none exists, the gate degrades to `none` and the plan says so.
+Follow the core's *Discovering build and test commands* — here only the build
+command matters (there is no `scoped`/`full` gate in forward mode). If none
+exists, the gate degrades to `none` and the plan says so.
 
 **Calibrate the gate before planning:** run the build once against the
 working tree as it stands (it *is* the final state, so building in place is
@@ -99,30 +99,19 @@ An unclassified file is a planning failure — recheck before presenting.
 
 ## 4. Slice
 
-**Axis first:** one purpose in the pause → slice by layer. Several purposes
-(a feature step plus an opportunistic fix) → slice vertically by purpose
-first, then layer inside each.
+Apply the core's *Slicing* rules — axis first, the four-layer order,
+file-level granularity, fixture trap — with the forward-mode deltas:
 
-**Layer order within a purpose** — same ladder as `narrate`, but a pause
-point rarely spans all of it. One to three commits is the normal outcome;
-producing five commits out of an afternoon's diff is over-slicing:
+- A pause point rarely spans the whole ladder. **One to three commits** is
+  the normal outcome; producing five commits out of an afternoon's diff is
+  over-slicing.
+- No partial staging, no `git add -p`: a file that spans two slices goes
+  whole into the later slice.
+- The compilable-slice rule applies only when the gate is `build`.
 
-1. Intent docs — PRD, ADRs, reference notes
-2. Domain / central definitions **+ their tests**
-3. Support / infrastructure **+ their tests**
-4. Wiring, composition **+ E2E tests**
-
-Granularity is **file-level**. No partial staging, no `git add -p`: a file
-that spans two slices goes whole into the later slice. When the gate is
-`build`, every slice must leave the tree compilable — tests travel with the
-code they test, and the fixture-in-support trap from `narrate` applies here
-unchanged.
-
-Messages follow the repo's existing style and carry the trailers the final
-`/narrate` pass consumes:
+Messages carry the core's `Stage:` trailer plus the forward-specific one:
 
 ```
-Stage: docs | domain | support | e2e
 Wip-Build: red          (only when the gate was calibrated to none by a red tree)
 ```
 
@@ -152,25 +141,13 @@ Per slice, in order:
 1. `git add <the slice's files>` — explicit paths only. Never `git add -A`,
    `-u`, or `.`: the left-out list must survive.
 2. `git commit` with the plan's message verbatim, trailers included.
-3. If gate is `build`: build this commit in a disposable worktree — the
-   working tree still holds later slices unstaged, so building it would test
-   the wrong tree:
+3. If gate is `build`: run the core's disposable-worktree gate
+   (build only) on the new commit. The last commit's gate is redundant with
+   the step-2 calibration run (same tree) — skip it and say so.
 
-   ```
-   git worktree add /tmp/narrate-wip-gate <commit-sha>
-   (cd /tmp/narrate-wip-gate && <build_cmd>)
-   git worktree remove --force /tmp/narrate-wip-gate
-   ```
-
-   The last commit's gate is redundant with the step-2 calibration run
-   (same tree) — skip it and say so.
-
-**Gate failure = slicing error**, never a code error: the full tree compiled
-in step 2, so a red prefix is missing a file a later slice holds. Fix by
-reassignment only: `git reset --soft <start_head>`, `git restore --staged .`,
-move the file earlier, redo from step 6.1. Three amendment rounds maximum;
-then merge the failing commit with its predecessor (concatenate messages,
-keep both `Stage:` trailers). Never edit content to make a gate pass.
+On a red gate, the core's *Gate failure = slicing error* rules apply; the
+forward-mode redo procedure is: `git reset --soft <start_head>`,
+`git restore --staged .`, move the file earlier, redo from step 6.1.
 
 ## 7. Verify and report
 

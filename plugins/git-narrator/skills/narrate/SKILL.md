@@ -24,8 +24,13 @@ you do not touch history yourself. Execution belongs to the
 `git-narrator:executor` agent, which you spawn at the end with the plan and the
 protocol path.
 
-Read `${CLAUDE_SKILL_DIR}/execution-protocol.md` now — the plan you produce must
-satisfy its input contract, and its gates shape what a valid plan looks like.
+Read two files now:
+
+- `${CLAUDE_PLUGIN_ROOT}/reference/narration-core.md` — the definitions shared
+  with `narrate-wip`: build/test discovery, slicing axes and layer order,
+  trailer vocabulary, worktree gate, gate-failure rules.
+- `${CLAUDE_SKILL_DIR}/execution-protocol.md` — the plan you produce must
+  satisfy its input contract, and its gates shape what a valid plan looks like.
 
 ## 1. Preconditions
 
@@ -45,16 +50,9 @@ detect drift between approval and execution.
 
 ## 2. Discover build and test commands
 
-Read what the project defines — `package.json` scripts, `Makefile`,
-`pyproject.toml`, `*.csproj` / `*.sln`, `justfile`, or `.github/workflows/` —
-and extract:
-
-- the **build command** (compile/typecheck; the cheapest full-tree check),
-- the **test command**, and how to scope it to a path or filter if the runner
-  supports it (`dotnet test --filter`, `npm test -- <path>`, `pytest <path>`).
-
-If no build step exists, pick the closest cheap gate (linter, `py_compile`) and
-say so in the plan. Never invent commands.
+Follow the core's *Discovering build and test commands*. The scoping syntax
+matters here more than in `narrate-wip`: gate levels `scoped` and `full`
+depend on it.
 
 ## 3. Analyze the branch
 
@@ -81,30 +79,15 @@ messages and file clustering.
 
 ## 4. Slice
 
-**Axis first:** one purpose → slice by layer. Several purposes → slice
-vertically by purpose first, then apply the layer order inside each purpose.
+Apply the core's *Slicing* rules: axis first, the four-layer order, file-level
+granularity, fixture trap. Two narrate-specific additions:
 
-**Layer order within a purpose** (each slice must leave the tree compilable —
-tests travel *with* the code they test, never ahead of it):
-
-1. Intent docs — PRD, ADRs, reference files, scripts that document intent
-2. Domain / central definitions **+ their tests**
-3. Support / infrastructure **+ their tests**
-4. Wiring, composition **+ E2E tests**
-
-Granularity is **file-level**. If one file genuinely spans two slices, prefer
-assigning it to the later slice; splitting a file across commits is the
-protocol's advanced path and needs a strong reason.
-
-While classifying, watch for the classic trap: test fixtures and builders used
-by domain tests but living in a "support" directory. If domain tests import
-them, they belong in the domain slice — the build gate will catch this, but
-catching it at planning is one less re-slice cycle.
-
-Commits carrying a `Stage:` trailer were made by `/git-narrator:narrate-wip`
-and are already sliced: treat their file-to-stage assignment as a strong
-prior (override only with a reason), and treat `Wip-Build: red` commits as
-squash candidates with their completing counterpart.
+- Splitting a file across commits is the protocol's advanced path and needs a
+  strong reason — prefer whole-file assignment to the later slice.
+- Commits carrying a `Stage:` trailer were made by `/git-narrator:narrate-wip`
+  and are already sliced: treat their file-to-stage assignment as a strong
+  prior (override only with a reason), and treat `Wip-Build: red` commits as
+  squash candidates with their completing counterpart.
 
 ## 5. Decide the fate of explorations (user decision)
 
@@ -124,11 +107,10 @@ For each exploration pair from 3b, use AskUserQuestion with these options:
 ## 6. Present the plan and get approval
 
 Show a table: one row per planned commit — position, message (with trailers),
-files, and which gate applies. Messages follow the repo's existing style and
-carry machine-readable trailers for future archaeology:
+files, and which gate applies. Messages carry the core's `Stage:` trailer plus
+the narrate-specific ones:
 
 ```
-Stage: docs | domain | support | e2e
 Refs: ADR-014            (when applicable)
 Narrated-From: <original HEAD sha>   (last commit only)
 ```
