@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "git-narrator",
   "displayName": "Git Narrator",
-  "description": "Curates linear Git history: recommends the semantic shape of a PR, then can rebuild messy exploratory commits into a verified, byte-identical sequence.",
+  "description": "Curates linear Git history: recommends the semantic shape of a PR, turns work-in-progress into semantic commits as you go (forward mode), and can rebuild messy exploratory commits into a verified, byte-identical sequence.",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"

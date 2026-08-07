@@ -55,8 +55,10 @@ provedor, e passa por cima da policy quando 3 entradas apontam na mesma direçã
 | Componente | Nome | O que faz |
 | --- | --- | --- |
 | skill | `/git-narrator:narrate` | **Fase 1 — planejamento.** Analisa a branch, fatia as mudanças (docs de intenção → domínio+testes → suporte+testes → wiring+E2E), detecta explorações add→remove e pergunta o destino de cada uma (ADR, par reconstruído, ou descartar). Apresenta o plano e só delega após aprovação. |
+| skill | `/git-narrator:narrate-wip` | **Modo forward.** Num ponto de pausa, transforma a working tree suja em 1–3 commits semânticos em vez de `git add -A && commit -m wip`. Mesmos eixos de fatiamento e trailers `Stage:`, gate de build opcional em worktree descartável. Sem rewrite, sem force-push — seguro em branch com PR em review. Arquivos podem ficar de fora de propósito (lista explícita no plano). |
 | agent | `git-narrator:executor` | **Fase 2 — execução.** Roda o protocolo: backup ref, `reset --soft`, staging fatiado, gate de build/testes por commit, e a verificação de que a árvore final é byte-idêntica. Sem `Edit`/`Write`. |
 | referência | `execution-protocol.md` | O contrato dos gates, compartilhado pelas duas fases. |
+| referência | `reference/narration-core.md` | O bloco comum às duas skills — descoberta de build/testes, eixos de fatiamento, trailers, gate em worktree, semântica de gate vermelho. Cada skill guarda só os próprios deltas. |
 
 Três decisões de desenho que valem conhecer antes de usar:
 
@@ -65,6 +67,13 @@ Três decisões de desenho que valem conhecer antes de usar:
 - **Gate vermelho é erro de fatiamento, não de código.** A árvore é imutável; a única correção é mover arquivo entre fatias. Até 3 rodadas, depois funde os dois commits.
 
 Aborto sempre restaura do backup ref, e o relatório traz o comando de restore mesmo quando dá certo.
+
+O `narrate-wip` complementa (não substitui) o `narrate` final: ordem de
+descoberta não é ordem de leitura, e explorações só revelam o destino no fim.
+Mas commits forward já chegam atômicos e rotulados por `Stage:`, então a
+narração pré-merge vira principalmente reordenação — e como só faz `add` +
+`commit`, tudo é reversível com um `git reset --soft` (comando incluído no
+relatório).
 
 ### `comment-curator`
 
@@ -152,9 +161,11 @@ claude-tookit/
 │   │       └── log-calibration.py   # único caminho de escrita (append-only)
 │   ├── git-narrator/
 │   │   ├── .claude-plugin/plugin.json
+│   │   ├── reference/narration-core.md  # bloco comum às duas skills
 │   │   ├── skills/narrate/
 │   │   │   ├── SKILL.md             # fase 1: análise e plano
 │   │   │   └── execution-protocol.md
+│   │   ├── skills/narrate-wip/SKILL.md  # modo forward: commits semânticos do WIP
 │   │   └── agents/executor.md       # fase 2: execução mecânica
 │   ├── comment-curator/
 │   │   ├── .claude-plugin/plugin.json

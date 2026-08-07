@@ -44,7 +44,7 @@
     {
       "name": "git-narrator",
       "source": "./plugins/git-narrator",
-      "description": "Re-narrates a feature branch before merge: rebuilds messy exploratory history into a semantic commit sequence, with a byte-identical final tree and per-commit build gates.",
+      "description": "Re-narrates a feature branch before merge: rebuilds messy exploratory history into a semantic commit sequence, with a byte-identical final tree and per-commit build gates. Forward mode (narrate-wip) turns the dirty working tree into semantic commits as you go, without rewriting history.",
       "category": "git",
       "keywords": [
         "git",
