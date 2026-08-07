@@ -47,8 +47,12 @@ trailers for future archaeology. The shared one:
 Stage: docs | domain | support | e2e
 ```
 
-Each mode adds its own on top (`Refs:` / `Narrated-From:` for `narrate`,
-`Wip-Build:` for `narrate-wip`) — defined in the respective skill.
+One `Stage:` line per commit is the norm; a commit produced by merging two
+slices (see the amendment ceiling below) keeps both `Stage:` lines —
+repetition is the signal that it spans layers.
+
+Each mode adds its own trailers on top (`Refs:` / `Narrated-From:` for
+`narrate`, `Wip-Build:` for `narrate-wip`) — defined in the respective skill.
 
 ## The disposable-worktree gate
 

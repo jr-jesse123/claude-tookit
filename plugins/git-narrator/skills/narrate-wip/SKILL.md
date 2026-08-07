@@ -55,13 +55,16 @@ Record two anchors:
 
 - `start_head` = `git rev-parse HEAD` — the abort target.
 - `backup` = `git stash create "narrate-wip backup"` — a commit SHA capturing
-  the tracked working-tree state without touching the tree. If it returns
-  empty while `--porcelain` showed only untracked files, note that: untracked
-  files are not in the backup, but nothing in this flow deletes or edits
-  files, so they are never at risk.
+  the tracked working-tree state without touching the tree. **It returns
+  empty when nothing tracked is dirty** (only untracked files): record
+  `backup = none`, skip the `git stash store` below, and use the no-backup
+  wording in the plan, verification, and report. Untracked files are never in
+  the backup either way — but nothing in this flow deletes or edits files, so
+  they are not at risk.
 
-Keep `backup` alive for the run: `git stash store -m "narrate-wip backup" <sha>`
-(drop it from the report if the user prefers; by default report it).
+When `backup` is a SHA, keep it alive for the run:
+`git stash store -m "narrate-wip backup" <sha>` (drop it from the report if
+the user prefers; by default report it).
 
 ## 2. Discover the build command
 
@@ -121,8 +124,9 @@ Show a table: one row per planned commit — position, message (with
 trailers), files, gate. Below it, the **left-out list** (files that stay
 uncommitted) — explicitly, so silence never hides a file.
 
-State visibly, in one block: `start_head`, the backup stash SHA, and the
-restore command:
+State visibly, in one block: `start_head`, the backup stash SHA (or
+`backup: none — only untracked files, nothing tracked to capture`), and the
+restore command, which works with or without a backup:
 
 ```
 git reset --soft <start_head> && git restore --staged .
@@ -154,13 +158,16 @@ forward-mode redo procedure is: `git reset --soft <start_head>`,
 - `git status --porcelain` now lists **exactly** the left-out and untracked
   files from the plan — nothing more, nothing less. Any surprise → restore
   and report.
-- `git diff <backup> HEAD --stat` must list only the left-out files'
-  pending changes; with nothing left out, it must be empty. This is the
-  content-immutability invariant made mechanical.
+- With a backup SHA: `git diff <backup> HEAD --stat` must list only the
+  left-out files' pending changes; with nothing left out, it must be empty.
+  This is the content-immutability invariant made mechanical.
+- With `backup = none` there is no tracked baseline to diff. The remaining
+  guards: the porcelain check above, and `git show --stat` per new commit
+  listing exactly the planned files.
 
 Report: the new `git log --oneline` range, gate results per commit
-(including amendment rounds), the backup stash SHA, the restore command, and
-the left-out list. **Do not push.** If the user asks, a plain `git push` —
+(including amendment rounds), the backup stash SHA (or that none was
+created, and why), the restore command, and the left-out list. **Do not push.** If the user asks, a plain `git push` —
 this skill never has a reason to force.
 
 ## Relation to the final /narrate

@@ -111,6 +111,7 @@ files, and which gate applies. Messages carry the core's `Stage:` trailer plus
 the narrate-specific ones:
 
 ```
+Stage: docs | domain | support | e2e   (from the core — every commit)
 Refs: ADR-014            (when applicable)
 Narrated-From: <original HEAD sha>   (last commit only)
 ```
