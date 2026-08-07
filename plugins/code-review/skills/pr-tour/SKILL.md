@@ -162,8 +162,8 @@ On failure, fix and re-validate; double-check `linkStyle` indices against the
 edge order, which the parser only partially covers. If `npx` is unavailable
 or offline, skip silently — never block the tour on validation.
 
-**Examples — read only what you selected.** Few-shot references live in
-`${CLAUDE_SKILL_DIR}/examples/`, one file per diagram type: `flowchart.md`
+**Examples — read only what you selected.** Few-shot references live in the
+`examples/` directory next to this SKILL.md, one file per diagram type: `flowchart.md`
 (painted delta + before/after pair), `sequence.md`, `state.md`,
 `er-class.md`, `mindmap-timeline.md` — plus `prose.md` for the narrative and
 reading order at three PR sizes (small, medium, large with group splits).
