@@ -101,6 +101,11 @@ by domain tests but living in a "support" directory. If domain tests import
 them, they belong in the domain slice — the build gate will catch this, but
 catching it at planning is one less re-slice cycle.
 
+Commits carrying a `Stage:` trailer were made by `/git-narrator:narrate-wip`
+and are already sliced: treat their file-to-stage assignment as a strong
+prior (override only with a reason), and treat `Wip-Build: red` commits as
+squash candidates with their completing counterpart.
+
 ## 5. Decide the fate of explorations (user decision)
 
 For each exploration pair from 3b, use AskUserQuestion with these options:
