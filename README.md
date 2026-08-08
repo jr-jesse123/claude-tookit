@@ -42,7 +42,15 @@ sem reinstalar).
 | --- | --- | --- |
 | skill | `/code-review:quick-review` | Revisa as mudanças não commitadas: correção, edge cases, sobras de debug, contratos quebrados, testes faltando. |
 | skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
+| skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. |
 | agent | `code-review:security-reviewer` | Subagente que audita injection, authn/authz, segredos, path traversal, desserialização e cripto. Só lê — nunca edita. |
+
+Os dois tours compartilham as convenções de pintura (o `plan-tour` lê os
+`examples/` do `pr-tour` dentro do plugin) e fecham um ciclo: o `plan-tour`
+pinta o delta *prometido* e, depois da implementação, o `pr-tour` pinta o
+delta *entregue* — dá para comparar os dois no fim. Fluxo típico:
+plano → `plan-tour` → (ajusta o plano se houver discrepância) →
+implementação → `pr-tour`.
 
 ### `model-router`
 
@@ -158,6 +166,9 @@ claude-tookit/
 │   │   ├── skills/pr-tour/
 │   │   │   ├── SKILL.md
 │   │   │   └── examples/            # few-shot por tipo de diagrama + prosa, via ${CLAUDE_SKILL_DIR}
+│   │   ├── skills/plan-tour/
+│   │   │   ├── SKILL.md             # delta prospectivo: reusa os examples do pr-tour via ${CLAUDE_PLUGIN_ROOT}
+│   │   │   └── examples/prospective.md
 │   │   └── agents/security-reviewer.md
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json

@@ -10,7 +10,7 @@
     {
       "name": "code-review",
       "source": "./plugins/code-review",
-      "description": "Fast, focused review of uncommitted changes, a guided PR reading tour, plus a security-focused subagent.",
+      "description": "Fast, focused review of uncommitted changes, guided reading tours of PRs and of implementation plans, plus a security-focused subagent.",
       "category": "quality",
       "keywords": [
         "review",
