@@ -22,6 +22,18 @@ Para atualizar quando este repo mudar:
 /plugin marketplace update jr-claude-toolkit
 ```
 
+### Auto-instalação neste repo
+
+Este repositório consome os próprios plugins: `.claude/settings.json` registra o
+marketplace via `extraKnownMarketplaces` e habilita todos os plugins via
+`enabledPlugins`. Ao abrir o repo no Claude Code e confiar na pasta, ele
+oferece instalar o marketplace e os plugins automaticamente — sem rodar
+`/plugin install` na mão.
+
+Nota: mesmo aqui os plugins rodam da cópia em `~/.claude/plugins/cache`, não
+desta pasta (veja [Desenvolver localmente](#desenvolver-localmente) para iterar
+sem reinstalar).
+
 ## Plugins
 
 ### `code-review`
