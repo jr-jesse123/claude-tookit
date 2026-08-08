@@ -285,6 +285,61 @@ moment that opt-in becomes a deliberate decision rather than a reflex.
 - **Cap the fan-out.** As with subagents, recommend a bound (finder count,
   verification votes, loop rounds) alongside the shape.
 
+### Agent team → Agent Teams (experimental)
+
+Reviewed 2026-08-08 against code.claude.com/docs/en/agent-teams. In Claude
+Code the **Agent team** shape materializes as the experimental Agent Teams
+feature, behind explicit opt-in: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in
+the environment or settings. As with ultracode, name the opt-in in the
+recommendation — it is a deliberate decision, not a default.
+
+- **Mechanism — active coordination, not hand-offs at seams.** A permanent
+  lead session spawns teammates, each a separate Claude Code instance with
+  its own context window and prompt cache. They coordinate through a shared
+  task list (teammates claim work themselves) and native peer-to-peer mailbox
+  messages, mid-work — the team does not need manual relay or file-based
+  hand-off notifications.
+- **Model per teammate: yes. Effort per teammate: no.** Each teammate's model
+  is choosable (in the spawn prompt, or via the "Default teammate model"
+  setting), so a decomposed plan can route each part to its own model.
+  **Effort is inherited from the lead with no per-teammate override** — parts
+  routed to different effort levels cannot be expressed as one team; split
+  the team or stage the odd part as a separate session.
+- **Cost.** Roughly 7× a solo session, scaling linearly with team size and
+  lifetime; each teammate bills its own full context and keeps its own cache.
+  The docs' own cost advice matches this policy: workhorse-tier (sonnet)
+  teammates by default, teams of 3–5, shut teammates down when their part
+  ends.
+- **Limitations (as of 2026-08).** Same machine only; one team per session;
+  no nested teams; `/resume` and `/rewind` do not restore teammates. Work
+  that must survive a session restart should not be shaped as a team —
+  prefer a staged pipeline of plain sessions.
+
+### Cross-session messaging ("socket")
+
+Since v2.1.224 (2026-08-07), local Claude Code sessions on the same machine
+discover each other (`ListAgents`) and exchange plain-text messages
+(`SendMessage`) over a Unix domain socket; cross-machine delivery routes
+through Anthropic servers. **This is a coordination medium, not an execution
+shape**: it creates no new context, cannot choose a model or effort (the
+receiver's current settings apply), and carries text only — never recommend it as a routing
+destination.
+
+What it changes for routing:
+
+- **It cheapens coordination for Staged pipeline and independent parallel
+  sessions** — the shapes that previously needed the user to relay hand-off
+  notifications by hand. It is *not* how Agent Teams coordinate; teams have
+  their own task list and mailbox (above).
+- **The message is the bell, not the package.** Structured hand-off contracts
+  (specs, file lists, diffs) still travel via files or branches; the message
+  only says they are ready and where.
+- **Cost and timing.** Each delivered message starts a turn in the receiving
+  session, billed against that session's full context; caches are per-session
+  and never shared. Delivery waits for the receiver's turn boundary — it is
+  not a synchronous orchestration channel; for synchronous fan-out the shape
+  is still a subagent or an orchestrated workflow.
+
 Switching the model of a running conversation invalidates its prompt cache and
 re-reads the history at full price. Prefer a new session or a subagent over
 repeatedly switching a long-running main conversation.

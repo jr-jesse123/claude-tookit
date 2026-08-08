@@ -145,7 +145,7 @@ multi-model shapes that `choose-model` only detects get actually planned:
 | --- | --- |
 | **Parallel scouts** | Independent read-only parts (searches, inventories, analyses) on a mechanical- or workhorse-tier model, fanned out, results joined by the caller |
 | **Advisor plus implementer** | A frontier part produces the plan/spec/review; workhorse parts implement against it. The documented pattern on both providers — see each policy's Execution-shape notes |
-| **Agent team** | Independent workstreams with real deliverables each, coordinated at the seams |
+| **Agent team** | Independent workstreams with real deliverables each, under active coordination — a lead, a shared task list, native peer messaging where the harness provides them (see the policies' Execution-shape notes for mechanism, opt-in, and per-teammate model/effort constraints) |
 | **Orchestrated workflow** | Exhaustiveness or adversarial verification structured as fan-out: diverse finder lenses, independent verification of findings, judge panels. Buys coverage and confidence, not intelligence — the agents run on the same models, so it never substitutes for a higher tier |
 | **Staged pipeline** | Sequential parts too large or too far apart in tier to share a session — each stage a fresh session or subagent, hand-offs written down |
 
@@ -160,6 +160,14 @@ Constraints:
   different lens, or it is spend without safety).
 - **Every fan-out gets a named cap** — scout count, verification votes, loop
   rounds, team size. An uncapped fan-out is not a plan.
+- **Hand-offs name their transport.** For each Interfaces entry, say how the
+  hand-off travels: the artifact itself (spec, file list, branch) goes through
+  the repository, and the *notification* goes through whatever the shape
+  provides — a team's own task list and mailbox, a workflow's return value, or,
+  between plain sessions in a staged pipeline, the harness's cross-session
+  messaging where the provider's Execution-shape notes say it is available.
+  A hand-off whose transport is "the user relays it" is a cost — count it
+  against the decomposition in the step 2 gate.
 - **Name what the single-agent run would miss.** The most expensive shapes
   (orchestrated workflow, agent team) must justify themselves the same way a
   tier does: a concrete miss, not a feeling of thoroughness.
