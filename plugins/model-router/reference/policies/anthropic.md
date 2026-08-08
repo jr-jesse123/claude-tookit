@@ -322,7 +322,7 @@ discover each other (`ListAgents`) and exchange plain-text messages
 (`SendMessage`) over a Unix domain socket; cross-machine delivery routes
 through Anthropic servers. **This is a coordination medium, not an execution
 shape**: it creates no new context, cannot choose a model or effort (the
-receiver's apply), and carries text only — never recommend it as a routing
+receiver's current settings apply), and carries text only — never recommend it as a routing
 destination.
 
 What it changes for routing:
