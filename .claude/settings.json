@@ -1,0 +1,20 @@
+{
+  "extraKnownMarketplaces": {
+    "jr-claude-toolkit": {
+      "source": {
+        "source": "github",
+        "repo": "jr-jesse123/claude-tookit"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "code-review@jr-claude-toolkit": true,
+    "model-router@jr-claude-toolkit": true,
+    "git-narrator@jr-claude-toolkit": true,
+    "comment-curator@jr-claude-toolkit": true,
+    "repo-governance@jr-claude-toolkit": true,
+    "sessions@jr-claude-toolkit": true,
+    "output-styler@jr-claude-toolkit": true,
+    "devops-tools@jr-claude-toolkit": true
+  }
+}
