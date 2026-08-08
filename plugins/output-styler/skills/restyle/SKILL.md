@@ -103,11 +103,25 @@ and let sentence length and long-word share carry the comparison.
 ## 6. Maturing a project style
 
 When the user declares a winner ("gostei do bluf", "visual ganhou para esse
-tipo de projeto"), offer — never do it unasked — to record the preference in
-the project's `CLAUDE.md` under an `## Output style` heading: the chosen
-style, one line on when it applies, and the date. Use Edit on the existing
-file or Write to create it, only after explicit confirmation. That closes the
-experiment loop: the next session picks the preference up automatically.
+tipo de projeto"), offer — never do it unasked — the mechanism that matches
+the winner:
+
+- **The winner ships as a native output style in this plugin** (today:
+  `visual`) → offer to make it the project's output style: set
+  `"outputStyle": "Visual"` in the project's `.claude/settings.json` (the
+  user can also do it via `/config` → *Output style*). This changes the
+  register at the system-prompt level and persists across sessions — the
+  mechanism Claude Code recommends for persistent tone. Mention the
+  difference: the output style makes Claude *speak* that way natively, while
+  this skill keeps existing for on-demand comparison.
+- **Any other winner** → offer to record the preference in the project's
+  `CLAUDE.md` under an `## Output style` heading: the chosen style, one line
+  on when it applies, and the date. A style that keeps winning here is the
+  signal it has earned its own native output style port.
+
+Either way, use Edit on the existing file or Write to create it, only after
+explicit confirmation. That closes the experiment loop: the next session
+picks the preference up automatically.
 
 ## What not to do
 

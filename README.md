@@ -139,13 +139,24 @@ Decisões de desenho que valem conhecer:
 | --- | --- | --- |
 | skill | `/output-styler:restyle` | Reescreve o último output (ou um texto/arquivo apontado) em um ou mais estilos nomeados, lado a lado, para comparação: `bluf` (resposta primeiro — BLUF/Minto), `plain` (linguagem simples — ISO 24495-1), `docs` (documentação de desenvolvedor — Google/Microsoft), `ste` (técnico controlado — ASD-STE100), `eli5` (só palavras comuns + uma analogia) e `visual` (Mermaid/tabelas). `all` gera todos; `--score` anexa métricas de legibilidade. |
 | referência | `styles/*.md` | Um arquivo por estilo (regras + exemplo antes/depois), carregado por progressive disclosure — só os estilos pedidos entram no contexto. |
+| output style | `Visual` (ative em `/config` → *Output style*) | Registro permanente de conversa: o Claude passa a se comunicar visualmente por padrão — Mermaid/tabelas quando o conteúdo é estrutura, fluxo, estado ou comparação; prosa para o que figura não alcança (e para resposta factual simples — diagrama decorativo é proibido). Mesma disciplina dos tours do `code-review`: cada diagrama responde uma pergunta nomeada, nós ancorados em arquivos/símbolos reais. |
+
+Estilo de reescrita e output style são criaturas diferentes: os `styles/*.md`
+são regras de *reescrita sob demanda* (comparação, um texto por vez); o
+componente em `output-styles/` é system prompt — muda como o Claude *fala*,
+persistente por projeto ou usuário. Só ganha porte nativo o estilo com tese
+conversacional genuína (hoje: `visual`); os demais continuam disponíveis no
+`restyle`, e vencer comparações repetidamente é o critério para o próximo
+porte.
 
 Invariantes que valem conhecer: os *fatos* são congelados — restyle muda forma,
 nunca conteúdo, e cortes forçados pelo estilo viram uma linha *Omitted:* em vez
 de sumirem em silêncio. O alvo fica fixado no texto original entre invocações
 (comparar estilos exige a mesma base). Quando você declara um vencedor, a skill
-oferece registrar a preferência no `CLAUDE.md` do projeto — é assim que o
-experimento vira o estilo padrão daquele repositório.
+oferece o mecanismo certo: `outputStyle` no `.claude/settings.json` do projeto
+se o vencedor tem porte nativo (hoje: `visual`), ou uma linha no `CLAUDE.md`
+para os demais — é assim que o experimento vira o estilo padrão daquele
+repositório.
 
 ### `devops-tools`
 
@@ -205,6 +216,7 @@ claude-tookit/
 │   │   └── skills/name/SKILL.md
 │   ├── output-styler/
 │   │   ├── .claude-plugin/plugin.json
+│   │   ├── output-styles/visual.md  # registro visual permanente (ative em /config → Output style)
 │   │   └── skills/restyle/
 │   │       ├── SKILL.md
 │   │       └── styles/              # um por estilo, lidos via ${CLAUDE_SKILL_DIR}

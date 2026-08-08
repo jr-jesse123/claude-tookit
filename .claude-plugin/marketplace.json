@@ -111,7 +111,7 @@
     {
       "name": "output-styler",
       "source": "./plugins/output-styler",
-      "description": "Rewrites the last response in one or more named writing styles (STE, plain language, BLUF, ELI5, dev docs, visual) for side-by-side comparison, with optional readability scores and per-project style preferences.",
+      "description": "Rewrites the last response in one or more named writing styles (STE, plain language, BLUF, ELI5, dev docs, visual) for side-by-side comparison, with optional readability scores and per-project style preferences — plus a native Visual output style that makes Claude converse in diagrams by default.",
       "category": "productivity",
       "keywords": [
         "writing",
