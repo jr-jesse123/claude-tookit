@@ -77,6 +77,19 @@ means *will exist*, not *was added* — the diagram is a promise, and saying
 so once near the diagram is enough. Skip the diagram when the group touches
 only 1–2 files.
 
+Multiple diagrams are an explicit option when distinct perspectives or zoom
+levels help more than one picture can — an overview `flowchart` of the
+terrain plus a `sequenceDiagram` of the planned runtime flow, or a macro
+map plus a zoom into the subsystem the plan reshapes most. `pr-tour`'s
+discipline applies unchanged: each diagram answers a different question
+("who will depend on whom?" vs "in what order will it happen?") and
+carries a one-line title naming that question; if two diagrams answer the
+same question, keep one. And when the plan changes the topology so much
+that the painted union becomes a tangle of marks, draw the painted pair
+instead — the before/after pair from the `pr-tour` examples, with *before*
+= today and *after* = the plan's end state. The criterion is clarity,
+never quantity.
+
 Read before drawing — never from memory:
 
 - `${CLAUDE_PLUGIN_ROOT}/skills/pr-tour/examples/flowchart.md` (the
