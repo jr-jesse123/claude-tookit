@@ -48,19 +48,24 @@ sem reinstalar).
 
 | Componente | Nome | O que faz |
 | --- | --- | --- |
-| skill | `/model-router:choose-model` | Recomenda o modelo, o effort e a forma de execução mais baratos que dão conta da tarefa, entre os provedores aceitos (Anthropic e OpenAI). Pontua 5 dimensões (novidade, horizonte, força do oráculo, blast radius, escala de contexto), converte em um tier abstrato e deixa cada policy de provedor nomear o candidato. Pesquisa online opcional (`--research`) quando policy e log não cobrem o caso. |
-| skill | `/model-router:log-calibration` | Invocada ao fim da tarefa: preenche os outcomes a partir da sessão, confirma com você e faz append no log via script validado — o único caminho de escrita do plugin. |
-| referência | `policies/anthropic.md`, `policies/openai.md` | Uma policy por provedor: mapeamento de tiers, escada de effort, preços, categorias, notas de execução. Carregadas por progressive disclosure — só as dos provedores aceitos entram no contexto. |
-| referência | `calibration.md` | Schema do log de calibração e regras de threshold — o único comparador cross-provider que o plugin confia. |
+| skill | `/model-router:choose-model` | Roteia **uma tarefa atômica**: recomenda o modelo, o effort e a forma de execução mais baratos que dão conta dela, entre os provedores aceitos (Anthropic e OpenAI). Aplica a rubrica compartilhada (5 dimensões → tier abstrato) e deixa cada policy de provedor nomear o candidato. Quando detecta que a forma honesta é multi-modelo (scouts paralelos, advisor+implementer, agent team, workflow orquestrado), não chuta: emite o sinal e encaminha para a `plan-execution`. Pesquisa online opcional (`--research`) quando policy e log não cobrem o caso. |
+| skill | `/model-router:plan-execution` | A pergunta invertida: **decompõe primeiro, roteia depois**. Para tarefa grande ou heterogênea demais para rotear como unidade, corta em 2–7 partes atômicas (cada uma com prompt executável, oráculo próprio e dependências explícitas), aplica a mesma rubrica **por parte**, e monta o shape de execução (scouts, advisor+implementer, agent team, workflow, pipeline em estágios) com caps de fan-out nomeados. Se a tarefa é atômica, devolve para a `choose-model` em uma linha — o gate é que a decomposição precisa se pagar. |
+| skill | `/model-router:log-calibration` | Invocada ao fim da tarefa (ou de cada parte de um plano): preenche os outcomes a partir da sessão, confirma com você e faz append no log via script validado — o único caminho de escrita do plugin. |
+| referência | `reference/routing-core.md` | O núcleo compartilhado pelas duas skills de roteamento: hard overrides, rubrica de 5 dimensões, regra de decisão → tier, thresholds do log, desempate cross-provider e regra de effort. Não nomeia modelos. |
+| referência | `reference/policies/anthropic.md`, `reference/policies/openai.md` | Uma policy por provedor: mapeamento de tiers, escada de effort, preços, categorias, notas de execução. Carregadas por progressive disclosure — só as dos provedores aceitos entram no contexto. |
+| referência | `reference/calibration.md` | Schema do log de calibração e regras de threshold — o único comparador cross-provider que o plugin confia. |
 
 Provedores aceitos vêm de `--providers=` no argumento ou de
 `.claude/model-router.json` no projeto (default: só `anthropic`). Para mudar
-roteamento, edite a policy do provedor — a skill contém apenas o procedimento,
-sem critérios de modelo duplicados.
+roteamento, edite a policy do provedor — as skills contêm apenas procedimento,
+sem critérios de modelo duplicados; a rubrica vive uma vez só em
+`routing-core.md`.
 
-O advisor só recomenda; nunca executa (`Edit`/`Write` em `disallowed-tools`). O
-log em `.claude/model-calibration.jsonl` acumula evidência real por categoria e
-provedor, e passa por cima da policy quando 3 entradas apontam na mesma direção.
+Os advisors só recomendam; nunca executam (`Edit`/`Write` em
+`disallowed-tools`). O log em `.claude/model-calibration.jsonl` acumula
+evidência real por categoria e provedor (partes de um plano logam sob o slug
+próprio), e passa por cima da policy quando 3 entradas apontam na mesma
+direção.
 
 ### `git-narrator`
 
@@ -161,13 +166,15 @@ claude-tookit/
 │   │   └── agents/security-reviewer.md
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json
-│   │   ├── skills/choose-model/
-│   │   │   ├── SKILL.md
-│   │   │   ├── policies/            # uma por provedor, lidas via ${CLAUDE_SKILL_DIR}
+│   │   ├── reference/               # compartilhado pelas skills, via ${CLAUDE_PLUGIN_ROOT}
+│   │   │   ├── routing-core.md      # rubrica, tiers, desempate, thresholds — sem modelos
+│   │   │   ├── policies/            # uma por provedor, progressive disclosure
 │   │   │   │   ├── anthropic.md
 │   │   │   │   └── openai.md
 │   │   │   ├── calibration.md
 │   │   │   └── calibration.example.jsonl
+│   │   ├── skills/choose-model/SKILL.md    # roteia tarefa atômica; multi-modelo → encaminha
+│   │   ├── skills/plan-execution/SKILL.md  # decompõe primeiro, roteia cada parte depois
 │   │   └── skills/log-calibration/
 │   │       ├── SKILL.md
 │   │       └── log-calibration.py   # único caminho de escrita (append-only)

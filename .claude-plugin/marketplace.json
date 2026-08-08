@@ -26,13 +26,14 @@
     {
       "name": "model-router",
       "source": "./plugins/model-router",
-      "description": "Recommends the cheapest model, effort level, and execution shape that will complete a task reliably, from versioned per-provider routing policies (Anthropic and OpenAI) and a project-local calibration log.",
+      "description": "Recommends the cheapest model, effort level, and execution shape that will complete a task reliably — routing atomic tasks with choose-model and decomposing multi-model work into routed execution plans with plan-execution — from versioned per-provider routing policies (Anthropic and OpenAI) and a project-local calibration log.",
       "category": "productivity",
       "keywords": [
         "model-selection",
         "effort",
         "cost",
         "routing",
+        "decomposition",
         "openai",
         "multi-provider"
       ],

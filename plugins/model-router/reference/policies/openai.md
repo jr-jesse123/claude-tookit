@@ -2,10 +2,10 @@
 
 Last reviewed: 2026-08-05
 
-This file is the **routing data for the OpenAI provider**. `SKILL.md` owns the
-rubric, the tier layer, and the procedure; this file maps OpenAI models onto
-the tiers and carries everything model-specific. When OpenAI routing changes,
-change it here only.
+This file is the **routing data for the OpenAI provider**. The shared
+`routing-core.md` owns the rubric and the tier layer, and the skills own their
+procedures; this file maps OpenAI models onto the tiers and carries everything
+model-specific. When OpenAI routing changes, change it here only.
 
 Treat this as policy, not as a claim about model capability. Update it when
 your own logged evidence contradicts it — see `../calibration.md`.
@@ -114,15 +114,16 @@ from your own log.
   before cheaper models implement. `[vendor]`
 - Frontier reasoning and deep-research work. `[vendor]`
 - Claimed state of the art on the Artificial Analysis Coding Agent Index at
-  launch. `[vendor]` — a cross-provider marketing claim; per `SKILL.md`
-  step 5, it never decides a cross-provider tie. It earns Sol the frontier
+  launch. `[vendor]` — a cross-provider marketing claim; per
+  `routing-core.md`'s tie-break rules, it never decides a cross-provider
+  tie. It earns Sol the frontier
   slot *within* this policy, nothing more.
 
 ## Token economics (input)
 
 Output volume is steerable (`reasoning_effort`, prompting) and is measured by
 the calibration log, not legislated here. Input-side notes for the price
-tie-break (SKILL.md step 5.2):
+tie-break (`routing-core.md` → tie-break rule 2):
 
 - **Different tokenizer family from Claude.** The same file yields different
   token counts on GPT and Claude models — a count measured on one provider is
@@ -138,7 +139,7 @@ tie-break (SKILL.md step 5.2):
   controls `[vendor]`). Like the Anthropic cache-read discount, a warm cache
   can dominate the sticker comparison on repeated-context work — but caches
   never transfer across providers, which reinforces ecosystem affinity
-  (step 5.3).
+  (tie-break rule 3).
 
 ## Effort vs. model
 
@@ -152,7 +153,8 @@ bottleneck. Exhaust the ladder within a tier before moving up.
 **OpenAI models do not run inside Claude Code.** Recommending one always
 implies a harness switch — Codex CLI, a Responses API script, or another agent
 — which means a cold prompt cache, a different tool-calling dialect, and none
-of the current session's context. Per `SKILL.md` step 5.3, that switch must buy
+of the current session's context. Per `routing-core.md`'s tie-break rule 3,
+that switch must buy
 something concrete; the output's execution shape must name the harness.
 
 Suggested command shapes:
@@ -168,7 +170,7 @@ recommend a cap on fan-out, as with any orchestrated shape. The **Orchestrated
 workflow** shape falls under the same caveat: this provider has no native
 equivalent of Claude Code's workflow orchestration, so the shape implies a
 hand-built orchestration script on the Responses API — name that harness cost
-in the output, per `SKILL.md` step 5.3.
+in the output, per `routing-core.md`'s tie-break rule 3.
 
 **Plan-then-delegate is this provider's documented advisor-plus-implementer
 shape:** OpenAI's own launch guidance describes using Sol to resolve
