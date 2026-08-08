@@ -1,6 +1,6 @@
 ---
 name: log-calibration
-description: Append an honest entry to the project's model-calibration log after a task finishes, filling the outcome fields from what actually happened in the session. Companion to choose-model, which advises before the task and never writes.
+description: Append an honest entry to the project's model-calibration log after a task finishes, filling the outcome fields from what actually happened in the session. Companion to the choose-model and plan-execution advisors, which advise before the task and never write.
 when_to_use: Use at the end of a task whose model or effort was chosen via the choose-model advisor, or whenever the user asks to log a calibration entry. Never use before or during the task — the outcome fields are only knowable after it ends.
 argument-hint: "[optional outcome notes]"
 allowed-tools:
@@ -18,8 +18,10 @@ disallowed-tools:
 
 Append one entry to `${CLAUDE_PROJECT_DIR}/.claude/model-calibration.jsonl`
 describing how the task that just finished actually went. The schema and the
-thresholds that consume this log live in the choose-model skill's
-`calibration.md` — this skill only records, it never routes.
+thresholds that consume this log live in the plugin's
+`reference/calibration.md` — this skill only records, it never routes. A part
+of a plan-execution plan counts as a task of its own: log it under the part's
+`category` slug when it finishes.
 
 **The one rule: outcomes come from evidence, not optimism.** Every field you
 fill must be traceable to something that happened in this session. If you

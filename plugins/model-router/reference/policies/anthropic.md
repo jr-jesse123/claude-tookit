@@ -2,10 +2,10 @@
 
 Last reviewed: 2026-08-05
 
-This file is the **routing data for the Anthropic provider**. `SKILL.md` owns
-the rubric, the tier layer, and the procedure; this file maps Anthropic models
-onto the tiers and carries everything model-specific. When Anthropic routing
-changes, change it here only.
+This file is the **routing data for the Anthropic provider**. The shared
+`routing-core.md` owns the rubric and the tier layer, and the skills own their
+procedures; this file maps Anthropic models onto the tiers and carries
+everything model-specific. When Anthropic routing changes, change it here only.
 
 Treat this as policy, not as a claim about model capability. Update it when your
 own logged evidence contradicts it — see `../calibration.md`.
@@ -148,7 +148,8 @@ also the documented fallback target when Opus 5 declines a request — see
 
 ## Escalation ladder
 
-Apply in order unless a hard override (see `SKILL.md` step 2) fires.
+Apply in order unless a hard override (see `routing-core.md` → Hard
+overrides) fires.
 
 1. Haiku for obviously mechanical work.
 2. Sonnet `medium` for normal development.
@@ -211,7 +212,7 @@ entries confirm or demote these like any prior.
 Output volume is steerable (effort, `max_tokens`, prompting) and is therefore
 not legislated here — the calibration log measures it per category instead.
 Input-side token density is not steerable; these notes exist so the price
-tie-break (SKILL.md step 5.2) uses real counts:
+tie-break (`routing-core.md` → tie-break rule 2) uses real counts:
 
 - **Tokenizers differ within this provider.** Sonnet 5's tokenizer produces
   ~30% more tokens than Sonnet 4.6's for the same text; the Opus 4.7+/Fable
@@ -223,7 +224,7 @@ tie-break (SKILL.md step 5.2) uses real counts:
   comparing — one API call per candidate beats any multiplier.
 - **Caching bends the effective input rate by ~10×.** Cache reads bill at
   ~0.1× base input; an input-heavy session with a warm cache pays a fraction
-  of sticker. This compounds with ecosystem affinity (step 5.3): the provider
+  of sticker. This compounds with ecosystem affinity (tie-break rule 3): the provider
   whose harness already holds the session's cache wins input-heavy ties
   almost by default.
 - **No long-context surcharge** at 1M (see Context behavior) — the input rate
@@ -275,8 +276,8 @@ moment that opt-in becomes a deliberate decision rather than a reflex.
 - **When it clears the bar.** Audits and reviews where a miss is expensive
   (adversarial verification, loop-until-dry), work larger than one context
   window (mass migrations, codebase-wide sweeps), and decisions wanting
-  independent perspectives (judge panels). These map to the rubric signals in
-  `SKILL.md` step 7 — do not recommend it on tier alone.
+  independent perspectives (judge panels). These map to the plan-execution
+  skill's decomposition signals — do not recommend it on tier alone.
 - **When it does not.** Ordinary implementation, single-file debugging, or
   anything a solo run plus its tests already verifies. Opus verifies its own
   work unprompted (above), so a workflow whose only job is "check the answer

@@ -2,7 +2,8 @@
 
 Benchmarks and provider policies are priors; your own completed tasks are
 evidence. This file owns the log's schema and recording flow — it is shared by
-every provider policy and by the `log-calibration` skill. It is also the **only
+every provider policy, by the routing skills (`choose-model`,
+`plan-execution`), and by the `log-calibration` skill. It is also the **only
 cross-provider comparator this plugin trusts**: public benchmarks measure
 different suites with different shapes, but the log measures your tasks.
 
@@ -16,11 +17,12 @@ will not fit a static site.
 
 ## Recording an entry
 
-The choose-model advisor **never writes this file.** It runs before the task,
-and every outcome field (`escalated`, `corrections`, `tests`, …) is only
-knowable after the task ends — so an entry written at recommendation time
-cannot be honest. The advisor reads the log when present and emits a
-ready-to-run logging command with the outcome flags left as placeholders.
+The routing advisors (`choose-model`, `plan-execution`) **never write this
+file.** They run before the task, and every outcome field (`escalated`,
+`corrections`, `tests`, …) is only knowable after the task ends — so an entry
+written at recommendation time cannot be honest. The advisors read the log
+when present and emit ready-to-run logging commands (one per task, or one per
+part of a decomposed plan) with the outcome flags left as placeholders.
 
 In order of preference:
 
@@ -57,7 +59,7 @@ for a populated sample.
 | `escalated` | Whether a stronger model or effort was needed mid-task |
 | `corrections` | Number of user corrections during the task |
 | `minutes` | Wall-clock duration |
-| `tokens_in` / `tokens_out` | Optional token usage (e.g. from `/cost`). `tokens_out` includes thinking. These turn the policies' token-economics priors into measured per-category numbers — the blended-cost tie-break (SKILL.md step 5.2) prefers them over any prior. `null` when unknown. |
+| `tokens_in` / `tokens_out` | Optional token usage (e.g. from `/cost`). `tokens_out` includes thinking. These turn the policies' token-economics priors into measured per-category numbers — the blended-cost tie-break (`routing-core.md` → tie-break rule 2) prefers them over any prior. `null` when unknown. |
 | `tests` | `pass`, `fail`, or `none` |
 | `rework` | Whether the result required architectural rework afterward |
 | `note` | Free text; recording the advisor's score and whether it matched is the most useful thing to put here |
@@ -74,7 +76,8 @@ Evaluated per `category`, over entries whose `provider` is currently accepted:
 - Fewer than three, or mixed → noise, not signal.
 
 When entries for the same category exist under more than one provider, they
-double as the cross-provider tie-break (SKILL.md step 5.1): the provider whose
+double as the cross-provider tie-break (`routing-core.md` → tie-break
+rule 1): the provider whose
 candidate has clean entries for the category wins over one with none.
 
 Revise the provider policies' routing tables when a category accumulates
