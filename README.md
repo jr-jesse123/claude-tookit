@@ -75,6 +75,59 @@ evidência real por categoria e provedor (partes de um plano logam sob o slug
 próprio), e passa por cima da policy quando 3 entradas apontam na mesma
 direção.
 
+### `codex-agents`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/codex-agents:delegate` | Entrega uma tarefa delimitada a um modelo Codex (`gpt-5.6` luna/terra/sol). Resolve escopo vago em caminhos reais, **empacota** o que a sessão sabe e o agente remoto não pode ver num prompt auto-contido, dispara `codex exec`, e devolve o resultado como *claim verificada* — com as citações conferidas contra o código, não relatadas no vácuo. Aceita `--model`, `--effort` e `--write`. |
+| agent | `codex-agents:codex-qa` | Passada de QA rodada no `gpt-5.6-luna`: edge cases, condições de contorno, caminhos de erro, estado que sobrevive a falha, e adequação da suíte de testes. Exige `Trigger` concreto em cada achado. Só lê. |
+| agent | `codex-agents:codex-ux` | Revisão de UX rodada no `gpt-5.6-luna`: copy, mensagens de erro, estados vazio/loading/parcial, validação de formulário, affordances e acessibilidade visível no markup. Exige `Suggest` concreto — texto substituto, não "melhore a redação". Só lê. |
+| referência | `reference/dispatch.md` | O contrato compartilhado: tabela de tiers, forma do comando `codex exec`, e as **seis regras de empacotamento**. Carregado por skill e agents via `${CLAUDE_PLUGIN_ROOT}`. |
+
+A premissa do plugin: **o Codex acorda frio.** `codex exec` sobe um agente sem
+histórico da conversa, sem `CLAUDE.md`, e sem resolver nenhum pronome — "esse
+arquivo", "o bug que achamos", "aquela abordagem" não existem para ele. O que
+ele tem é o repositório em disco. Todo o resto precisa estar na string do
+prompt, e é por isso que o plugin existe em vez de você digitar `codex exec` na
+mão: o empacotamento é o trabalho, a escolha do modelo é uma tabela de quatro
+linhas.
+
+Consequência prática: convenções que vivem só no `CLAUDE.md` **não chegam** num
+agente delegado. O Codex lê `AGENTS.md` — as convenções duráveis precisam morar
+lá, com o `CLAUDE.md` apontando para elas em vez de manter duas cópias
+divergentes.
+
+Achados voltam como **claims, não fatos**: a skill e os agents abrem cada
+`file:line` citado antes de repassar, derrubam citação fabricada, e separam o
+que conferiram do que não conferiram. Review roles rodam `--sandbox read-only`
+por padrão — um revisor que pode escrever é um revisor que "conserta" em
+silêncio o que devia reportar.
+
+Setup (uma vez):
+
+```
+npm install -g @openai/codex && codex login
+/plugin install codex-agents@jr-claude-toolkit
+```
+
+O plugin oficial da OpenAI ([`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc)
+— `/codex:review`, `/codex:rescue`, `/codex:transfer`, jobs em background) é
+complementar e vale instalar junto; este chama `codex exec` direto, sem depender
+dos internals dele. Divisão grosseira: `/codex:rescue` para hand-off pontual que
+**você** dirige na hora; `codex-agents` para delegação que é um **papel**,
+executado igual toda vez.
+
+Sobre custo: com assinatura ChatGPT o ganho não é `$`/token — é **quota**. A
+delegação tira trabalho da janela do Claude e o joga num orçamento flat
+separado. Com API key, a economia do Luna é real e mensurável. Os dois casos
+estão em `reference/dispatch.md`, junto com o custo fixo que toda delegação
+paga: cold start, releitura do repo, zero reuso de cache.
+
+> Independente do `model-router` por decisão de projeto — a policy de OpenAI de
+> lá é rubrica de roteamento; a tabela daqui é default rápido por papel. Para
+> uma decisão pontuada numa tarefa difícil específica, `/model-router:choose-model`
+> continua sendo a ferramenta certa.
+
 ### `git-narrator`
 
 | Componente | Nome | O que faz |
@@ -201,6 +254,13 @@ claude-tookit/
 │   │   └── skills/log-calibration/
 │   │       ├── SKILL.md
 │   │       └── log-calibration.py   # único caminho de escrita (append-only)
+│   ├── codex-agents/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── reference/dispatch.md    # tiers + comando + as 6 regras de empacotamento
+│   │   ├── skills/delegate/SKILL.md # "delegue ao codex X" → prompt auto-contido
+│   │   └── agents/                  # papéis que rodam a análise no luna
+│   │       ├── codex-qa.md
+│   │       └── codex-ux.md
 │   ├── git-narrator/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/narration-core.md  # bloco comum às duas skills

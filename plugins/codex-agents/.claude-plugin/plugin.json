@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "codex-agents",
+  "displayName": "Codex Agents",
+  "description": "Role-shaped delegation to Codex models (gpt-5.6 luna/terra/sol) from inside Claude Code — a general delegate skill plus QA and UX subagents that package this session's context into a self-contained prompt, run the analysis on a cheaper model via `codex exec`, and return findings as verified claims rather than laundered assertions.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "openai",
+    "delegation",
+    "qa",
+    "ux",
+    "cost",
+    "multi-provider"
+  ]
+}
