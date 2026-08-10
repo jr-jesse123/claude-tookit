@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "codex-qa findings",
+  "description": "Response shape for a QA delegation. Passed to `codex exec --output-schema`; the model's final message conforms to this instead of to prose instructions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scope_covered", "findings", "unspecified_behavior", "notes"],
+  "properties": {
+    "scope_covered": {
+      "type": "array",
+      "description": "Repo-relative paths actually read. Not the paths requested — the paths reached.",
+      "items": { "type": "string" }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Defects found. Empty is a valid answer; do not pad.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "line", "title", "trigger", "result", "covered_by", "severity"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Repo-relative path. Must be a file you actually read."
+          },
+          "line": {
+            "type": "integer",
+            "description": "1-indexed line the finding anchors to."
+          },
+          "title": {
+            "type": "string",
+            "description": "One line, stating the defect."
+          },
+          "trigger": {
+            "type": "string",
+            "description": "The concrete input or state that reaches the defect. Not a category of input — a specific one, precise enough to write a test from."
+          },
+          "result": {
+            "type": "string",
+            "description": "What actually goes wrong when the trigger fires."
+          },
+          "covered_by": {
+            "type": ["string", "null"],
+            "description": "Path (and test name) of the existing test that would catch this, or null when nothing covers it."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "high: data loss, corruption, or silent wrong results. medium: failure the user sees and cannot work around. low: recoverable or narrow."
+          }
+        }
+      }
+    },
+    "unspecified_behavior": {
+      "type": "array",
+      "description": "Places where correct behavior is genuinely undefined by spec, tests, or docs — so no defect can be asserted. Report the ambiguity here rather than inventing a bar and filing it as a finding.",
+      "items": { "type": "string" }
+    },
+    "notes": {
+      "type": "string",
+      "description": "What limited the pass: files that could not be read, context that was missing, areas deliberately skipped. Empty string if none."
+    }
+  }
+}

@@ -50,36 +50,53 @@ output.
    and have the delegation flag terminology inconsistencies rather than
    assert a house style it invented.
 
-3. **Delegate.** `--model gpt-5.6-luna`, `-c model_reasoning_effort="low"`,
-   `--sandbox read-only`. Demand this output contract in the prompt:
+3. **Delegate**, in the canonical flag order from `dispatch.md`:
 
+   ```bash
+   codex exec --sandbox read-only \
+     --model gpt-5.6-luna \
+     -c model_reasoning_effort="low" \
+     --output-schema "${CLAUDE_PLUGIN_ROOT}/schemas/ux-findings.json" \
+     --skip-git-repo-check \
+     "<prompt>"
    ```
-   For each finding:
-     file:line — <one-line title>
-     Now:      <what the user experiences today>
-     Problem:  <who it hurts and how>
-     Suggest:  <concrete replacement copy or behavior>
-   Group by surface. If nothing is found, say so — do not pad.
-   ```
 
-   `Suggest` must be concrete — actual replacement copy, not "improve the
-   wording". Vague suggestions are the dominant failure mode of a UX pass and
-   the prompt should forbid them by name.
+   The schema carries the output contract — including that `suggest` must be
+   actual replacement copy rather than "improve the wording", and that
+   `objective` separates rule-checkable issues from judgment calls. **Do not
+   restate the format in the prompt.** Spend the prompt on the product context
+   from step 2 and the out-of-scope list.
 
-4. **Verify before returning.** Open every file:line cited. Confirm the string
-   or markup is really there and really is user-facing — a "finding" against an
-   internal log message, a test fixture, or a code comment is noise. Drop it and
-   note that you did.
+   Mind the shell: UX prompts carry user-facing copy, which is exactly the text
+   most likely to contain quotes, backticks, or `$`. Build multi-line prompts
+   with a heredoc into a variable rather than inlining them.
+
+   One-shot only — do not `resume` a UX pass.
+
+4. **Verify before returning.** Parse the JSON, then open every `file` at
+   `line`. Confirm the string or markup is really there **and really is
+   user-facing** — a "finding" against an internal log message, a test fixture,
+   or a code comment is noise. Drop it and say you did.
+
+   Check `surfaces_covered` against what you asked for; report the real
+   coverage, not the requested one. If the JSON fails to parse, that is a
+   failed run, not an empty result.
 
 ## Output
 
-Return the surviving findings in the contract shape above, prefixed with
-`Codex (gpt-5.6-luna) reports:`, then a two-line assessment: which findings you
-confirmed as genuinely user-facing, and which you dropped. State the surfaces
-you actually covered.
+Render the surviving findings as readable prose — `file:line`, title, then
+Now / Problem / Suggest — grouped by `surface`, prefixed with
+`Codex (gpt-5.6-luna) reports:`. The caller reads text; the schema exists to
+make the answer parseable and complete, not to be pasted raw.
 
-Separate the objective from the subjective in your assessment — a missing input
-label and a preference about tone are not the same kind of claim, and the
-caller should not have to sort them.
+**Split the list on `objective` before rendering.** A missing input label and a
+preference about tone are not the same kind of claim; report the checkable ones
+first, under their own heading, and the judgment calls after. The caller should
+never have to sort them.
+
+Then a two-line assessment: which findings you confirmed as genuinely
+user-facing, and which you dropped. State the surfaces actually covered, and
+pass through `inconclusive` — those are places the caller may need to check in
+a running app, which you cannot do from source.
 
 Never edit files. Suggested copy is a proposal for the caller to apply.

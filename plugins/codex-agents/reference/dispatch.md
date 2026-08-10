@@ -54,34 +54,110 @@ Two constraints on Luna, both inherited from observed limits:
 
 ## Command shape
 
+**The flag order below is canonical — do not reorder it.** `--sandbox
+read-only` comes first so the whole invocation can be pinned by a permission
+rule (see *Pinning the sandbox*); a reordered command silently falls outside
+that pin.
+
 ```bash
-codex exec \
+codex exec --sandbox read-only \
   --model <model> \
   -c model_reasoning_effort="<effort>" \
-  --sandbox read-only \
+  --output-schema "${CLAUDE_PLUGIN_ROOT}/schemas/<role>.json" \
   --skip-git-repo-check \
   "<prompt>"
 ```
 
 Rules:
 
-- **`--sandbox read-only` is the default and is mandatory for every review
-  role** (QA, UX, second opinion). A review agent that can write is a review
-  agent that can silently "fix" what it was asked to report on. Only raise it
-  when the user asked for changes *and* said so explicitly, and name the raise
-  in your output.
+- **`--sandbox read-only` is mandatory for every review role** (QA, UX, second
+  opinion). A review agent that can write is a review agent that can silently
+  "fix" what it was asked to report on. Only raise it when the user asked for
+  changes *and* said so explicitly, and name the raise in your output. The
+  other values are `workspace-write` and `danger-full-access`.
 - `-c` is repeatable for further config overrides.
 - Quote the prompt as a single argument. Prefer a heredoc into a variable for
-  multi-line prompts rather than fighting shell escaping inline.
+  multi-line prompts rather than fighting shell escaping inline — this is the
+  sharpest edge of the CLI transport, and copy containing quotes, backticks, or
+  `$` is exactly what a UX delegation carries.
 - Codex writes progress to stderr and the final message to stdout. Capture
   both; a non-zero exit with empty stdout means the run failed, not that the
   answer was "nothing".
 
-**Verify the flag names once, at setup** (`codex exec --help`) and correct this
-file if they drift — this table was assembled from Codex CLI documentation, not
-from a run in this repository. `--json` (structured event stream) and
-`-o <file>` (write final message to a file) are reported to exist; confirm
-before depending on them.
+Flags verified against `codex-rs/exec/src/cli.rs` on 2026-08-10. Others worth
+knowing: `--json` (events as JSONL on stdout), `-o/--output-last-message FILE`
+(final message to a file), `--ephemeral` (do not persist the session to disk),
+`--ignore-user-config`, `--strict-config`.
+
+## Structured output
+
+`--output-schema FILE` takes a JSON Schema describing the shape of the model's
+**final response**. Prefer it over asking for a format in prose: an output
+contract written into the prompt is a request the model may drift from, while a
+schema is enforced and parseable on return.
+
+This plugin ships one schema per role in `${CLAUDE_PLUGIN_ROOT}/schemas/`. Pass
+the path directly — the files are inside the plugin, so no temp file is needed.
+Keep the field descriptions in the schema doing the instructional work
+(`trigger` says what a good trigger is); the prompt then states the task, not
+the format.
+
+When you add a schema, keep it in the strict-friendly subset: every property
+`required`, `additionalProperties: false`, optionality expressed as
+`["string", "null"]` rather than by omission, and `enum` instead of free-text
+categories. Validation keywords beyond that (`pattern`, `format`, `minimum`)
+are unreliable across structured-output implementations — put the constraint in
+the field's `description` instead.
+
+An empty result is a valid response. Say so in the schema descriptions, or the
+model pads to fill the array.
+
+## Continuing a delegation
+
+Follow-up questions do not need a fresh cold start. `codex exec` takes
+subcommands:
+
+| | |
+| --- | --- |
+| `codex exec resume <session_id> "<prompt>"` | continue a session by id |
+| `codex exec resume --last "<prompt>"` | continue the most recent session in this cwd |
+| `codex exec fork <session_id> "<prompt>"` | branch a session into a new one, leaving the original intact |
+
+Use continuation when the follow-up depends on what the delegation just said —
+"why did you rule out X", "expand finding 3". Use a fresh delegation when the
+question is independent; resuming drags the whole prior turn along and, on
+Luna, spends the context budget that the *new* question needs.
+
+Two constraints:
+
+- **Review roles do not resume.** A QA or UX pass is one-shot by design — its
+  scope, schema, and sandbox are fixed at dispatch. Continuation belongs to the
+  `delegate` skill, where a human is steering.
+- **Re-verify the sandbox when resuming.** Whether `--sandbox` applies to the
+  `resume` subcommand the same way it does to a fresh `exec` is not confirmed
+  here. Until it is, treat a resumed session as carrying the sandbox of the
+  session it resumes, and do not use resume to widen access.
+
+## Pinning the sandbox
+
+The permission layer can enforce read-only independently of what any agent
+decides, because Bash rules match on the command prefix:
+
+```json
+"permissions": {
+  "allow": ["Bash(codex exec --sandbox read-only:*)"]
+}
+```
+
+With that rule and without a broader `Bash(codex exec:*)` grant, a delegation
+that tries to run `workspace-write` does not silently proceed — it prompts.
+This is the one guarantee the MCP transport cannot express: MCP permission
+rules match tool names (`mcp__codex__codex`), not argument values, so the
+sandbox there is whatever the caller passes.
+
+The pin is prefix matching, which is why the flag order above is fixed. It also
+means `codex exec resume …` needs its own rule; if you add one, apply the same
+ordering discipline.
 
 ## Packaging rules
 

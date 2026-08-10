@@ -79,10 +79,11 @@ direção.
 
 | Componente | Nome | O que faz |
 | --- | --- | --- |
-| skill | `/codex-agents:delegate` | Entrega uma tarefa delimitada a um modelo Codex (`gpt-5.6` luna/terra/sol). Resolve escopo vago em caminhos reais, **empacota** o que a sessão sabe e o agente remoto não pode ver num prompt auto-contido, dispara `codex exec`, e devolve o resultado como *claim verificada* — com as citações conferidas contra o código, não relatadas no vácuo. Aceita `--model`, `--effort` e `--write`. |
-| agent | `codex-agents:codex-qa` | Passada de QA rodada no `gpt-5.6-luna`: edge cases, condições de contorno, caminhos de erro, estado que sobrevive a falha, e adequação da suíte de testes. Exige `Trigger` concreto em cada achado. Só lê. |
-| agent | `codex-agents:codex-ux` | Revisão de UX rodada no `gpt-5.6-luna`: copy, mensagens de erro, estados vazio/loading/parcial, validação de formulário, affordances e acessibilidade visível no markup. Exige `Suggest` concreto — texto substituto, não "melhore a redação". Só lê. |
-| referência | `reference/dispatch.md` | O contrato compartilhado: tabela de tiers, forma do comando `codex exec`, e as **seis regras de empacotamento**. Carregado por skill e agents via `${CLAUDE_PLUGIN_ROOT}`. |
+| skill | `/codex-agents:delegate` | Entrega uma tarefa delimitada a um modelo Codex (`gpt-5.6` luna/terra/sol). Resolve escopo vago em caminhos reais, **empacota** o que a sessão sabe e o agente remoto não pode ver num prompt auto-contido, dispara `codex exec`, e devolve o resultado como *claim verificada* — com as citações conferidas contra o código, não relatadas no vácuo. Aceita `--model`, `--effort`, `--schema`, `--write` e `--resume` (continua a thread anterior em vez de recomeçar frio). |
+| agent | `codex-agents:codex-qa` | Passada de QA rodada no `gpt-5.6-luna`: edge cases, condições de contorno, caminhos de erro, estado que sobrevive a falha, e adequação da suíte de testes. Cada achado carrega `trigger` concreto e `severity`, por schema. Só lê. |
+| agent | `codex-agents:codex-ux` | Revisão de UX rodada no `gpt-5.6-luna`: copy, mensagens de erro, estados vazio/loading/parcial, validação de formulário, affordances e acessibilidade visível no markup. Cada achado carrega `suggest` — texto substituto, não "melhore a redação" — e um booleano `objective` que separa regra checável de julgamento de tom. Só lê. |
+| referência | `reference/dispatch.md` | O contrato compartilhado: tabela de tiers, forma canônica do comando, as **seis regras de empacotamento**, continuação de sessão e o pin de sandbox. Carregado por skill e agents via `${CLAUDE_PLUGIN_ROOT}`. |
+| referência | `schemas/qa-findings.json`, `schemas/ux-findings.json` | JSON Schema por papel, passado em `--output-schema`. O contrato de saída deixa de ser pedido em prosa e vira forma imposta na resposta final. |
 
 A premissa do plugin: **o Codex acorda frio.** `codex exec` sobe um agente sem
 histórico da conversa, sem `CLAUDE.md`, e sem resolver nenhum pronome — "esse
@@ -102,6 +103,23 @@ Achados voltam como **claims, não fatos**: a skill e os agents abrem cada
 que conferiram do que não conferiram. Review roles rodam `--sandbox read-only`
 por padrão — um revisor que pode escrever é um revisor que "conserta" em
 silêncio o que devia reportar.
+
+Duas garantias vêm do CLI, não de boa vontade do modelo:
+
+- **`--output-schema`.** O contrato de saída é JSON Schema (`schemas/`), não
+  pedido em prosa — o `severity` do QA e o `objective` do UX são campos
+  impostos, e o passo de verificação itera sobre objetos em vez de reparsear
+  texto. Resposta que não parseia é falha, não resultado vazio.
+- **Pin de sandbox.** A ordem dos flags é canônica (`--sandbox` primeiro) para
+  que o *harness* possa travar por regra de permissão:
+  `Bash(codex exec --sandbox read-only:*)`. Com esse pin e sem um
+  `Bash(codex exec:*)` mais largo, uma delegação que tente `workspace-write`
+  para e pergunta. É a única garantia que o transporte MCP não consegue
+  expressar — lá a regra casa por nome de tool, não por valor de argumento.
+
+Para pergunta de follow-up existe `--resume` (`codex exec resume --last`), que
+continua a thread em vez de pagar cold start de novo. Os agents de review são
+one-shot de propósito: escopo, schema e sandbox são fixados no disparo.
 
 Setup (uma vez):
 
@@ -257,6 +275,9 @@ claude-tookit/
 │   ├── codex-agents/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/dispatch.md    # tiers + comando + as 6 regras de empacotamento
+│   │   ├── schemas/                 # contrato de saída via --output-schema
+│   │   │   ├── qa-findings.json
+│   │   │   └── ux-findings.json
 │   │   ├── skills/delegate/SKILL.md # "delegue ao codex X" → prompt auto-contido
 │   │   └── agents/                  # papéis que rodam a análise no luna
 │   │       ├── codex-qa.md
