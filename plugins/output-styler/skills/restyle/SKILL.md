@@ -20,10 +20,10 @@ dictionary), apply its rules' spirit, as the style file explains.
 ## 0. `--help` short-circuits everything
 
 `--help` (or `-h`, or `help` as the only word) anywhere in `$ARGUMENTS` → read
-`${CLAUDE_SKILL_DIR}/help.md`, present it, and stop. Nothing is restyled, no
-target is resolved, no style file is loaded — even when styles were named in
-the same invocation. Close by offering the invocation the user seems to be
-heading for.
+`${CLAUDE_SKILL_DIR}/help.md`, present it in the conversation's language (translate prose,
+but keep style names, aliases, flags, and code/commands verbatim), and stop.
+Nothing is restyled, no target is resolved, no style file is loaded — even when styles
+were named in the same invocation. Close by offering the invocation the user seems to be heading for.
 
 ## 1. Resolve the target
 
