@@ -1,7 +1,7 @@
 ---
 name: restyle
-description: Rewrite the previous response — or a text/file the user points at — in one or more named writing styles (ste, plain, bluf, eli5, docs, visual) so the user can compare variants side by side and mature a preferred output style per project. Use when the user asks to restyle, reformulate, simplify, summarize differently, or visualize an explanation they just received.
-argument-hint: "[style ... | all] [--score] [optional: file path or quoted text]"
+description: Rewrite the previous response — or a text/file the user points at — in one or more named writing styles (ste, plain, bluf, eli5, docs, visual) so the user can compare variants side by side and mature a preferred output style per project. Use when the user asks to restyle, reformulate, simplify, summarize differently, or visualize an explanation they just received; `--help` describes each style, with samples, so the user can choose before restyling anything.
+argument-hint: "[bluf|plain|docs|ste|eli5|visual|all] [--score] [--help] [file|text]"
 allowed-tools: Read, Glob, Grep, Edit, Write
 ---
 
@@ -16,6 +16,14 @@ comparison is meaningless.
 Write every variant in the language the conversation is happening in. The
 styles are language-independent; where a standard is English-specific (STE's
 dictionary), apply its rules' spirit, as the style file explains.
+
+## 0. `--help` short-circuits everything
+
+`--help` (or `-h`, or `help` as the only word) anywhere in `$ARGUMENTS` → read
+`${CLAUDE_SKILL_DIR}/help.md`, present it, and stop. Nothing is restyled, no
+target is resolved, no style file is loaded — even when styles were named in
+the same invocation. Close by offering the invocation the user seems to be
+heading for.
 
 ## 1. Resolve the target
 
@@ -51,6 +59,9 @@ Styles come from `$ARGUMENTS`, separated by spaces or commas, case-insensitive.
 - `all` (or `todos`) → every style, in the table's order.
 - Unknown name → show this table and ask; do not guess.
 - No style given → show this table and ask which one(s).
+- Whenever you show this table, add one line: `--help` gives the full catalog —
+  when each style pays off, what it costs, and the same text rendered in all
+  six.
 - `--score` anywhere in the arguments → append readability metrics (step 5).
 
 ## 3. Load only the selected styles
