@@ -137,8 +137,9 @@ Decisões de desenho que valem conhecer:
 
 | Componente | Nome | O que faz |
 | --- | --- | --- |
-| skill | `/output-styler:restyle` | Reescreve o último output (ou um texto/arquivo apontado) em um ou mais estilos nomeados, lado a lado, para comparação: `bluf` (resposta primeiro — BLUF/Minto), `plain` (linguagem simples — ISO 24495-1), `docs` (documentação de desenvolvedor — Google/Microsoft), `ste` (técnico controlado — ASD-STE100), `eli5` (só palavras comuns + uma analogia) e `visual` (Mermaid/tabelas). `all` gera todos; `--score` anexa métricas de legibilidade. |
+| skill | `/output-styler:restyle` | Reescreve o último output (ou um texto/arquivo apontado) em um ou mais estilos nomeados, lado a lado, para comparação: `bluf` (resposta primeiro — BLUF/Minto), `plain` (linguagem simples — ISO 24495-1), `docs` (documentação de desenvolvedor — Google/Microsoft), `ste` (técnico controlado — ASD-STE100), `eli5` (só palavras comuns + uma analogia) e `visual` (Mermaid/tabelas). `all` gera todos; `--score` anexa métricas de legibilidade; `--help` mostra o catálogo e não reescreve nada. |
 | referência | `styles/*.md` | Um arquivo por estilo (regras + exemplo antes/depois), carregado por progressive disclosure — só os estilos pedidos entram no contexto. |
+| referência | `help.md` | Catálogo de decisão do `--help`: quando cada estilo compensa, o que ele custa, e o mesmo texto renderizado nos seis. Lido só quando `--help` aparece. |
 | output style | `Visual` (ative em `/config` → *Output style*) | Registro permanente de conversa: o Claude passa a se comunicar visualmente por padrão — Mermaid/tabelas quando o conteúdo é estrutura, fluxo, estado ou comparação; prosa para o que figura não alcança (e para resposta factual simples — diagrama decorativo é proibido). Mesma disciplina dos tours do `code-review`: cada diagrama responde uma pergunta nomeada, nós ancorados em arquivos/símbolos reais. |
 
 Estilo de reescrita e output style são criaturas diferentes: os `styles/*.md`
@@ -219,6 +220,7 @@ claude-tookit/
 │   │   ├── output-styles/visual.md  # registro visual permanente (ative em /config → Output style)
 │   │   └── skills/restyle/
 │   │       ├── SKILL.md
+│   │       ├── help.md              # catálogo do --help (só entra em contexto com --help)
 │   │       └── styles/              # um por estilo, lidos via ${CLAUDE_SKILL_DIR}
 │   └── devops-tools/
 │       ├── .claude-plugin/plugin.json
