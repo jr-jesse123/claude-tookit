@@ -63,7 +63,7 @@ that pin.
 codex exec --sandbox read-only \
   --model <model> \
   -c model_reasoning_effort="<effort>" \
-  --output-schema "${CLAUDE_PLUGIN_ROOT}/schemas/<role>.json" \
+  --output-schema "${CLAUDE_PLUGIN_ROOT}/schemas/<role>-findings.json" \
   --skip-git-repo-check \
   "<prompt>"
 ```

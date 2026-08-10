@@ -111,7 +111,7 @@ Print this before running, so the user can see what leaves the session:
 ```
 → Codex delegation
   Model:   <model> (effort: <level>)
-  Session: fresh | resuming <--last or session id>
+  Session: fresh | resuming --last | resuming <session_id>
   Scope:   <paths or refs>
   Asks:    <the question, one line>
   Output:  prose | schema <name>
@@ -125,9 +125,15 @@ so the invocation stays inside a permission pin if the project has one:
 codex exec --sandbox read-only \
   --model <model> \
   -c model_reasoning_effort="<effort>" \
+  --output-schema "<absolute path to the schema>" \
   --skip-git-repo-check \
   "<prompt>"
 ```
+
+Drop the `--output-schema` line when the answer is prose — but drop it
+**deliberately**, and keep it consistent with the preview: an `Output: schema`
+line above a command without the flag means the run was not schema-enforced and
+the preview lied about it.
 
 For a continuation, `codex exec resume --last "<prompt>"` (or
 `resume <session_id>`). To explore an alternative without disturbing the
