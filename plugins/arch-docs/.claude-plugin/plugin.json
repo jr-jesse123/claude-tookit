@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "arch-docs",
+  "displayName": "Architecture Docs",
+  "description": "Right-sized architecture documentation: scaffolds a lean docs/architecture layout sized to the repo's real risk, drafts ADRs by interviewing the human for the why it cannot infer, and a read-only drift reviewer that flags diffs touching documented boundaries, contracts, or decisions.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["architecture", "documentation", "adr", "c4", "mermaid", "docs-as-code"]
+}
