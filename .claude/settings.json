@@ -16,6 +16,7 @@
     "repo-governance@jr-claude-toolkit": true,
     "sessions@jr-claude-toolkit": true,
     "output-styler@jr-claude-toolkit": true,
-    "devops-tools@jr-claude-toolkit": true
+    "devops-tools@jr-claude-toolkit": true,
+    "arch-docs@jr-claude-toolkit": true
   }
 }

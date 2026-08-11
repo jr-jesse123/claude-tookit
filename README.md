@@ -223,6 +223,25 @@ repositório.
 O hook está em [`plugins/devops-tools/scripts/guard-destructive-commands.py`](plugins/devops-tools/scripts/guard-destructive-commands.py).
 Edite a lista `RULES` para ajustar ao seu ambiente.
 
+### `arch-docs`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/arch-docs:init` | Levanta o repositório (unidades de deploy, integrações externas, nº de mantenedores, docs existentes) e propõe o *menor* conjunto de documentação arquitetural que passa no teste econômico — inclusive recomendando **não** criar `docs/architecture/` quando o projeto é pequeno (tier 0: Haiku no README + pasta `adr/`). Só faz o scaffold depois da aprovação, pré-preenchendo apenas o que o código evidencia (nomes reais de serviços, integrações encontradas); o que exige conhecimento humano vira `TODO(human):` com pergunta específica, nunca prosa inventada. Fecha listando decisões já embutidas no código cujo "porquê" não está registrado (candidatas a ADR). |
+| skill | `/arch-docs:adr` | Rascunha **um** ADR (Nygard + alternativas + evidências) por decisão. A etapa crítica é a entrevista: forças, alternativas rejeitadas, consequências negativas, reversibilidade — o que você não responder fica como pergunta aberta no rascunho, não vira texto plausível. Decisão que não passa no teste de significância recebe a recomendação de *não* ser registrada. Nunca reescreve ADR aceito: substituição é ADR novo com `Supersedes`/`Superseded by` cruzados. |
+| agent | `arch-docs:drift-reviewer` | Subagente só-leitura para diffs/PRs: filtra o diff pelo teste de significância e responde com três vereditos — **update** (doc agora contradiz o código, citando os dois lados), **record** (decisão significativa sem ADR) ou **clear** (dito explicitamente, nomeando quais docs foram checados). Não escreve documentação — dispara a pergunta que a regra de manutenção exige. |
+| referência | `reference/right-sizing.md` | Núcleo compartilhado pelos três: o teste econômico do Elemar Jr. ("código + doc" tem que custar menos que "código sozinho"; documento útil é documento consultado), teste de significância, ordem de durabilidade (restrições e atributos de qualidade primeiro, estrutura atual por último), a escada de artefatos por risco (todo item do tier 2 exige gatilho nomeado em uma frase) e a semântica obrigatória de setas (`sync:`/`event:`/`data:`/`dep:`/`deploy:`). |
+| referência | `reference/templates/` | Templates enxutos: overview em formato Architecture Haiku (uma página, Fairbanks), ADR, C4 context/containers em Mermaid com setas rotuladas, e o README-mapa de navegação com a regra de manutenção embutida. |
+
+Baseado no cap. 1.3 do *Manual do Arquiteto de Software* (Elemar Jr.):
+código é evidência do "como"; documentação arquitetural registra o "porquê" —
+e só se justifica quando custa menos do que economiza. Os três componentes
+cobrem os três momentos do ciclo: bootstrap uma vez (`init`), registro por
+decisão (`adr`), verificação por PR (`drift-reviewer`). O maior risco de
+ferramenta nessa área é gerar documentação demais; por isso o `init` sabe
+recomendar menos, o `adr` sabe recusar decisão insignificante, e o
+`drift-reviewer` trata "clear" como veredito de primeira classe.
+
 ## Estrutura do repositório
 
 ```
@@ -282,13 +301,21 @@ claude-tookit/
 │   │       ├── SKILL.md
 │   │       ├── help.md              # catálogo do --help (só entra em contexto com --help)
 │   │       └── styles/              # um por estilo, lidos via ${CLAUDE_SKILL_DIR}
-│   └── devops-tools/
+│   ├── devops-tools/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/deploy-check/SKILL.md
+│   │   ├── commands/changelog.md
+│   │   ├── hooks/hooks.json
+│   │   ├── scripts/guard-destructive-commands.py
+│   │   └── .mcp.json.example
+│   └── arch-docs/
 │       ├── .claude-plugin/plugin.json
-│       ├── skills/deploy-check/SKILL.md
-│       ├── commands/changelog.md
-│       ├── hooks/hooks.json
-│       ├── scripts/guard-destructive-commands.py
-│       └── .mcp.json.example
+│       ├── reference/
+│       │   ├── right-sizing.md      # núcleo: teste econômico, significância, escada de artefatos
+│       │   └── templates/           # haiku/overview, adr, c4 context/containers, readme-mapa
+│       ├── skills/init/SKILL.md     # scaffold na medida certa (sabe recomendar menos)
+│       ├── skills/adr/SKILL.md      # um ADR por decisão, entrevista obrigatória
+│       └── agents/drift-reviewer.md # update | record | clear por diff
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
 ├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml
