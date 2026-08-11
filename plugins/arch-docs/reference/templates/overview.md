@@ -41,7 +41,7 @@ what existed before, what forced its shape.
 
 ## Styles and patterns in use
 
-- TODO: e.g. modular monolith, event-driven between X and Y, outbox, CQRS in <module>.
+- TODO(human): e.g. modular monolith, event-driven between X and Y, outbox, CQRS in <module>.
 
 ## Boundaries and non-goals
 

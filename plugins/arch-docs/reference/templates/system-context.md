@@ -14,10 +14,10 @@ flowchart LR
   ext1["External: <dependency, e.g. payment gateway>"]
   ext2["External: <dependency, e.g. identity provider>"]
 
-  user -->|"sync: uses via web UI"| sys
-  admin -->|"sync: operates via admin UI"| sys
-  sys -->|"sync: REST — charges payments"| ext1
-  sys -->|"sync: OIDC — delegates authentication"| ext2
+  user -->|"sync: uses via <channel>"| sys
+  admin -->|"sync: operates via <channel>"| sys
+  sys -->|"sync: <protocol> — <what for>"| ext1
+  sys -->|"event: <topic> — <what for>"| ext2
 ```
 
 <!-- Replace every placeholder with the real name before committing — a

@@ -11,7 +11,7 @@ flowchart TB
   subgraph sys["<System name>"]
     web["Container: web app — <responsibility>"]
     api["Container: API service — <responsibility>"]
-    db[("Container: PostgreSQL — system of record")]
+    db[("Container: <database technology> — system of record")]
     broker["Container: message broker — <topics/queues>"]
     worker["Container: worker — <responsibility>"]
   end

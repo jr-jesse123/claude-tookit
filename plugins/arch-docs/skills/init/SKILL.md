@@ -75,8 +75,10 @@ than an empty field.
 
 Label every diagram arrow with the interaction kind (`sync:` / `event:` /
 `data:` / `dep:` / `deploy:`) based on what the code shows. Validate every
-mermaid fence: `npx --yes @zabaca/mermaid-validate` with the fence body on
-stdin. A diagram that does not validate does not get committed.
+mermaid fence: `npx --yes @zabaca/mermaid-validate -` with the fence body on
+stdin (the trailing `-` is the stdin marker — same invocation as this repo's
+`scripts/validate-diagrams.mjs`). A diagram that does not validate does not
+get committed.
 
 ## 4. Report
 
