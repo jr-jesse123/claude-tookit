@@ -137,7 +137,7 @@ radius shape:
   today's promise, found with Grep and anchored `path:line`, each marked
   as one the plan accounts for or one **the plan does not mention**. An
   unmentioned consumer usually earns a *Plan vs. code* entry too.
-  Consumers no Grep can reach (external clients, rows and messages
+  Consumers that Grep cannot reach (external clients, rows and messages
   persisted under today's shape, serialized payloads) get a one-line note
   — the plan has to survive them after deploy.
 

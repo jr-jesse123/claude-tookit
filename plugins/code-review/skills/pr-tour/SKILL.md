@@ -1,6 +1,6 @@
 ---
 name: pr-tour
-description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff changes a promise other code relies on (types, events, endpoints — before→after delta, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
+description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff changes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — before→after delta, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
 argument-hint: [PR number/URL or branch; defaults to current branch vs default branch]
 allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
@@ -206,7 +206,7 @@ Each entry moves promise → verdict → radius:
   assumed: producers, consumers, implementors, each anchored `path:line`
   and marked as updated in this diff or **not in this diff**. The off-diff
   consumers are the reason this section exists — the diff cannot show
-  them. Consumers no Grep can reach get a one-line note instead: API
+  them. Consumers that Grep cannot reach get a one-line note instead: API
   clients outside the repo, rows and messages persisted under the old
   shape, serialized payloads, `any`-typed call sites, reflection.
 
@@ -218,6 +218,7 @@ By kind, what the promise consists of:
 | Events / messages | event name + payload schema | nothing type-checks across a queue — a renamed or repurposed field breaks subscribers silently; in-flight messages still carry the old payload |
 | Endpoints | verb + route + request/response shapes + status codes + auth | callers outside the repo; stricter validation is a contract change with no schema diff |
 | Persisted schema | table/column set, serialized format | old rows and old messages are consumers of the old contract that keep arriving after deploy |
+| Config keys / CLI flags | key or flag name + value type + default + accepted values | consumers live outside the code — deploy manifests, CI pipelines, users' scripts; a changed default is a contract change with no call-site diff |
 
 An un-updated consumer is reported as a fact of the terrain, not a finding
 — whether it is a bug belongs to `/code-review:quick-review`. The section
