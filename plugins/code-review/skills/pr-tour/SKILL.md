@@ -1,6 +1,6 @@
 ---
 name: pr-tour
-description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help) and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
+description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff changes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — before→after delta, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
 argument-hint: [PR number/URL or branch; defaults to current branch vs default branch]
 allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
@@ -166,10 +166,66 @@ or offline, skip silently — never block the tour on validation.
 `examples/` directory next to this SKILL.md, one file per diagram type: `flowchart.md`
 (painted delta + before/after pair), `sequence.md`, `state.md`,
 `er-class.md`, `mindmap-timeline.md` — plus `prose.md` for the narrative and
-reading order at three PR sizes (small, medium, large with group splits).
-After the selector has picked the type(s), read the matching file(s) and
-`prose.md`; never read the whole folder. They are format references, not
-templates — size the real tour to the real diff.
+reading order at three PR sizes (small, medium, large with group splits),
+and `contracts.md` for the contracts section below (read only when that
+section applies). After the selector has picked the type(s), read the
+matching file(s) and `prose.md`; never read the whole folder. They are
+format references, not templates — size the real tour to the real diff.
+
+## Report — contracts (only when the diff changes one)
+
+A contract is a promise other code relies on without reading the
+implementation: an exported type or interface, a function signature, an
+event name and its payload, an HTTP/RPC endpoint, a DB schema, a config
+key, a CLI flag. When a group changes such a promise, insert this section
+between its narrative and its reading order — one entry per changed
+contract. When no contract changed, omit the section entirely; a diff of
+pure implementation gets no empty "Contracts: none".
+
+Each entry moves promise → verdict → radius:
+
+```
+- `Invoice.status` · `src/billing/schema.ts:12` — union widened:
+  `"open" | "paid"` → `"open" | "paid" | "refunded"`. Additive for
+  producers; breaking for exhaustive consumers. Bound by it:
+  `billing/report.ts:88` (switch, updated here), `export/csv.ts:31`
+  (switch, **not in this diff**).
+```
+
+- **Promise delta** — quote the contract in its own language, before →
+  after: the old and new type or signature, payload fields, verb + route +
+  status codes, column set. Never paraphrase a shape the reader could be
+  shown.
+- **Compatibility verdict** — *additive* (existing readers and writers keep
+  working) or *breaking*, always with direction: for whom. Direction is
+  where reviewers slip — a widened union or return type is additive for
+  producers but breaks exhaustive consumers; a widened parameter is the
+  reverse; a new member on an interface reads as an addition in the diff
+  but is breaking for every implementor.
+- **Blast radius** — who is bound by the promise, found with Grep, never
+  assumed: producers, consumers, implementors, each anchored `path:line`
+  and marked as updated in this diff or **not in this diff**. The off-diff
+  consumers are the reason this section exists — the diff cannot show
+  them. Consumers that Grep cannot reach get a one-line note instead: API
+  clients outside the repo, rows and messages persisted under the old
+  shape, serialized payloads, `any`-typed call sites, reflection.
+
+By kind, what the promise consists of:
+
+| Contract | Quote as the promise | Easy to miss |
+| --- | --- | --- |
+| Types, interfaces, signatures | exported shape: fields, unions, parameter/return types, generic bounds | the compiler flags compiled consumers — name the ones it cannot: serialized data, `any` call sites, downstream repos |
+| Events / messages | event name + payload schema | nothing type-checks across a queue — a renamed or repurposed field breaks subscribers silently; in-flight messages still carry the old payload |
+| Endpoints | verb + route + request/response shapes + status codes + auth | callers outside the repo; stricter validation is a contract change with no schema diff |
+| Persisted schema | table/column set, serialized format | old rows and old messages are consumers of the old contract that keep arriving after deploy |
+| Config keys / CLI flags | key or flag name + value type + default + accepted values | consumers live outside the code — deploy manifests, CI pipelines, users' scripts; a changed default is a contract change with no call-site diff |
+
+An un-updated consumer is reported as a fact of the terrain, not a finding
+— whether it is a bug belongs to `/code-review:quick-review`. The section
+does not repeat the diagram either: `classDiagram`/`erDiagram` show the
+structure; this section states the verdict and the off-diff radius. When
+an entry names an off-diff consumer, point the reading order's contract
+entry at it.
 
 ## Report — reading order
 

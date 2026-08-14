@@ -41,8 +41,8 @@ sem reinstalar).
 | Componente | Nome | O que faz |
 | --- | --- | --- |
 | skill | `/code-review:quick-review` | Revisa as mudanças não commitadas: correção, edge cases, sobras de debug, contratos quebrados, testes faltando. |
-| skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
-| skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair — um ou mais diagramas, cada um respondendo uma pergunta diferente, como no `pr-tour`), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. |
+| skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, seção de **contratos** quando o diff muda uma promessa que outro código consome (tipos/interfaces, eventos, endpoints, schemas — delta antes→depois citado na linguagem do contrato, veredito de compatibilidade com direção, e raio de alcance incluindo consumidores *fora* do diff), e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
+| skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair — um ou mais diagramas, cada um respondendo uma pergunta diferente, como no `pr-tour`), nomeia os contratos que o plano vai mudar (promessa de hoje citada do código → promessa planejada, compatibilidade, raio de alcance — consumidores que o plano não menciona viram discrepância), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. |
 | agent | `code-review:security-reviewer` | Subagente que audita injection, authn/authz, segredos, path traversal, desserialização e cripto. Só lê — nunca edita. |
 
 Os dois tours compartilham as convenções de pintura (o `plan-tour` lê os
@@ -254,7 +254,7 @@ claude-tookit/
 │   │   ├── skills/quick-review/SKILL.md
 │   │   ├── skills/pr-tour/
 │   │   │   ├── SKILL.md
-│   │   │   └── examples/            # few-shot por tipo de diagrama + prosa, via ${CLAUDE_SKILL_DIR}
+│   │   │   └── examples/            # few-shot por tipo de diagrama + prosa + contratos, via ${CLAUDE_SKILL_DIR}
 │   │   ├── skills/plan-tour/
 │   │   │   ├── SKILL.md             # delta prospectivo: reusa os examples do pr-tour via ${CLAUDE_PLUGIN_ROOT}
 │   │   │   └── examples/prospective.md
