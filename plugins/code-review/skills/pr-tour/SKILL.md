@@ -279,9 +279,14 @@ Per group, a numbered list. Each entry has three parts:
   diagrams.
 
 Default ordering, to adapt whenever the actual flow disagrees: contracts
-first, then core logic following the data flow, then wiring and call sites,
-then tests (read them as the promised behavior — do they match the
-narrative?), then generated files last, skim only.
+first, then core logic following the data flow, then wiring and call
+sites, then generated files last, skim only. Tests do not bunch at the
+end — a test whose scope is one just-read file or layer reads immediately
+after it (`summary.fs` → `summary.tests.fs`; `api/a.fs` → `api/b.fs` →
+`api.tests.fs`), while the promise it pins is still fresh: read it as the
+promised behavior — does it match the narrative? Only tests that span
+layers (integration, e2e) keep a slot of their own, after everything they
+exercise.
 
 **Category labels** like `[Contracts]` above are optional. Invent the 3–6
 labels that fit *this* diff — Models, Integrations, Tests, Config, UI,
