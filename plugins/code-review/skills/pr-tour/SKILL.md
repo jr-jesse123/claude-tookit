@@ -211,6 +211,29 @@ Each entry moves promise → verdict → radius:
   clients outside the repo, rows and messages persisted under the old
   shape, serialized payloads, `any`-typed call sites, reflection.
 
+**Quoting in blocks.** A one-line delta stays inline, as above. When the
+shape does not fit a line — a record with several fields, a payload
+schema, an endpoint with request, response, and status codes — quote it in
+a fenced code block in the contract's native notation; the fence is the
+visual aid, syntax highlighting included:
+
+- The repo's own contract artifact first, when one exists: the changed
+  fragment of its OpenAPI/JSON Schema (` ```yaml `/` ```json `), protobuf,
+  GraphQL SDL, SQL DDL — never a spec fabricated for the tour; for a
+  code-first endpoint the honest quote is the source signature or a
+  compact ` ```http ` request/response sample.
+- Otherwise the conventional notation for the kind: the source language
+  for types and signatures (` ```ts `, ` ```fsharp `, …), a ` ```json `
+  payload for events.
+- Carry the painting language into the block: ⊕/⊖ as comments on added and
+  removed lines; or a ` ```diff ` fence when before and after interleave —
+  it trades syntax highlight for +/− painting, pick per block.
+- Quote the delta plus the minimum context needed to read it, never the
+  whole type or document; the verdict and the radius stay in the prose
+  around the block. The structural picture stays with the diagrams
+  (`classDiagram`/`erDiagram`) — the block shows the promise's text, not
+  its neighborhood.
+
 The ends of the spectrum follow the tours' painting language. A **new
 contract** (⊕) has no before: quote the promise being made, and in place
 of a break the verdict names the commitment — what surface is now

@@ -129,7 +129,9 @@ endpoint, a DB schema, a config key — add one entry per contract, in
 - **Promise delta** — today's real shape, quoted from the code with
   `path:line`, → the shape the plan promises. A contract the plan creates
   has no today — quote the promised shape and say it is new; one the plan
-  removes has no after. When the plan's stated shape and the code's
+  removes has no after. `pr-tour`'s block-quoting rules apply unchanged
+  when the shape outgrows a line: fenced block in the contract's native
+  notation, ⊕/⊖ as comments. When the plan's stated shape and the code's
   current shape already disagree, that is a *Plan vs. code* entry, not a
   contract delta.
 - **Compatibility verdict** — additive or breaking, always with direction:

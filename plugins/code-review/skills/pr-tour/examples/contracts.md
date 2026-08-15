@@ -57,5 +57,45 @@ breaking by definition.
 >   here); mobile clients ship on their own cadence — cannot be verified
 >   from this repo.
 
+## Block-quoted promise — when the shape outgrows the line
+
+The one-line deltas above stay inline. A shape that doesn't fit a line is
+quoted in a fenced block in its native notation, ⊕/⊖ carried in as
+comments; verdict and radius stay in the prose around it.
+
+> - `SubmitClaim` payload · `src/claims/types.ts:18` — request record
+>   reshaped:
+>
+>   ```ts
+>   interface SubmitClaim {
+>     claimId: string
+>     amountCents: number      // ⊖ was: amount: number (float, BRL)
+>     currency: "BRL" | "USD"  // ⊕ new, required
+>     notes?: string
+>   }
+>   ```
+>
+>   Breaking for every caller: the amount field changed name and unit, and
+>   `currency` is required. Bound by it: `web/claim-form.tsx:77` (updated
+>   here), `jobs/import-legacy.ts:120` (**not in this diff**).
+
+For a code-first endpoint, the honest block is an `http` sample — a spec
+fragment is quoted only when the repo itself maintains one (OpenAPI,
+protobuf, SDL):
+
+> - `POST /claims` · `api/routes.ts:64` — ⊕ new endpoint:
+>
+>   ```http
+>   POST /claims
+>   Content-Type: application/json     ← SubmitClaim (above)
+>
+>   201 → { "claimId": "..." }
+>   409 → duplicate claimId
+>   422 → validator's voice, api/validate.ts:88
+>   ```
+>
+>   New promise: consumers wired in this diff: `web/claim-form.tsx:81`;
+>   none outside the diff yet.
+
 "Not in this diff" is a fact of the terrain, not a finding — the review
 verdict belongs to `/code-review:quick-review`.
