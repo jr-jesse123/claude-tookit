@@ -1,6 +1,6 @@
 ---
 name: pr-tour
-description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff introduces, changes, or removes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — before→after delta, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
+description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff introduces, changes, or removes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — promise delta with before→after where both exist, a new contract has no before and a removed one no after, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
 argument-hint: [PR number/URL or branch; defaults to current branch vs default branch]
 allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
