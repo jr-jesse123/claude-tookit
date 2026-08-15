@@ -1,11 +1,13 @@
 # Contracts examples — promise delta, compatibility verdict, blast radius
 
 Format reference, not a template. The section appears only when the diff
-changes a promise other code relies on; write the real entries in the
-user's language, sized to the real contract. Every entry moves promise →
-verdict → radius; what varies by kind is who counts as a consumer — an
-implementor (interfaces), a subscriber (events), a caller (endpoints),
-old data (schemas).
+introduces, changes, or removes a promise other code relies on; write the
+real entries in the user's language, sized to the real contract. Every
+entry moves promise → verdict → radius; what varies by kind is who counts
+as a consumer — an implementor (interfaces), a subscriber (events), a
+caller (endpoints), old data (schemas). A new contract has no before and
+its verdict names the commitment; a removed one has no after and is
+breaking by definition.
 
 ## Type contract — widened union (typed language)
 
@@ -36,6 +38,15 @@ old data (schemas).
 >   `email/receipt.ts:35` (**not in this diff**). Messages published
 >   before the deploy still carry the int payload — subscribers see both
 >   shapes during rollout.
+
+## New contract — endpoint introduced (⊕, no before)
+
+> - `GET /invoices/:id/refunds` · `api/routes.ts:102` — ⊕ new endpoint:
+>   returns `Refund[]` (200), 404 for unknown invoice, auth middleware
+>   matching the other billing routes. New promise: public API surface
+>   grows — response shape is committed once external clients appear.
+>   Consumers wired in this diff: `web/refund-list.tsx:33`; none outside
+>   the diff yet, so this is the cheapest moment to reshape it.
 
 ## Endpoint contract — narrowed request
 

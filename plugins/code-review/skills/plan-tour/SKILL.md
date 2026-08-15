@@ -1,6 +1,6 @@
 ---
 name: plan-tour
-description: Ground an implementation plan in the real codebase before any code is written — trace the terrain the plan touches, narrate how it works today and how the plan transforms it, paint a prospective Mermaid delta (existing code dimmed, planned additions ⊕, planned removals ⊖), state the contracts the plan will change (today's promise quoted from the code → the planned promise, compatibility, blast radius), and report factual plan-vs-code discrepancies plus the open questions the plan leaves. Use after a plan exists and before implementing — not for touring diffs (pr-tour) or finding bugs (quick-review).
+description: Ground an implementation plan in the real codebase before any code is written — trace the terrain the plan touches, narrate how it works today and how the plan transforms it, paint a prospective Mermaid delta (existing code dimmed, planned additions ⊕, planned removals ⊖), state the contracts the plan will introduce, change, or remove (today's promise quoted from the code → the planned promise, compatibility, blast radius), and report factual plan-vs-code discrepancies plus the open questions the plan leaves. Use after a plan exists and before implementing — not for touring diffs (pr-tour) or finding bugs (quick-review).
 argument-hint: [path to a plan file, or pasted plan text; defaults to the plan in this conversation]
 allowed-tools: Bash(git log:*), Bash(git show:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
@@ -118,18 +118,20 @@ DIAGRAM
 On failure, fix and re-validate; double-check `linkStyle` indices against
 the edge order. If `npx` is unavailable or offline, skip silently.
 
-## Report — contracts (only when the plan changes one)
+## Report — contracts (only when the plan touches one)
 
 `pr-tour`'s contracts section, shifted to the future tense. When the plan
-changes a promise other code relies on — an exported type or interface, a
-function signature, an event payload, an endpoint, a DB schema, a config
-key — add one entry per contract, in `pr-tour`'s promise → verdict →
-radius shape:
+introduces, changes, or removes a promise other code relies on — an
+exported type or interface, a function signature, an event payload, an
+endpoint, a DB schema, a config key — add one entry per contract, in
+`pr-tour`'s promise → verdict → radius shape:
 
 - **Promise delta** — today's real shape, quoted from the code with
-  `path:line`, → the shape the plan promises. When the plan's stated shape
-  and the code's current shape already disagree, that is a *Plan vs. code*
-  entry, not a contract delta.
+  `path:line`, → the shape the plan promises. A contract the plan creates
+  has no today — quote the promised shape and say it is new; one the plan
+  removes has no after. When the plan's stated shape and the code's
+  current shape already disagree, that is a *Plan vs. code* entry, not a
+  contract delta.
 - **Compatibility verdict** — additive or breaking, always with direction:
   for whom, same rules as `pr-tour` (a widened union breaks exhaustive
   consumers, a new interface member breaks every implementor, …).

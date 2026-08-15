@@ -1,6 +1,6 @@
 ---
 name: pr-tour
-description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff changes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — before→after delta, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
+description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff introduces, changes, or removes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — before→after delta, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
 argument-hint: [PR number/URL or branch; defaults to current branch vs default branch]
 allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
@@ -172,15 +172,16 @@ section applies). After the selector has picked the type(s), read the
 matching file(s) and `prose.md`; never read the whole folder. They are
 format references, not templates — size the real tour to the real diff.
 
-## Report — contracts (only when the diff changes one)
+## Report — contracts (only when the diff touches one)
 
 A contract is a promise other code relies on without reading the
 implementation: an exported type or interface, a function signature, an
 event name and its payload, an HTTP/RPC endpoint, a DB schema, a config
-key, a CLI flag. When a group changes such a promise, insert this section
-between its narrative and its reading order — one entry per changed
-contract. When no contract changed, omit the section entirely; a diff of
-pure implementation gets no empty "Contracts: none".
+key, a CLI flag. When a group introduces, changes, or removes such a
+promise, insert this section between its narrative and its reading order —
+one entry per contract. When the diff touches no contract, omit the
+section entirely; a diff of pure implementation gets no empty
+"Contracts: none".
 
 Each entry moves promise → verdict → radius:
 
@@ -209,6 +210,16 @@ Each entry moves promise → verdict → radius:
   them. Consumers that Grep cannot reach get a one-line note instead: API
   clients outside the repo, rows and messages persisted under the old
   shape, serialized payloads, `any`-typed call sites, reflection.
+
+The ends of the spectrum follow the tours' painting language. A **new
+contract** (⊕) has no before: quote the promise being made, and in place
+of a break the verdict names the commitment — what surface is now
+promised, to whom (public API? internal? persisted?), and so what will be
+expensive to change later. Its radius is the consumers this diff wires up;
+"no consumers outside this diff yet" is worth saying — it tells the
+reviewer this is the cheapest moment the contract will ever have to be
+reshaped. A **removed contract** (⊖) has no after: breaking by definition;
+Grep for stragglers still bound to it that the diff missed.
 
 By kind, what the promise consists of:
 
