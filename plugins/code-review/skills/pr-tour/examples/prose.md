@@ -30,12 +30,13 @@ sized to the real diff. Diagrams are omitted here — see the per-type files.
 >    the `Refund` type. Look at: nullability of `Refund.reason`.
 > 2. `billing/refund.ts` — [Core] — the substance. Look at: the idempotency
 >    guard at `billing/refund.ts:58` — double-submit is the risk here.
-> 3. `billing/charge.ts` — [Core] — small but load-bearing. Look at: the
+> 3. `billing/refund.test.ts` — [Tests] — rides with the layer it pins,
+>    while `refund.ts` is fresh. Look at: idempotency covered, or only
+>    single-submit?
+> 4. `billing/charge.ts` — [Core] — small but load-bearing. Look at: the
 >    `refundable` flag — is it ever true for zero-amount receipts?
-> 4. `api/routes.ts` — [Wiring] — connects the dots. Look at: auth middleware
+> 5. `api/routes.ts` — [Wiring] — connects the dots. Look at: auth middleware
 >    on the new route matches the other billing routes.
-> 5. `billing/refund.test.ts` — [Tests] — the promise. Look at: idempotency
->    covered, or only single-submit?
 > 6. `openapi.yaml` — [Generated] — skim: regenerated from routes.
 
 ## Large PR — independent groups, each with its own tour

@@ -176,9 +176,10 @@ implementing — the same entry shape as `pr-tour`: why this position, then
 one or two concrete things to look at, anchored as `path:line`. Planned-new
 files do not appear (there is nothing to read yet); modify/remove targets
 and their load-bearing neighbors do. Contracts first, then the code the
-plan will change following the flow, then the neighbors that constrain it,
-then existing tests (they are the behavior the plan must not break —
-unless it says so).
+plan will change following the flow, then the neighbors that constrain
+it. Existing tests ride with the layer they pin, as in `pr-tour` — read
+each right after its layer, as the behavior the plan must not break
+(unless it says so); tests spanning layers close the list.
 
 ## Report — open questions
 
