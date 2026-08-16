@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "codex-ux findings",
+  "description": "Response shape for a UX delegation. Passed to `codex exec --output-schema`; the model's final message conforms to this instead of to prose instructions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["surfaces_covered", "findings", "inconclusive", "notes"],
+  "properties": {
+    "surfaces_covered": {
+      "type": "array",
+      "description": "The user-facing surfaces actually reviewed — screen, flow, or component names, each with the path it was read from.",
+      "items": { "type": "string" }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Issues in what the user encounters. Empty is a valid answer; do not pad.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["surface", "file", "line", "title", "now", "problem", "suggest", "kind", "objective"],
+        "properties": {
+          "surface": {
+            "type": "string",
+            "description": "Which screen, flow, or component this belongs to."
+          },
+          "file": {
+            "type": "string",
+            "description": "Repo-relative path. Must be a file you actually read."
+          },
+          "line": {
+            "type": "integer",
+            "description": "1-indexed line the finding anchors to."
+          },
+          "title": {
+            "type": "string",
+            "description": "One line, stating the issue."
+          },
+          "now": {
+            "type": "string",
+            "description": "What the user experiences today — quote the actual string or describe the actual behavior the code produces."
+          },
+          "problem": {
+            "type": "string",
+            "description": "Who it hurts and how. A problem no user has is not a finding."
+          },
+          "suggest": {
+            "type": "string",
+            "description": "Concrete replacement copy or behavior. Actual text, not 'improve the wording' — a vague suggestion is a rejected finding."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["copy", "error-state", "empty-state", "loading-state", "validation", "affordance", "accessibility"],
+            "description": "Which category of user-facing problem this is."
+          },
+          "objective": {
+            "type": "boolean",
+            "description": "true when the issue is checkable against a rule (missing input label, raw exception shown to the user, destructive action with no confirmation). false when it is a judgment call about tone, wording, or emphasis. The caller sorts on this — do not blur the two."
+          }
+        }
+      }
+    },
+    "inconclusive": {
+      "type": "array",
+      "description": "Places where the source does not determine what the user actually sees — dynamic content, theming, or rendering you cannot resolve by reading. Report here instead of guessing at rendered output.",
+      "items": { "type": "string" }
+    },
+    "notes": {
+      "type": "string",
+      "description": "What limited the pass: missing product context, absent voice or terminology rules, surfaces deliberately skipped. Empty string if none."
+    }
+  }
+}

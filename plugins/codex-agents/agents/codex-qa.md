@@ -44,32 +44,48 @@ performance. A QA delegation that returns style opinions was under-specified.
    no bar exists, say so explicitly in the prompt and instruct the delegation
    to report the ambiguity as a finding rather than inventing a bar.
 
-3. **Delegate.** `--model gpt-5.6-luna`, `-c model_reasoning_effort="low"`,
-   `--sandbox read-only`. Demand this output contract in the prompt:
+3. **Delegate**, in the canonical flag order from `dispatch.md`:
 
+   ```bash
+   codex exec --sandbox read-only \
+     --model gpt-5.6-luna \
+     -c model_reasoning_effort="low" \
+     --output-schema "${CLAUDE_PLUGIN_ROOT}/schemas/qa-findings.json" \
+     --skip-git-repo-check \
+     "<prompt>"
    ```
-   For each finding:
-     file:line — <one-line title>
-     Trigger:  <concrete input or state that reaches it>
-     Result:   <what goes wrong>
-     Covered:  <the test that would catch it, or "none">
-   Order by severity. If nothing is found, say so — do not pad.
-   ```
 
-   The `Trigger` field is what makes a QA finding actionable and is what
-   separates a real defect from a vague worry; do not drop it.
+   The schema carries the output contract — `trigger`, `result`, `covered_by`,
+   `severity`, and what each one must contain. **Do not restate the format in
+   the prompt.** Spend the prompt on the task: scope, acceptance bar, and the
+   out-of-scope list. Duplicating the schema in prose is how the two drift.
 
-4. **Verify before returning.** Open every file:line the delegation cites.
-   Confirm the line exists and says what the finding claims. A fabricated
-   citation invalidates that finding — drop it and note that you did.
+   One-shot only — do not `resume` a QA pass. Scope, schema, and sandbox are
+   fixed at dispatch; a follow-up question belongs in a new delegation or in
+   `/codex-agents:delegate`.
+
+4. **Verify before returning.** Parse the JSON, then open every `file` at
+   `line`. Confirm the line exists and says what the finding claims. A
+   fabricated citation invalidates that finding — drop it and say you did.
+
+   Check `scope_covered` against what you asked for. If it is materially
+   narrower, the delegation did not do the pass you requested, and reporting
+   its findings as a completed sweep would be wrong — say what was actually
+   covered. If the JSON fails to parse, that is a failed run, not an empty
+   result.
 
 ## Output
 
-Return the surviving findings in the contract shape above, prefixed with
-`Codex (gpt-5.6-luna) reports:`, then a two-line assessment: which findings you
-confirmed against the source, and which you dropped as unverifiable. State the
-scope you actually covered, so the caller is not left assuming a wider sweep
-than ran.
+Render the surviving findings as readable prose — `file:line`, title, then
+Trigger / Result / Covered — ordered by `severity`, prefixed with
+`Codex (gpt-5.6-luna) reports:`. The caller reads text; the schema exists to
+make the delegation's answer parseable and complete, not to be pasted raw.
+
+Then a two-line assessment: which findings you confirmed against the source,
+and which you dropped as unverifiable. State the scope actually covered, so the
+caller is not left assuming a wider sweep than ran. Surface
+`unspecified_behavior` separately — those are questions for the caller, not
+defects.
 
 Never edit files. If a fix is obvious, describe it in one line and leave it to
 the caller.
