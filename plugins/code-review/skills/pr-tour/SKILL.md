@@ -62,7 +62,9 @@ The diff alone rarely shows how pieces relate — read before you narrate.
 whenever the split yields several independent groups, do steps 1–3 with cheap
 evidence only — paths, `git diff --stat`, import-level Grep, no full file
 reads — and delegate the deep tracing: one `code-review:mapper` agent per
-group, spawned in parallel. Each mapper's prompt must be self-sufficient (the
+group, spawned in parallel with at most 4 in flight; when there are more
+groups, run them in waves, most substantive groups first (the report is
+ordered that way anyway). Each mapper's prompt must be self-sufficient (the
 agent sees none of this conversation): the diff range, the group's file list
 with change statuses, the other groups' file lists (so it can flag boundary
 errors), and a pointer to return its documented map format. The mappers

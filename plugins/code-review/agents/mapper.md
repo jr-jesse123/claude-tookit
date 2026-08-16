@@ -43,10 +43,14 @@ changes, or removes:
   Quote, never paraphrase — the tour reuses your quote directly.
 - The blast radius, found with Grep and never assumed: producers, consumers,
   implementors, each anchored `path:line` and marked **in this diff** or
-  **not in this diff**. Note the consumers Grep cannot reach when the kind
-  implies them: persisted rows/messages under the old shape, callers outside
-  the repo, `any`-typed call sites, reflection, deploy manifests for config
-  keys.
+  **not in this diff**.
+- Separately from those verified hits, the *classes* of consumers Grep cannot
+  reach, when the contract's kind implies them: persisted rows/messages under
+  the old shape, callers outside the repo, `any`-typed call sites, reflection,
+  deploy manifests for config keys. These are caveats, not findings — phrase
+  them as possibilities ("old rows may still arrive under the previous
+  shape"), never as located facts, and keep them visually apart from the
+  grep-anchored radius so the tour can quote each with the right confidence.
 
 **4. Reading-order candidate.** The group's files in the order a reviewer
 should read them, each with one line of *why here* and *look at* facts —
