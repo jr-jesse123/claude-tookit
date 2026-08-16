@@ -190,7 +190,15 @@ protege a alegação, não a forma — comentário humano antigo tem prior de
 manutenção (`git log -L` distingue origem humana de LLM), mas inchaço é
 condensável nos dois modos. As observations saem acionáveis: cada bloco que
 pertence a outro lugar vem com destino nomeado (ADR, design doc, PR) e a linha-
-ponteiro que o substituiria. Depois de editar, auto-diff confirma que só linhas
+ponteiro que o substituiria. Prosa livre junto do path vira **diretiva do
+dono** — quebra convenção que o repo sedimentou, restringe a passada, ou nomeia
+uma convenção nova nascendo no projeto — e vence o status quo (o idioma da casa
+segue governando forma, nunca tamanho); rodada anterior de curadoria não conta
+como precedente, e keep em bloco "porque o estilo é deliberado" vira pergunta
+no gate, com segunda passada focada só nos blocos grandes se você mandar gerar.
+A verificação é só-leitura de verdade — sem mutar a working tree, sem rodar
+suítes; alegação fora do alcance da leitura fica "mantida por ausência de
+contradição", anotada. Depois de editar, auto-diff confirma que só linhas
 de comentário mudaram, e o build do projeto (se descobrível) confirma que nada
 funcional saiu junto.
 
