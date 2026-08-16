@@ -33,5 +33,11 @@ sequenceDiagram
     Note over API,G: ⊖ the old synchronous api→gateway call is gone
 ```
 
+`Legend: ⊕ = participant or message added · ⊖ = removed · alt/else = mutually exclusive paths · loop = retried until it succeeds or dead-letters`
+
+No color to explain here — the legend still earns its line, because
+`alt`/`loop` are the diagram's real encoding and a reader who takes them for
+plain sequence reads the retry as three calls that always happen.
+
 One-line title above the diagram in the real tour: "In what order does a
 placed order get charged now?" — the question this type answers.

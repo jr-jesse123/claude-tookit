@@ -72,10 +72,13 @@ union of today and the planned end state, with the same conventions as
 `pr-tour`: planned-new elements solid and thicker (`classDef added`, ⊕ in
 the label), planned-removed dashed (`classDef removed`, ⊖), planned-modified
 in default styling — undimmed and unmarked — and untouched context dimmed
-gray, edges painted with `linkStyle` to match. The one semantic shift: ⊕
-means *will exist*, not *was added* — the diagram is a promise, and saying
-so once near the diagram is enough. Skip the diagram when the group touches
-only 1–2 files.
+gray, edges painted with `linkStyle` to match. `pr-tour`'s legend rule comes
+along unchanged: one compact line below the fence, in the tour's language,
+naming *visual → meaning* for the encodings that diagram actually uses —
+colors and stroke styles, and equally the notations a reader would have to
+infer. The one semantic shift rides in that line: here ⊕ means *will exist*,
+not *was added*, and the legend is where the diagram says so, once. Skip the
+diagram when the group touches only 1–2 files.
 
 Multiple diagrams are an explicit option when distinct perspectives or zoom
 levels help more than one picture can — an overview `flowchart` of the

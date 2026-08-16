@@ -23,6 +23,8 @@ erDiagram
     }
 ```
 
+`Legend: ⊕ = table, relationship or column added by this migration · unmarked = already in the schema`
+
 Anchor in prose: "matches migration `db/migrations/0042_add_refunds.sql`".
 
 ## Class — contract between types ("what is the contract now?")
@@ -39,6 +41,10 @@ classDiagram
     note for PaymentGateway "⊕ refund() added — every implementor must follow"
 ```
 
+`Legend: ⊕ = member added by this change · <|.. = implements`
+
 The note names the ripple: a widened interface is a contract change for every
 implementor — that is what the reviewer must verify, and the reading order
-should point at each implementation file.
+should point at each implementation file. The legend spends its second entry
+on `<|..` because the arrow is the diagram's only statement of who is bound
+by the new member, and nothing in the labels says it.

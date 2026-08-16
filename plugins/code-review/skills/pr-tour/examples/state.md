@@ -20,10 +20,14 @@ stateDiagram-v2
     class Refunded added
 ```
 
+`Legend: ⊕ in a state name, thicker green outline = state added by this change · ⊕ on a transition label = transition added · unmarked = already existed`
+
 - New states take `classDef added` *and* ⊕ in the displayed name
   (`state "Refunded ⊕" as Refunded`) — some renderers drop state styles, so
   color is never the only signal. New/removed transitions are marked ⊕/⊖ in
-  the transition label (edges cannot be classDef-styled here).
+  the transition label (edges cannot be classDef-styled here). The legend
+  names both carriers of the same fact, so the diagram still reads where the
+  color was dropped.
 - Anchor the machine to code in the surrounding prose: "implemented across
   `billing/charge.ts:77` and `billing/refund.ts:31`" — not inside the
   diagram.

@@ -23,8 +23,7 @@ and wire the middleware into `api/server.ts` for the two public routes."*
 
 ## Prospective delta
 
-> The diagram paints the planned end state over today's terrain — ⊕ marks
-> what *will exist* once the plan lands, not what was added.
+> The diagram paints the planned end state over today's terrain.
 
 ```mermaid
 flowchart LR
@@ -41,6 +40,14 @@ flowchart LR
     class S,H,W ctx
     linkStyle 0,1,2 stroke:#0a7d33,stroke-width:2px
 ```
+
+`Legend: ⊕ solid green = will exist once the plan lands · unmarked = exists today, the plan changes it · gray = exists today, the plan does not touch it`
+
+The legend carries the tense, and that is the entry the reader most needs: in
+a plan tour ⊕ is a promise, not a fact of the tree, and a reader arriving from
+a `pr-tour` reads it as "already added" unless the line says otherwise. Like
+every other line of the tour, it is written in the user's language — English
+here only because this file is a reference for you.
 
 Edge accounting: `R→L`, `L→C`, `L→S` will exist only after the plan lands →
 added. `R→H` and `R→W` exist today and survive → context, unpainted.

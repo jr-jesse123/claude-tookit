@@ -170,6 +170,28 @@ Painting rules:
 - Light fills need an explicit dark text color (e.g. `color:#111`) so labels
   stay readable on dark themes.
 
+**Legend.** A diagram that carries a convention states it. One compact line
+directly below the fence, in the tour's language, each entry *visual →
+meaning*:
+
+`Legend: ⊕ solid green = added · ⊖ dashed red = removed · unmarked = modified · gray = untouched context`
+
+Below the fence, never as a subgraph inside it: a legend node competes with
+the real graph for layout and lands wherever the renderer decides. It is not
+only about color — any notation the reader would otherwise have to infer
+belongs in the same line: a node shape that stands for a kind of thing, the
+`symbol · path` naming, `alt`/`loop`/`par` blocks, a `Note over` used as a
+removal marker, an ⊕ that means *will exist* rather than *was added*.
+
+What earns an entry is what the diagram encodes silently. A label that
+already says it in words does not — `[[queue: order-events ⊕]]` needs no
+"`[[…]]` = queue" entry — and a diagram with no styling and no markers needs
+no legend at all. List only the encodings that diagram actually uses:
+inventing entries for conventions absent from it is padding, and it teaches
+the reader to distrust the legend. Several diagrams sharing one set of
+conventions take one legend, under the first; a painted before/after pair
+takes one per fence, since each side encodes a different half of the change.
+
 **Validate before presenting.** When `npx` is available, run each fence
 through the official mermaid parser before showing the tour — the command
 must start with `npx` (a leading `echo ... |` would not match the allowed

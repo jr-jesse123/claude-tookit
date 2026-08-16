@@ -30,6 +30,13 @@ flowchart LR
     linkStyle 1,2,4 stroke:#0a7d33,stroke-width:2px
 ```
 
+`Legend: ⊕ solid green = added · ⊖ dashed red = removed · unmarked = modified · gray = untouched context`
+
+The legend lists the four things this diagram encodes silently and nothing
+else. `[[queue: order-events ⊕]]` and `[(db)]` get no entry: their labels
+already say "queue" and "db" in words, so the shape teaches nothing the
+reader does not have.
+
 Edge accounting: `A→B` and `B→C` exist only before the change → removed;
 `A→Q`, `Q→W`, `W→C` exist only after → added. A removed node's edges go with
 it — do not leave them painted as context.
@@ -54,6 +61,8 @@ flowchart LR
     linkStyle 0,1 stroke:#c00000,stroke-dasharray:6 4
 ```
 
+`Legend: ⊖ dashed red = leaves with this change · unmarked = modified · gray = untouched anchor, unchanged on both sides`
+
 **After — what arrives (⊕):**
 
 ```mermaid
@@ -68,8 +77,15 @@ flowchart LR
     linkStyle 0,1,2 stroke:#0a7d33,stroke-width:2px
 ```
 
+`Legend: ⊕ solid green = arrives with this change · unmarked = modified · gray = untouched anchor, unchanged on both sides`
+
+The pair takes one legend per fence rather than one for both: each side
+encodes a different half of the change, and a shared legend would list ⊖ under
+a diagram that has none.
+
 Notes carried by these examples: nodes named by real paths (symbol + path for
 sub-file pieces, e.g. `charge() · billing/charge.ts`); modified nodes take
 the default styling — dimming marks the untouched, ⊕/⊖ mark the exceptional;
 `linkStyle` indices match the edge order in the code — paint edges last;
-color never the only signal (dash/weight + ⊕/⊖ ride along).
+color never the only signal (dash/weight + ⊕/⊖ ride along), and the legend
+below the fence names each signal once.

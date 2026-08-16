@@ -22,6 +22,12 @@ mindmap
       README.md
 ```
 
+`Legend: ⊕ = file added by this PR · unmarked = existing file the PR modifies`
+
+The second entry is the one that earns the line: without it the unmarked
+leaves read as untouched neighbors drawn for context, which is what they mean
+in every flowchart of this tour and not what they mean here.
+
 Use it as the opening overview of a sprawling PR, before per-group tours —
 it answers breadth, not connection; pair it with a flowchart per group when
 connections matter.
@@ -35,6 +41,8 @@ timeline
     Phase 2 : flag ramp-up : sync path measured
     Phase 3 : remove sync path : drop legacy columns
 ```
+
+`Legend: ⊕ = shipped by this PR · phases without ⊕ = planned, not in this diff`
 
 Mark which phase this PR is — the reviewer's question is usually "how much of
 the plan am I approving right now?"
