@@ -19,6 +19,28 @@ justify staying. That bar guards the *claim*, not the form: condense (below)
 leaves the claim intact, so an oversized-but-true comment is fair game in
 either mode.
 
+Verification is by reading: code, diffs, `git log`, `git blame`. Never mutate
+the working tree — no editing code to test a claim, not even with a revert
+afterwards — and never run build or test suites; the read-only intent covers
+Bash too, not only the blocked edit tools. An empirical claim beyond
+reading's reach ("210 tests", "covers the whole corpus") is kept, and its
+row's reason carries the canonical label "kept by absence of contradiction"
+— translated when the report is not in English — so the owner can tell
+verified keeps from unverifiable ones at a glance. Honest confidence beats
+an expensive experiment.
+
+## The owner's directive
+
+The prompt may carry a free-prose directive from the invocation — the repo
+owner's declared intent for this pass. It outranks the status quo: it can
+break an established convention ("trim the history blocks hard" removes
+length as a defense, while house idiom — markers, language, tone — keeps
+governing form), narrow the pass ("don't touch docstrings"), or name a new
+convention as it is being born mid-project ("TODOs now carry an issue link"):
+apply the named pattern as this pass's standard even where the code predates
+it. Two things a directive can never do: override the off-limits list, or
+make anything but comment lines editable.
+
 ## Confirm before judging
 
 The candidate list is tuned for near-zero false negatives, so it contains
@@ -76,6 +98,11 @@ naming a parameter that no longer exists.
 Cite the contradiction — comment text vs. what line N actually does. No
 citation, no stale verdict.
 
+A claim true only at a moment — a test count, a line total, a dated quantity
+— ages on its own even when correct today. When the mechanism it documents
+still holds, fix it to a timeless phrasing ("the property tests" rather than
+"210 tests") instead of updating the number for the next drift.
+
 Action: **fix** when the underlying constraint still exists and only the
 details drifted — minimal rewording, in the file's existing comment idiom and
 language; **delete** when the code outgrew the comment entirely.
@@ -117,6 +144,15 @@ type system can't encode. Also everything in the off-limits list. Keep means
 **as-is** — content *and* form earn their place; a keep-worthy claim in a
 bloated wrapper already matched condense above.
 
+**Blanket keeps are an impasse, not a verdict.** If you find yourself keeping
+a whole class of candidates for one shared reason — most commonly "the long
+paragraphs are deliberate house style" — do not settle that yourself: keep
+them for now, but state the impasse in observations with the evidence (the
+commits and files that establish the convention), so the skill can put the
+choice to the owner. And in path mode, the five largest kept blocks each
+carry, in their row's reason, a justification of *size* — why these 30 lines
+and not 6 pointing at the ADR — not only of content.
+
 ### Borderline calls: use origin as a prior
 
 When a comment sits between delete and keep, or between condense and keep,
@@ -126,6 +162,13 @@ check its provenance —
 keep, it may carry tribal knowledge the code doesn't show. This check costs a
 command per comment — spend it on borderline calls only, not the whole
 inventory.
+
+One source never counts as precedent: a previous curation pass. A
+comment-only commit from an earlier run of this skill (typically
+Claude-authored) is not "declared repository practice", and surviving an
+earlier pass is no evidence a comment should survive this one — reading it as
+convention would make every pass ratify the last. Only convention humans
+established by writing code counts as a prior.
 
 ## What you return
 

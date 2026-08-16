@@ -1,7 +1,7 @@
 ---
 name: curate
-description: Review the lifecycle of code comments - verify each against the code it describes, delete noise, condense bloated-but-true comments down to the claim, keep load-bearing constraints. Scoped to uncommitted changes by default, or to a file/directory you name. Verification runs in the comment-curator verifier agent; approval and edits stay in the session. Use after LLM-heavy sessions or before merging a branch, when comments have accumulated faster than they were curated.
-argument-hint: "[file or directory; empty = current diff]"
+description: Review the lifecycle of code comments - verify each against the code it describes, delete noise, condense bloated-but-true comments down to the claim, keep load-bearing constraints. Scoped to uncommitted changes by default, or to a file/directory you name; free prose alongside the path becomes the owner's directive for the pass (break an established convention, narrow the scope, or seed a new convention). Verification runs in the comment-curator verifier agent; approval and edits stay in the session. Use after LLM-heavy sessions or before merging a branch, when comments have accumulated faster than they were curated.
+argument-hint: "[file or directory; empty = current diff] [directive prose, e.g. 'trim the history blocks hard']"
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -44,6 +44,14 @@ comment must justify staying; in path mode it must be *demonstrably* wrong or
 noisy to be touched. In **path mode**, if the scope exceeds ~50 files, report
 the count and ask whether to proceed or narrow before reading anything.
 
+**The directive.** Whatever remains in `$ARGUMENTS` after removing the paths
+is the owner's directive for this pass — free prose like "trim the history
+blocks hard", "don't touch docstrings", or "new convention: TODOs carry an
+issue link". It is how the owner breaks a pattern the repo has settled into,
+or names a new one as it is being born. Quote it back when stating the scope,
+and pass it to the verifiers verbatim — interpreting it is their job, not
+yours. No leftover prose → no directive; the defaults apply.
+
 ## 2. Inventory
 
 Build the candidate list with the bundled script — it is deterministic about
@@ -71,7 +79,8 @@ be self-sufficient:
 1. The mode — **diff** or **path** — stated explicitly.
 2. The candidate lines from step 2, verbatim (all of them; the verifier
    discards false positives, you don't pre-filter).
-3. That it must return the verdict table and observations in its documented
+3. The owner's directive from step 1, verbatim — or that there is none.
+4. That it must return the verdict table and observations in its documented
    format, nothing else.
 
 **Fan out when the inventory is large.** Above ~150 candidates or ~15 files,
@@ -95,10 +104,19 @@ acted on in this pass, each with its proposed destination and the drafted
 pointer line that would replace the block once that destination exists. Report
 only — creating those documents is future work, not part of this run's edits.
 
-Then ask, via AskUserQuestion: **apply all** / **apply all except condenses**
-(condenses are the riskiest edit class — rewrites of true comments) /
-**adjust** (loop back with their exceptions, covering any arbitrary subset) /
-**abort**. Nothing is edited before an explicit choice.
+Then ask, via AskUserQuestion: **apply all** / **apply all except the
+riskiest class present** (name it in the option — condenses when the table
+has any, else stale rewrites; drop this option when the table holds a single
+class) / **adjust** (loop back with their exceptions, covering any arbitrary
+subset) / **abort**. Nothing is edited before an explicit choice.
+
+**A class withheld by convention is a question, not a result.** When the
+observations say the verifiers kept a whole class because the style looks
+deliberate (their impasse rule), do not bury that in the totals — put the
+choice in the same gate: keep the convention, or generate the withheld
+verdicts? On "generate", run a focused second pass — only the kept blocks
+above ~6 lines go back to the verifiers, carrying a trim directive — never
+the whole inventory again.
 
 ## 5. Apply and verify
 
