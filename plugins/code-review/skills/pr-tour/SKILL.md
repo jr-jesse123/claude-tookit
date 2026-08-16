@@ -58,6 +58,29 @@ The diff alone rarely shows how pieces relate — read before you narrate.
    groups, put those files in a final housekeeping group instead of forcing
    them into one.
 
+**Fan out on large diffs.** Above ~20 changed files (excluding generated), or
+whenever the split yields several independent groups, do steps 1–3 with cheap
+evidence only — paths, `git diff --stat`, import-level Grep, no full file
+reads — and delegate the deep tracing: one `code-review:mapper` agent per
+group, spawned in parallel with at most 4 in flight; when there are more
+groups, run them in waves, most substantive groups first (the report is
+ordered that way anyway). Each mapper's prompt must be self-sufficient (the
+agent sees none of this conversation): the diff range, the group's file list
+with change statuses, the other groups' file lists (so it can flag boundary
+errors), and a pointer to return its documented map format. The mappers
+return facts — call-graph edges, verbatim contract deltas with grep-found
+blast radius, reading-order candidates, diagram-worthy spots. Everything
+downstream stays here: the narrative, the diagram choice and painting, and
+the contracts section's compatibility verdicts are written *from the maps*,
+at this session's full model — judgment does not ride along with the
+delegation. Apply any boundary corrections the mappers report (merge groups
+joined by a verified edge) before writing, and open a changed file yourself
+only when a map is missing a quote or anchor you need.
+
+Below the threshold, map inline as steps 1–3 describe — spawning overhead
+buys nothing on a small diff, and the files you read while mapping stay in
+context for the review conversation that usually follows the tour.
+
 ## Report — how the changes connect
 
 A cohesive PR gets one tour. Independent groups each get their own complete
@@ -203,7 +226,8 @@ Each entry moves promise → verdict → radius:
   producers but breaks exhaustive consumers; a widened parameter is the
   reverse; a new member on an interface reads as an addition in the diff
   but is breaking for every implementor.
-- **Blast radius** — who is bound by the promise, found with Grep, never
+- **Blast radius** — who is bound by the promise, found with Grep (or taken
+  from a mapper's map on a fanned-out tour), never
   assumed: producers, consumers, implementors, each anchored `path:line`
   and marked as updated in this diff or **not in this diff**. The off-diff
   consumers are the reason this section exists — the diff cannot show
