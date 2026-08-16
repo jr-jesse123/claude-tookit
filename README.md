@@ -157,15 +157,23 @@ relatório).
 
 | Componente | Nome | O que faz |
 | --- | --- | --- |
-| skill | `/comment-curator:curate` | Revisa o ciclo de vida dos comentários — no diff atual (default) ou num arquivo/pasta que você passar. Três vereditos: **stale** (contradiz o código — corrige ou remove, sempre com citação da contradição), **delete** (ruído: narração, código comentado, artefatos de sessão LLM), **keep** (restrições que o código não consegue expressar). Nada é editado antes de você aprovar a tabela de vereditos. |
+| skill | `/comment-curator:curate` | **Orquestração.** Resolve o escopo — diff atual (default) ou arquivo/pasta que você passar — roda o script de inventário, delega a verificação ao agente, apresenta a tabela de vereditos e aplica só o que você aprovar. Nada é editado antes da aprovação. |
+| agent | `comment-curator:verifier` | **Verificação.** Lê o código em volta de cada candidato e emite os quatro vereditos: **stale** (contradiz o código — corrige ou remove, sempre com citação da contradição), **delete** (ruído: narração, código comentado, artefatos de sessão LLM), **condense** (verdadeiro mas inchado — reescreve para o mínimo que sustenta a alegação, apontando para `git log`/ADR/código em vez de repetir), **keep** (restrições que o código não consegue expressar, no tamanho que precisam). Roda em Sonnet, sem `Edit`/`Write` — a leitura pesada fica no contexto descartável do agente, não na sua sessão. Inventários grandes são fatiados em 2–4 verifiers paralelos. |
 
-Regras que valem conhecer: na dúvida, mantém (delete errado perde conhecimento;
-keep errado custa uma linha); doc comments de API pública são contrato e nunca
-saem por redundância; headers de licença, pragmas e arquivos gerados são
-intocáveis; em modo caminho, comentário humano antigo tem prior de manutenção
-(`git log -L` distingue origem humana de LLM). Depois de editar, auto-diff
-confirma que só linhas de comentário mudaram, e o build do projeto (se
-descobrível) confirma que nada funcional saiu junto.
+Regras que valem conhecer: a dúvida se divide — dúvida sobre se a *alegação*
+ainda vale → keep (delete errado perde conhecimento); dúvida sobre se ela
+precisa desse *tamanho* → condense (condensar realoca conhecimento para
+`git log`/ADR/código, não apaga — o erro custa uma consulta, não uma perda);
+doc comments de API pública são contrato — corrigíveis se stale, nunca
+deletados por redundância nem condensados por verbosidade; headers de licença,
+pragmas e arquivos gerados são intocáveis; em modo caminho, a barra alta
+protege a alegação, não a forma — comentário humano antigo tem prior de
+manutenção (`git log -L` distingue origem humana de LLM), mas inchaço é
+condensável nos dois modos. As observations saem acionáveis: cada bloco que
+pertence a outro lugar vem com destino nomeado (ADR, design doc, PR) e a linha-
+ponteiro que o substituiria. Depois de editar, auto-diff confirma que só linhas
+de comentário mudaram, e o build do projeto (se descobrível) confirma que nada
+funcional saiu junto.
 
 ### `sessions`
 
@@ -290,7 +298,8 @@ claude-tookit/
 │   │   └── agents/executor.md       # fase 2: execução mecânica
 │   ├── comment-curator/
 │   │   ├── .claude-plugin/plugin.json
-│   │   └── skills/curate/SKILL.md
+│   │   ├── skills/curate/SKILL.md   # orquestra: escopo, inventário, aprovação, edição
+│   │   └── agents/verifier.md       # vereditos em Sonnet, read-only
 │   ├── sessions/
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/name/SKILL.md
