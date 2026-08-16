@@ -44,6 +44,7 @@ sem reinstalar).
 | skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, seção de **contratos** quando o diff cria, muda ou remove uma promessa que outro código consome (tipos/interfaces, eventos, endpoints, schemas — delta da promessa citado na linguagem do contrato — antes→depois quando os dois lados existem; contrato novo não tem antes, removido não tem depois —, veredito de compatibilidade com direção, e raio de alcance incluindo consumidores *fora* do diff), e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
 | skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair — um ou mais diagramas, cada um respondendo uma pergunta diferente, como no `pr-tour`), nomeia os contratos que o plano vai criar, mudar ou remover (promessa de hoje citada do código → promessa planejada, compatibilidade, raio de alcance — consumidores que o plano não menciona viram discrepância), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. |
 | agent | `code-review:security-reviewer` | Subagente que audita injection, authn/authz, segredos, path traversal, desserialização e cripto. Só lê — nunca edita. |
+| agent | `code-review:mapper` | Subagente do `pr-tour` para diffs grandes (>~20 arquivos ou vários grupos independentes): um mapper por grupo, em paralelo, em Sonnet. Traça o grafo de chamadas do grupo, cita os deltas de contrato verbatim com raio de alcance via Grep e devolve um mapa estruturado — só fatos. Narrativa, escolha/pintura de diagramas e vereditos de compatibilidade ficam na sessão, no modelo cheio: coleta delega bem, julgamento não. Em diff pequeno o tour segue inline, sem agente. |
 
 Os dois tours compartilham as convenções de pintura (o `plan-tour` lê os
 `examples/` do `pr-tour` dentro do plugin) e fecham um ciclo: o `plan-tour`
@@ -266,7 +267,9 @@ claude-tookit/
 │   │   ├── skills/plan-tour/
 │   │   │   ├── SKILL.md             # delta prospectivo: reusa os examples do pr-tour via ${CLAUDE_PLUGIN_ROOT}
 │   │   │   └── examples/prospective.md
-│   │   └── agents/security-reviewer.md
+│   │   └── agents/
+│   │       ├── security-reviewer.md
+│   │       └── mapper.md            # pr-tour em diff grande: fatos por grupo, em Sonnet
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/               # compartilhado pelas skills, via ${CLAUDE_PLUGIN_ROOT}
