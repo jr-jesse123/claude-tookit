@@ -41,9 +41,10 @@ sem reinstalar).
 | Componente | Nome | O que faz |
 | --- | --- | --- |
 | skill | `/code-review:quick-review` | Revisa as mudanças não commitadas: correção, edge cases, sobras de debug, contratos quebrados, testes faltando. |
-| skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
-| skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair — um ou mais diagramas, cada um respondendo uma pergunta diferente, como no `pr-tour`), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. |
+| skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, seção de **contratos** quando o diff cria, muda ou remove uma promessa que outro código consome (tipos/interfaces, eventos, endpoints, schemas — delta da promessa citado na linguagem do contrato — antes→depois quando os dois lados existem; contrato novo não tem antes, removido não tem depois —, veredito de compatibilidade com direção, e raio de alcance incluindo consumidores *fora* do diff), e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
+| skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair — um ou mais diagramas, cada um respondendo uma pergunta diferente, como no `pr-tour`), nomeia os contratos que o plano vai criar, mudar ou remover (promessa de hoje citada do código → promessa planejada, compatibilidade, raio de alcance — consumidores que o plano não menciona viram discrepância), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. |
 | agent | `code-review:security-reviewer` | Subagente que audita injection, authn/authz, segredos, path traversal, desserialização e cripto. Só lê — nunca edita. |
+| agent | `code-review:mapper` | Subagente do `pr-tour` para diffs grandes (>~20 arquivos ou vários grupos independentes): um mapper por grupo, em paralelo, em Sonnet. Traça o grafo de chamadas do grupo, cita os deltas de contrato verbatim com raio de alcance via Grep e devolve um mapa estruturado — só fatos. Narrativa, escolha/pintura de diagramas e vereditos de compatibilidade ficam na sessão, no modelo cheio: coleta delega bem, julgamento não. Em diff pequeno o tour segue inline, sem agente. |
 
 Os dois tours compartilham as convenções de pintura (o `plan-tour` lê os
 `examples/` do `pr-tour` dentro do plugin) e fecham um ciclo: o `plan-tour`
@@ -175,15 +176,23 @@ relatório).
 
 | Componente | Nome | O que faz |
 | --- | --- | --- |
-| skill | `/comment-curator:curate` | Revisa o ciclo de vida dos comentários — no diff atual (default) ou num arquivo/pasta que você passar. Três vereditos: **stale** (contradiz o código — corrige ou remove, sempre com citação da contradição), **delete** (ruído: narração, código comentado, artefatos de sessão LLM), **keep** (restrições que o código não consegue expressar). Nada é editado antes de você aprovar a tabela de vereditos. |
+| skill | `/comment-curator:curate` | **Orquestração.** Resolve o escopo — diff atual (default) ou arquivo/pasta que você passar — roda o script de inventário, delega a verificação ao agente, apresenta a tabela de vereditos e aplica só o que você aprovar. Nada é editado antes da aprovação. |
+| agent | `comment-curator:verifier` | **Verificação.** Lê o código em volta de cada candidato e emite os quatro vereditos: **stale** (contradiz o código — corrige ou remove, sempre com citação da contradição), **delete** (ruído: narração, código comentado, artefatos de sessão LLM), **condense** (verdadeiro mas inchado — reescreve para o mínimo que sustenta a alegação, apontando para `git log`/ADR/código em vez de repetir), **keep** (restrições que o código não consegue expressar, no tamanho que precisam). Roda em Sonnet, sem `Edit`/`Write` — a leitura pesada fica no contexto descartável do agente, não na sua sessão. Inventários grandes são fatiados em 2–4 verifiers paralelos. |
 
-Regras que valem conhecer: na dúvida, mantém (delete errado perde conhecimento;
-keep errado custa uma linha); doc comments de API pública são contrato e nunca
-saem por redundância; headers de licença, pragmas e arquivos gerados são
-intocáveis; em modo caminho, comentário humano antigo tem prior de manutenção
-(`git log -L` distingue origem humana de LLM). Depois de editar, auto-diff
-confirma que só linhas de comentário mudaram, e o build do projeto (se
-descobrível) confirma que nada funcional saiu junto.
+Regras que valem conhecer: a dúvida se divide — dúvida sobre se a *alegação*
+ainda vale → keep (delete errado perde conhecimento); dúvida sobre se ela
+precisa desse *tamanho* → condense (condensar realoca conhecimento para
+`git log`/ADR/código, não apaga — o erro custa uma consulta, não uma perda);
+doc comments de API pública são contrato — corrigíveis se stale, nunca
+deletados por redundância nem condensados por verbosidade; headers de licença,
+pragmas e arquivos gerados são intocáveis; em modo caminho, a barra alta
+protege a alegação, não a forma — comentário humano antigo tem prior de
+manutenção (`git log -L` distingue origem humana de LLM), mas inchaço é
+condensável nos dois modos. As observations saem acionáveis: cada bloco que
+pertence a outro lugar vem com destino nomeado (ADR, design doc, PR) e a linha-
+ponteiro que o substituiria. Depois de editar, auto-diff confirma que só linhas
+de comentário mudaram, e o build do projeto (se descobrível) confirma que nada
+funcional saiu junto.
 
 ### `sessions`
 
@@ -241,6 +250,25 @@ repositório.
 O hook está em [`plugins/devops-tools/scripts/guard-destructive-commands.py`](plugins/devops-tools/scripts/guard-destructive-commands.py).
 Edite a lista `RULES` para ajustar ao seu ambiente.
 
+### `arch-docs`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/arch-docs:init` | Levanta o repositório (unidades de deploy, integrações externas, nº de mantenedores, docs existentes) e propõe o *menor* conjunto de documentação arquitetural que passa no teste econômico — inclusive recomendando **não** criar `docs/architecture/` quando o projeto é pequeno (tier 0: Haiku no README + pasta `adr/`). Só faz o scaffold depois da aprovação, pré-preenchendo apenas o que o código evidencia (nomes reais de serviços, integrações encontradas); o que exige conhecimento humano vira `TODO(human):` com pergunta específica, nunca prosa inventada. Fecha listando decisões já embutidas no código cujo "porquê" não está registrado (candidatas a ADR). |
+| skill | `/arch-docs:adr` | Rascunha **um** ADR (Nygard + alternativas + evidências) por decisão. A etapa crítica é a entrevista: forças, alternativas rejeitadas, consequências negativas, reversibilidade — o que você não responder fica como pergunta aberta no rascunho, não vira texto plausível. Decisão que não passa no teste de significância recebe a recomendação de *não* ser registrada. Nunca reescreve ADR aceito: substituição é ADR novo com `Supersedes`/`Superseded by` cruzados. |
+| agent | `arch-docs:drift-reviewer` | Subagente só-leitura para diffs/PRs: filtra o diff pelo teste de significância e responde com três vereditos — **update** (doc agora contradiz o código, citando os dois lados), **record** (decisão significativa sem ADR) ou **clear** (dito explicitamente, nomeando quais docs foram checados). Não escreve documentação — dispara a pergunta que a regra de manutenção exige. |
+| referência | `reference/right-sizing.md` | Núcleo compartilhado pelos três: o teste econômico do Elemar Jr. ("código + doc" tem que custar menos que "código sozinho"; documento útil é documento consultado), teste de significância, ordem de durabilidade (restrições e atributos de qualidade primeiro, estrutura atual por último), a escada de artefatos por risco (todo item do tier 2 exige gatilho nomeado em uma frase) e a semântica obrigatória de setas (`sync:`/`event:`/`data:`/`dep:`/`deploy:`). |
+| referência | `reference/templates/` | Templates enxutos: overview em formato Architecture Haiku (uma página, Fairbanks), ADR, C4 context/containers em Mermaid com setas rotuladas, e o README-mapa de navegação com a regra de manutenção embutida. |
+
+Baseado no cap. 1.3 do *Manual do Arquiteto de Software* (Elemar Jr.):
+código é evidência do "como"; documentação arquitetural registra o "porquê" —
+e só se justifica quando custa menos do que economiza. Os três componentes
+cobrem os três momentos do ciclo: bootstrap uma vez (`init`), registro por
+decisão (`adr`), verificação por PR (`drift-reviewer`). O maior risco de
+ferramenta nessa área é gerar documentação demais; por isso o `init` sabe
+recomendar menos, o `adr` sabe recusar decisão insignificante, e o
+`drift-reviewer` trata "clear" como veredito de primeira classe.
+
 ## Estrutura do repositório
 
 ```
@@ -253,11 +281,13 @@ claude-tookit/
 │   │   ├── skills/quick-review/SKILL.md
 │   │   ├── skills/pr-tour/
 │   │   │   ├── SKILL.md
-│   │   │   └── examples/            # few-shot por tipo de diagrama + prosa, via ${CLAUDE_SKILL_DIR}
+│   │   │   └── examples/            # few-shot por tipo de diagrama + prosa + contratos, via ${CLAUDE_SKILL_DIR}
 │   │   ├── skills/plan-tour/
 │   │   │   ├── SKILL.md             # delta prospectivo: reusa os examples do pr-tour via ${CLAUDE_PLUGIN_ROOT}
 │   │   │   └── examples/prospective.md
-│   │   └── agents/security-reviewer.md
+│   │   └── agents/
+│   │       ├── security-reviewer.md
+│   │       └── mapper.md            # pr-tour em diff grande: fatos por grupo, em Sonnet
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/               # compartilhado pelas skills, via ${CLAUDE_PLUGIN_ROOT}
@@ -292,7 +322,8 @@ claude-tookit/
 │   │   └── agents/executor.md       # fase 2: execução mecânica
 │   ├── comment-curator/
 │   │   ├── .claude-plugin/plugin.json
-│   │   └── skills/curate/SKILL.md
+│   │   ├── skills/curate/SKILL.md   # orquestra: escopo, inventário, aprovação, edição
+│   │   └── agents/verifier.md       # vereditos em Sonnet, read-only
 │   ├── sessions/
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/name/SKILL.md
@@ -303,13 +334,21 @@ claude-tookit/
 │   │       ├── SKILL.md
 │   │       ├── help.md              # catálogo do --help (só entra em contexto com --help)
 │   │       └── styles/              # um por estilo, lidos via ${CLAUDE_SKILL_DIR}
-│   └── devops-tools/
+│   ├── devops-tools/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/deploy-check/SKILL.md
+│   │   ├── commands/changelog.md
+│   │   ├── hooks/hooks.json
+│   │   ├── scripts/guard-destructive-commands.py
+│   │   └── .mcp.json.example
+│   └── arch-docs/
 │       ├── .claude-plugin/plugin.json
-│       ├── skills/deploy-check/SKILL.md
-│       ├── commands/changelog.md
-│       ├── hooks/hooks.json
-│       ├── scripts/guard-destructive-commands.py
-│       └── .mcp.json.example
+│       ├── reference/
+│       │   ├── right-sizing.md      # núcleo: teste econômico, significância, escada de artefatos
+│       │   └── templates/           # haiku/overview, adr, c4 context/containers, readme-mapa
+│       ├── skills/init/SKILL.md     # scaffold na medida certa (sabe recomendar menos)
+│       ├── skills/adr/SKILL.md      # um ADR por decisão, entrevista obrigatória
+│       └── agents/drift-reviewer.md # update | record | clear por diff
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
 ├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml

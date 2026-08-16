@@ -1,6 +1,6 @@
 ---
 name: plan-tour
-description: Ground an implementation plan in the real codebase before any code is written — trace the terrain the plan touches, narrate how it works today and how the plan transforms it, paint a prospective Mermaid delta (existing code dimmed, planned additions ⊕, planned removals ⊖), and report factual plan-vs-code discrepancies plus the open questions the plan leaves. Use after a plan exists and before implementing — not for touring diffs (pr-tour) or finding bugs (quick-review).
+description: Ground an implementation plan in the real codebase before any code is written — trace the terrain the plan touches, narrate how it works today and how the plan transforms it, paint a prospective Mermaid delta (existing code dimmed, planned additions ⊕, planned removals ⊖), state the contracts the plan will introduce, change, or remove (today's promise quoted from the code → the planned promise — a created contract has no today, a removed one no after — compatibility, blast radius), and report factual plan-vs-code discrepancies plus the open questions the plan leaves. Use after a plan exists and before implementing — not for touring diffs (pr-tour) or finding bugs (quick-review).
 argument-hint: [path to a plan file, or pasted plan text; defaults to the plan in this conversation]
 allowed-tools: Bash(git log:*), Bash(git show:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
@@ -118,6 +118,37 @@ DIAGRAM
 On failure, fix and re-validate; double-check `linkStyle` indices against
 the edge order. If `npx` is unavailable or offline, skip silently.
 
+## Report — contracts (only when the plan touches one)
+
+`pr-tour`'s contracts section, shifted to the future tense. When the plan
+introduces, changes, or removes a promise other code relies on — an
+exported type or interface, a function signature, an event payload, an
+endpoint, a DB schema, a config key — add one entry per contract, in
+`pr-tour`'s promise → verdict → radius shape:
+
+- **Promise delta** — today's real shape, quoted from the code with
+  `path:line`, → the shape the plan promises. A contract the plan creates
+  has no today — quote the promised shape and say it is new; one the plan
+  removes has no after. `pr-tour`'s block-quoting rules apply unchanged
+  when the shape outgrows a line: fenced block in the contract's native
+  notation, ⊕/⊖ as comments. When the plan's stated shape and the code's
+  current shape already disagree, that is a *Plan vs. code* entry, not a
+  contract delta.
+- **Compatibility verdict** — additive or breaking, always with direction:
+  for whom, same rules as `pr-tour` (a widened union breaks exhaustive
+  consumers, a new interface member breaks every implementor, …).
+- **Blast radius** — every producer, consumer, or implementor bound by
+  today's promise, found with Grep and anchored `path:line`, each marked
+  as one the plan accounts for or one **the plan does not mention**. An
+  unmentioned consumer usually earns a *Plan vs. code* entry too.
+  Consumers that Grep cannot reach (external clients, rows and messages
+  persisted under today's shape, serialized payloads) get a one-line note
+  — the plan has to survive them after deploy.
+
+When no contract changes, omit the section. Read
+`${CLAUDE_PLUGIN_ROOT}/skills/pr-tour/examples/contracts.md` before
+writing it — the entry shape applies unchanged; only the tense shifts.
+
 ## Report — plan vs. code
 
 The section that earns the tour its keep. One entry per mismatch found
@@ -145,9 +176,10 @@ implementing — the same entry shape as `pr-tour`: why this position, then
 one or two concrete things to look at, anchored as `path:line`. Planned-new
 files do not appear (there is nothing to read yet); modify/remove targets
 and their load-bearing neighbors do. Contracts first, then the code the
-plan will change following the flow, then the neighbors that constrain it,
-then existing tests (they are the behavior the plan must not break —
-unless it says so).
+plan will change following the flow, then the neighbors that constrain
+it. Existing tests ride with the layer they pin, as in `pr-tour` — read
+each right after its layer, as the behavior the plan must not break
+(unless it says so); tests spanning layers close the list.
 
 ## Report — open questions
 

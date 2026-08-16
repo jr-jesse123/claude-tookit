@@ -1,6 +1,6 @@
 ---
 name: pr-tour
-description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help) and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
+description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff introduces, changes, or removes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — promise delta with before→after where both exist, a new contract has no before and a removed one no after, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
 argument-hint: [PR number/URL or branch; defaults to current branch vs default branch]
 allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
 ---
@@ -57,6 +57,29 @@ The diff alone rarely shows how pieces relate — read before you narrate.
    changelogs) join the group they describe; when one such file spans several
    groups, put those files in a final housekeeping group instead of forcing
    them into one.
+
+**Fan out on large diffs.** Above ~20 changed files (excluding generated), or
+whenever the split yields several independent groups, do steps 1–3 with cheap
+evidence only — paths, `git diff --stat`, import-level Grep, no full file
+reads — and delegate the deep tracing: one `code-review:mapper` agent per
+group, spawned in parallel with at most 4 in flight; when there are more
+groups, run them in waves, most substantive groups first (the report is
+ordered that way anyway). Each mapper's prompt must be self-sufficient (the
+agent sees none of this conversation): the diff range, the group's file list
+with change statuses, the other groups' file lists (so it can flag boundary
+errors), and a pointer to return its documented map format. The mappers
+return facts — call-graph edges, verbatim contract deltas with grep-found
+blast radius, reading-order candidates, diagram-worthy spots. Everything
+downstream stays here: the narrative, the diagram choice and painting, and
+the contracts section's compatibility verdicts are written *from the maps*,
+at this session's full model — judgment does not ride along with the
+delegation. Apply any boundary corrections the mappers report (merge groups
+joined by a verified edge) before writing, and open a changed file yourself
+only when a map is missing a quote or anchor you need.
+
+Below the threshold, map inline as steps 1–3 describe — spawning overhead
+buys nothing on a small diff, and the files you read while mapping stay in
+context for the review conversation that usually follows the tour.
 
 ## Report — how the changes connect
 
@@ -166,10 +189,101 @@ or offline, skip silently — never block the tour on validation.
 `examples/` directory next to this SKILL.md, one file per diagram type: `flowchart.md`
 (painted delta + before/after pair), `sequence.md`, `state.md`,
 `er-class.md`, `mindmap-timeline.md` — plus `prose.md` for the narrative and
-reading order at three PR sizes (small, medium, large with group splits).
-After the selector has picked the type(s), read the matching file(s) and
-`prose.md`; never read the whole folder. They are format references, not
-templates — size the real tour to the real diff.
+reading order at three PR sizes (small, medium, large with group splits),
+and `contracts.md` for the contracts section below (read only when that
+section applies). After the selector has picked the type(s), read the
+matching file(s) and `prose.md`; never read the whole folder. They are
+format references, not templates — size the real tour to the real diff.
+
+## Report — contracts (only when the diff touches one)
+
+A contract is a promise other code relies on without reading the
+implementation: an exported type or interface, a function signature, an
+event name and its payload, an HTTP/RPC endpoint, a DB schema, a config
+key, a CLI flag. When a group introduces, changes, or removes such a
+promise, insert this section between its narrative and its reading order —
+one entry per contract. When the diff touches no contract, omit the
+section entirely; a diff of pure implementation gets no empty
+"Contracts: none".
+
+Each entry moves promise → verdict → radius:
+
+```
+- `Invoice.status` · `src/billing/schema.ts:12` — union widened:
+  `"open" | "paid"` → `"open" | "paid" | "refunded"`. Additive for
+  producers; breaking for exhaustive consumers. Bound by it:
+  `billing/report.ts:88` (switch, updated here), `export/csv.ts:31`
+  (switch, **not in this diff**).
+```
+
+- **Promise delta** — quote the contract in its own language, before →
+  after: the old and new type or signature, payload fields, verb + route +
+  status codes, column set. Never paraphrase a shape the reader could be
+  shown.
+- **Compatibility verdict** — *additive* (existing readers and writers keep
+  working) or *breaking*, always with direction: for whom. Direction is
+  where reviewers slip — a widened union or return type is additive for
+  producers but breaks exhaustive consumers; a widened parameter is the
+  reverse; a new member on an interface reads as an addition in the diff
+  but is breaking for every implementor.
+- **Blast radius** — who is bound by the promise, found with Grep (or taken
+  from a mapper's map on a fanned-out tour), never
+  assumed: producers, consumers, implementors, each anchored `path:line`
+  and marked as updated in this diff or **not in this diff**. The off-diff
+  consumers are the reason this section exists — the diff cannot show
+  them. Consumers that Grep cannot reach get a one-line note instead: API
+  clients outside the repo, rows and messages persisted under the old
+  shape, serialized payloads, `any`-typed call sites, reflection.
+
+**Quoting in blocks.** A one-line delta stays inline, as above. When the
+shape does not fit a line — a record with several fields, a payload
+schema, an endpoint with request, response, and status codes — quote it in
+a fenced code block in the contract's native notation; the fence is the
+visual aid, syntax highlighting included:
+
+- The repo's own contract artifact first, when one exists: the changed
+  fragment of its OpenAPI/JSON Schema (` ```yaml `/` ```json `), protobuf,
+  GraphQL SDL, SQL DDL — never a spec fabricated for the tour; for a
+  code-first endpoint the honest quote is the source signature or a
+  compact ` ```http ` request/response sample.
+- Otherwise the conventional notation for the kind: the source language
+  for types and signatures (` ```ts `, ` ```fsharp `, …), a ` ```json `
+  payload for events.
+- Carry the painting language into the block: ⊕/⊖ as comments on added and
+  removed lines; or a ` ```diff ` fence when before and after interleave —
+  it trades syntax highlight for +/− painting, pick per block.
+- Quote the delta plus the minimum context needed to read it, never the
+  whole type or document; the verdict and the radius stay in the prose
+  around the block. The structural picture stays with the diagrams
+  (`classDiagram`/`erDiagram`) — the block shows the promise's text, not
+  its neighborhood.
+
+The ends of the spectrum follow the tours' painting language. A **new
+contract** (⊕) has no before: quote the promise being made, and in place
+of a break the verdict names the commitment — what surface is now
+promised, to whom (public API? internal? persisted?), and so what will be
+expensive to change later. Its radius is the consumers this diff wires up;
+"no consumers outside this diff yet" is worth saying — it tells the
+reviewer this is the cheapest moment the contract will ever have to be
+reshaped. A **removed contract** (⊖) has no after: breaking by definition;
+Grep for stragglers still bound to it that the diff missed.
+
+By kind, what the promise consists of:
+
+| Contract | Quote as the promise | Easy to miss |
+| --- | --- | --- |
+| Types, interfaces, signatures | exported shape: fields, unions, parameter/return types, generic bounds | the compiler flags compiled consumers — name the ones it cannot: serialized data, `any` call sites, downstream repos |
+| Events / messages | event name + payload schema | nothing type-checks across a queue — a renamed or repurposed field breaks subscribers silently; in-flight messages still carry the old payload |
+| Endpoints | verb + route + request/response shapes + status codes + auth | callers outside the repo; stricter validation is a contract change with no schema diff |
+| Persisted schema | table/column set, serialized format | old rows and old messages are consumers of the old contract that keep arriving after deploy |
+| Config keys / CLI flags | key or flag name + value type + default + accepted values | consumers live outside the code — deploy manifests, CI pipelines, users' scripts; a changed default is a contract change with no call-site diff |
+
+An un-updated consumer is reported as a fact of the terrain, not a finding
+— whether it is a bug belongs to `/code-review:quick-review`. The section
+does not repeat the diagram either: `classDiagram`/`erDiagram` show the
+structure; this section states the verdict and the off-diff radius. When
+an entry names an off-diff consumer, point the reading order's contract
+entry at it.
 
 ## Report — reading order
 
@@ -189,9 +303,13 @@ Per group, a numbered list. Each entry has three parts:
   diagrams.
 
 Default ordering, to adapt whenever the actual flow disagrees: contracts
-first, then core logic following the data flow, then wiring and call sites,
-then tests (read them as the promised behavior — do they match the
-narrative?), then generated files last, skim only.
+first, then core logic following the data flow, then wiring and call
+sites. Tests do not bunch at the end — a test whose scope is one just-read
+file or layer reads immediately after it (`summary.ts` →
+`summary.test.ts`; `api/a.ts` → `api/b.ts` → `api.test.ts`), while the
+promise it pins is still fresh: read it as the promised behavior — does
+it match the narrative? Tests that span layers (integration, e2e) read
+after everything they exercise. Generated files come last, skim only.
 
 **Category labels** like `[Contracts]` above are optional. Invent the 3–6
 labels that fit *this* diff — Models, Integrations, Tests, Config, UI,
