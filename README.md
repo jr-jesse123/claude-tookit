@@ -157,7 +157,8 @@ relatório).
 
 | Componente | Nome | O que faz |
 | --- | --- | --- |
-| skill | `/comment-curator:curate` | Revisa o ciclo de vida dos comentários — no diff atual (default) ou num arquivo/pasta que você passar. Três vereditos: **stale** (contradiz o código — corrige ou remove, sempre com citação da contradição), **delete** (ruído: narração, código comentado, artefatos de sessão LLM), **keep** (restrições que o código não consegue expressar). Nada é editado antes de você aprovar a tabela de vereditos. |
+| skill | `/comment-curator:curate` | **Orquestração.** Resolve o escopo — diff atual (default) ou arquivo/pasta que você passar — roda o script de inventário, delega a verificação ao agente, apresenta a tabela de vereditos e aplica só o que você aprovar. Nada é editado antes da aprovação. |
+| agent | `comment-curator:verifier` | **Verificação.** Lê o código em volta de cada candidato e emite os três vereditos: **stale** (contradiz o código — corrige ou remove, sempre com citação da contradição), **delete** (ruído: narração, código comentado, artefatos de sessão LLM), **keep** (restrições que o código não consegue expressar). Roda em Sonnet, sem `Edit`/`Write` — a leitura pesada fica no contexto descartável do agente, não na sua sessão. Inventários grandes são fatiados em 2–4 verifiers paralelos. |
 
 Regras que valem conhecer: na dúvida, mantém (delete errado perde conhecimento;
 keep errado custa uma linha); doc comments de API pública são contrato e nunca
@@ -290,7 +291,8 @@ claude-tookit/
 │   │   └── agents/executor.md       # fase 2: execução mecânica
 │   ├── comment-curator/
 │   │   ├── .claude-plugin/plugin.json
-│   │   └── skills/curate/SKILL.md
+│   │   ├── skills/curate/SKILL.md   # orquestra: escopo, inventário, aprovação, edição
+│   │   └── agents/verifier.md       # vereditos em Sonnet, read-only
 │   ├── sessions/
 │   │   ├── .claude-plugin/plugin.json
 │   │   └── skills/name/SKILL.md

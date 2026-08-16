@@ -1,6 +1,6 @@
 ---
 name: curate
-description: Review the lifecycle of code comments - verify each against the code it describes, delete noise, keep load-bearing constraints. Scoped to uncommitted changes by default, or to a file/directory you name. Use after LLM-heavy sessions or before merging a branch, when comments have accumulated faster than they were curated.
+description: Review the lifecycle of code comments - verify each against the code it describes, delete noise, keep load-bearing constraints. Scoped to uncommitted changes by default, or to a file/directory you name. Verification runs in the comment-curator verifier agent; approval and edits stay in the session. Use after LLM-heavy sessions or before merging a branch, when comments have accumulated faster than they were curated.
 argument-hint: "[file or directory; empty = current diff]"
 disable-model-invocation: true
 allowed-tools:
@@ -20,8 +20,14 @@ allowed-tools:
 # Curate comments
 
 Review comments in scope and give each one of three verdicts: **stale**,
-**delete**, or **keep**. Nothing is edited before the user approves the verdict
-table. Every edit you make is comment-only — code never changes.
+**delete**, or **keep**. You are the orchestrator: you resolve the scope, build
+the inventory, present the verdict table, and apply what the user approves.
+Reading code and judging candidates — the expensive part — belongs to the
+`comment-curator:verifier` agent, which holds the verdict rules and keeps file
+contents out of this conversation. Do not read scoped files or verify
+candidates yourself; that defeats the split. Nothing is edited before the user
+approves the verdict table. Every edit you make is comment-only — code never
+changes.
 
 ## 1. Resolve the scope
 
@@ -32,20 +38,17 @@ table. Every edit you make is comment-only — code never changes.
 - Empty and the tree is clean → the branch diff against the default branch
   (`git diff $(git symbolic-ref refs/remotes/origin/HEAD)...HEAD`).
 
-State which scope you resolved to. In **path mode**, if the scope exceeds ~50
-files, report the count and ask whether to proceed or narrow before reading
-anything.
-
-Path mode reviews comments that predate this session, often written by humans
-with context you can't see. That shifts the burden of proof: in diff mode a
+State which scope you resolved to — the mode (**diff** or **path**) goes into
+the verifier prompt, because it sets the burden of proof: in diff mode a
 comment must justify staying; in path mode it must be *demonstrably* wrong or
-noisy to be touched.
+noisy to be touched. In **path mode**, if the scope exceeds ~50 files, report
+the count and ask whether to proceed or narrow before reading anything.
 
-## 2. Inventory — and what is never touched
+## 2. Inventory
 
 Build the candidate list with the bundled script — it is deterministic about
 coverage and emits the exact `file:line` numbers the verdict table and the
-`git log -L` checks depend on:
+edits depend on:
 
 - **Diff mode:** pipe each diff from step 1 through it —
   `git diff | python3 "${CLAUDE_SKILL_DIR}/extract-candidates.py"`, then the
@@ -53,98 +56,54 @@ coverage and emits the exact `file:line` numbers the verdict table and the
 - **Path mode:** `python3 "${CLAUDE_SKILL_DIR}/extract-candidates.py" <files…>`.
 
 Output is `path:line	flag	text`, one candidate per line (`+` added, `=`
-context, `.` file scan); the candidate count goes to stderr.
+context, `.` file scan); the candidate count goes to stderr. The script is
+tuned for near-zero false negatives, so it emits *candidates*, not comments —
+confirming each one in context is the verifier's job, not yours.
 
-The script is tuned for near-zero false negatives, so it emits *candidates*,
-not comments — a `https://` inside a string will be flagged. The inventory is
-what survives your reading, in both directions:
+Zero candidates → report that and stop.
 
-- **Confirm every candidate in context** before it gets a verdict; discard
-  flagged lines that are not comments.
-- **Read around flagged delimiters** (`/*`, `"""`): the middle lines of block
-  comments and docstrings carry no marker of their own, and a diff hunk can
-  begin inside one.
-- A comment you notice while reading that the script missed still enters the
-  inventory — the script bounds what you must check, not what you may find.
+## 3. Delegate verification
 
-The inventory covers line comments, block comments, and doc comments (`///`,
-`/** */`, docstrings).
+Spawn the `comment-curator:verifier` agent. It holds the verdict rules and the
+off-limits list; the agent sees none of this conversation, so its prompt must
+be self-sufficient:
 
-**Off-limits, regardless of content.** These are functional, not prose:
+1. The mode — **diff** or **path** — stated explicitly.
+2. The candidate lines from step 2, verbatim (all of them; the verifier
+   discards false positives, you don't pre-filter).
+3. That it must return the verdict table and observations in its documented
+   format, nothing else.
 
-- License and copyright headers.
-- Compiler/linter directives and pragmas: `#pragma`, `# noqa`, `# type:`,
-  `eslint-disable`, `@ts-ignore`, `#region`, shebangs, encoding declarations.
-- Anything in a generated file — `<auto-generated>`, `.Designer.cs`, `.g.cs`,
-  minified or `dist/` output. Skip the whole file.
-- Doc comments on **public API members**: these are contract, consumed through
-  IntelliSense and generated docs by callers who never open this file. They may
-  be flagged as stale (and fixed), never deleted for redundancy. Removing one
-  can also break builds outright — CS1591 under `GenerateDocumentationFile` +
-  warnings-as-errors.
+**Fan out when the inventory is large.** Above ~150 candidates or ~15 files,
+split by file into 2–4 verifiers with roughly balanced candidate counts —
+never split one file across verifiers — and spawn them in parallel, each with
+the same mode and its own slice. Merge the returned tables in file order.
 
-## 3. The three verdicts
-
-Work through them in order; first match wins. **When uncertain, keep.** A wrong
-delete loses knowledge; a wrong keep costs one line. This bias is the rule, not
-a preference.
-
-### Stale — the comment contradicts the code
-
-The only verdict with objective truth: the comment makes a checkable claim and
-the code does otherwise. "Returns null on failure" above a method that throws.
-A TODO describing work the code below already does. A parameter description
-naming a parameter that no longer exists.
-
-Cite the contradiction — comment text vs. what line N actually does. No
-citation, no stale verdict.
-
-Action: **fix** when the underlying constraint still exists and only the
-details drifted (minimal rewording); **delete** when the code outgrew the
-comment entirely.
-
-### Delete — noise with no future reader
-
-- Restates the line it sits on ("// increment the counter").
-- Narrates what the name, type, or signature already says — same file, same
-  view. (Against a *doc* comment this reasoning is invalid; see off-limits.)
-- Commented-out code. Git already remembers it; that is what history is for.
-- Review-artifact narration left by an LLM session: "// this handles the edge
-  case correctly", "// as requested", "// updated per feedback".
-
-### Keep — states what the code cannot
-
-A constraint with no representation in code: a third-party API that returns 200
-on failure; a deliberate deviation from convention; a non-obvious performance
-tradeoff; a link to the bug that motivated the strange branch; an invariant the
-type system can't encode. Also everything in the off-limits list.
-
-### Borderline calls: use origin as a prior
-
-When a comment sits between delete and keep, check its provenance —
-`git log -L<line>,<line>:<file>` or `git blame`. Born in a commit with a
-`Co-Authored-By: Claude` trailer → lean delete; an aged human commit → lean
-keep, it may carry tribal knowledge the code doesn't show. This check costs a
-command per comment — spend it on borderline calls only, not the whole
-inventory.
+While verifiers run, do not start reading the scoped files "to get ahead" —
+the whole point is that those tokens are spent in the agent's context, not
+here.
 
 ## 4. Verdict table and approval
 
-Present one table: `file:line` · comment (truncated) · verdict · one-line
-reason · action (for stale: the replacement text or "delete"). Then totals.
+Present the merged table: `file:line` · comment (truncated) · verdict ·
+one-line reason · action (for stale: the replacement text or "delete"). Then
+totals. Collapse `skip` rows (confirmed non-comments) into a single count —
+they need no user decision.
 
-Below it, an **observations** section for anything you noticed but will not act
-on in this pass: comments whose content belongs in an ADR or PR description,
-comments that exist only because a name is bad (with the rename that would
-retire them). Report only — these are future work, not edits.
+Below it, the verifiers' **observations** section: things noticed but not
+acted on in this pass. Report only — these are future work, not edits.
 
 Then ask, via AskUserQuestion: **apply all** / **apply only commented-out code
-deletions** (the safest subset) / **adjust** (loop back with their exceptions) /
-**abort**. Nothing is edited before an explicit choice.
+deletions** (the safest subset) / **adjust** (loop back with their exceptions)
+/ **abort**. Nothing is edited before an explicit choice.
 
 ## 5. Apply and verify
 
-Apply the approved verdicts with Edit — comment lines only. Then two checks:
+Apply the approved verdicts with Edit — comment lines only, reading only the
+files being edited (this is the one place you open scoped files, and only the
+approved ones). If a verifier row's line number doesn't match what you find on
+disk, skip that row and say so — never guess at a drifted line. Then two
+checks:
 
 1. **Self-diff.** Run `git diff` on the touched files and confirm every changed
    line is a comment line. Any code line in the diff means you slipped: revert
@@ -152,9 +111,9 @@ Apply the approved verdicts with Edit — comment lines only. Then two checks:
 2. **Build, if discoverable.** Find the project's build or lint command the way
    the project defines it (`package.json`, `Makefile`, `*.csproj`, CI config) —
    comment edits must not change the outcome. A new failure means a functional
-   comment got past the off-limits list (a directive, a doc comment under
-   CS1591): revert that file, reclassify, and note it in the report. If no
-   command is discoverable, say so.
+   comment got past the verifier's off-limits list (a directive, a doc comment
+   under CS1591): revert that file, reclassify, and note it in the report. If
+   no command is discoverable, say so.
 
 ## 6. Report
 
