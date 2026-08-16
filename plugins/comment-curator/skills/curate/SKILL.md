@@ -1,6 +1,6 @@
 ---
 name: curate
-description: Review the lifecycle of code comments - verify each against the code it describes, delete noise, keep load-bearing constraints. Scoped to uncommitted changes by default, or to a file/directory you name. Verification runs in the comment-curator verifier agent; approval and edits stay in the session. Use after LLM-heavy sessions or before merging a branch, when comments have accumulated faster than they were curated.
+description: Review the lifecycle of code comments - verify each against the code it describes, delete noise, condense bloated-but-true comments down to the claim, keep load-bearing constraints. Scoped to uncommitted changes by default, or to a file/directory you name. Verification runs in the comment-curator verifier agent; approval and edits stay in the session. Use after LLM-heavy sessions or before merging a branch, when comments have accumulated faster than they were curated.
 argument-hint: "[file or directory; empty = current diff]"
 disable-model-invocation: true
 allowed-tools:
@@ -19,8 +19,8 @@ allowed-tools:
 
 # Curate comments
 
-Review comments in scope and give each one of three verdicts: **stale**,
-**delete**, or **keep**. You are the orchestrator: you resolve the scope, build
+Review comments in scope and give each one of four verdicts: **stale**,
+**delete**, **condense**, or **keep**. You are the orchestrator: you resolve the scope, build
 the inventory, present the verdict table, and apply what the user approves.
 Reading code and judging candidates — the expensive part — belongs to the
 `comment-curator:verifier` agent, which holds the verdict rules and keeps file
@@ -86,16 +86,19 @@ here.
 ## 4. Verdict table and approval
 
 Present the merged table: `file:line` · comment (truncated) · verdict ·
-one-line reason · action (for stale: the replacement text or "delete"). Then
-totals. Collapse `skip` rows (confirmed non-comments) into a single count —
-they need no user decision.
+one-line reason · action (for stale and condense: the replacement text, or
+"delete" for stale). Then totals. Collapse `skip` rows (confirmed
+non-comments) into a single count — they need no user decision.
 
 Below it, the verifiers' **observations** section: things noticed but not
-acted on in this pass. Report only — these are future work, not edits.
+acted on in this pass, each with its proposed destination and the drafted
+pointer line that would replace the block once that destination exists. Report
+only — creating those documents is future work, not part of this run's edits.
 
-Then ask, via AskUserQuestion: **apply all** / **apply only commented-out code
-deletions** (the safest subset) / **adjust** (loop back with their exceptions)
-/ **abort**. Nothing is edited before an explicit choice.
+Then ask, via AskUserQuestion: **apply all** / **apply all except condenses**
+(condenses are the riskiest edit class — rewrites of true comments) /
+**adjust** (loop back with their exceptions, covering any arbitrary subset) /
+**abort**. Nothing is edited before an explicit choice.
 
 ## 5. Apply and verify
 
@@ -117,6 +120,7 @@ checks:
 
 ## 6. Report
 
-Counts per verdict, files touched, fixes vs. deletions, anything reverted by
-the checks and why, and the observations list. If the user declined some
+Counts per verdict, files touched, fixes vs. deletions vs. condenses (with
+lines removed by condensing), anything reverted by the checks and why, and the
+observations list. If the user declined some
 verdicts, don't relitigate them — record and move on.

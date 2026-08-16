@@ -15,7 +15,9 @@ presents your table to the user for approval and applies the result.
 The mode sets the burden of proof. Path mode reviews comments that predate the
 session, often written by humans with context you can't see: a comment must be
 *demonstrably* wrong or noisy to be touched. In diff mode a comment must
-justify staying.
+justify staying. That bar guards the *claim*, not the form: condense (below)
+leaves the claim intact, so an oversized-but-true comment is fair game in
+either mode.
 
 ## Confirm before judging
 
@@ -44,15 +46,25 @@ The inventory covers line comments, block comments, and doc comments (`///`,
   minified or `dist/` output. Skip the whole file.
 - Doc comments on **public API members**: these are contract, consumed through
   IntelliSense and generated docs by callers who never open this file. They may
-  be flagged as stale (and fixed), never deleted for redundancy. Removing one
-  can also break builds outright — CS1591 under `GenerateDocumentationFile` +
-  warnings-as-errors.
+  be flagged as stale (and fixed), never deleted for redundancy and never
+  condensed for verbosity — their readers don't have the code alongside to
+  follow the pointer. Removing one can also break builds outright — CS1591
+  under `GenerateDocumentationFile` + warnings-as-errors.
 
-## The three verdicts
+## The four verdicts
 
-Work through them in order; first match wins. **When uncertain, keep.** A wrong
-delete loses knowledge; a wrong keep costs one line. This bias is the rule, not
-a preference.
+Work through them in order; first match wins. The bias splits by what the
+uncertainty is *about*:
+
+- **Uncertain whether the claim still holds → keep it as-is.** A wrong delete
+  loses knowledge; this rule is unchanged.
+- **Uncertain whether the claim needs this many lines → condense.** Condensing
+  relocates knowledge — to `git log`, an ADR, the code below — it doesn't
+  erase it, so the failure mode costs a lookup, not a loss.
+
+"A wrong keep costs one line" is only true of one-line comments. A 30-line
+block that never earns its length is a cost too — there must be pressure
+pulling size down, not only caution holding content in place.
 
 ### Stale — the comment contradicts the code
 
@@ -65,8 +77,8 @@ Cite the contradiction — comment text vs. what line N actually does. No
 citation, no stale verdict.
 
 Action: **fix** when the underlying constraint still exists and only the
-details drifted (minimal rewording); **delete** when the code outgrew the
-comment entirely.
+details drifted — minimal rewording, in the file's existing comment idiom and
+language; **delete** when the code outgrew the comment entirely.
 
 ### Delete — noise with no future reader
 
@@ -77,16 +89,38 @@ comment entirely.
 - Review-artifact narration left by an LLM session: "// this handles the edge
   case correctly", "// as requested", "// updated per feedback".
 
+### Condense — true, but the form outgrew the claim
+
+The content passes the keep test — non-obvious, still true — but the comment
+spends more lines than the claim needs:
+
+- Narrates history: how the code got this way, what it replaced, what was
+  tried first. That is `git log`'s job.
+- Re-derives, step by step, mechanism the next screen of code already shows —
+  the comment competes with the code instead of pointing into it.
+- Answers several "whys" at once, burying the one that is load-bearing.
+- Restates its own point in more than one form: summary, then elaboration,
+  then an example of the same claim.
+
+Action: rewrite to the minimal wording that still carries the claim, in the
+file's existing comment idiom and language — point instead of repeat (`git
+log`, the ADR, the linked issue, the code below). The claim must survive the
+rewrite intact: if condensing would weaken or drop part of it, that part is
+exactly the evidence the comment is load-bearing — keep that part in.
+
 ### Keep — states what the code cannot
 
 A constraint with no representation in code: a third-party API that returns 200
 on failure; a deliberate deviation from convention; a non-obvious performance
 tradeoff; a link to the bug that motivated the strange branch; an invariant the
-type system can't encode. Also everything in the off-limits list.
+type system can't encode. Also everything in the off-limits list. Keep means
+**as-is** — content *and* form earn their place; a keep-worthy claim in a
+bloated wrapper already matched condense above.
 
 ### Borderline calls: use origin as a prior
 
-When a comment sits between delete and keep, check its provenance —
+When a comment sits between delete and keep, or between condense and keep,
+check its provenance —
 `git log -L<line>,<line>:<file>` or `git blame`. Born in a commit with a
 `Co-Authored-By: Claude` trailer → lean delete; an aged human commit → lean
 keep, it may carry tribal knowledge the code doesn't show. This check costs a
@@ -100,16 +134,20 @@ preamble, no narration of your process. Two sections:
 
 **Verdict table.** One row per candidate (plus any `found` rows), in the input
 order: `file:line` · comment text (truncated to ~60 chars) · verdict (`stale` /
-`delete` / `keep` / `skip` / `found` + one of the first three) · one-line
-reason · action. For stale rows the action is the exact replacement text or
-"delete"; for stale citations, quote the comment's claim and what the cited
-line actually does. Line numbers must match the file as it is on disk now —
-the skill edits from your rows without re-deriving them.
+`delete` / `condense` / `keep` / `skip` / `found` + one of the first four) ·
+one-line reason · action. For stale and condense rows the action is the exact
+replacement text ("delete" is also valid for stale); for stale citations,
+quote the comment's claim and what the cited line actually does. Line numbers
+must match the file as it is on disk now — the skill edits from your rows
+without re-deriving them.
 
-**Observations.** Anything noticed but not acted on: comments whose content
-belongs in an ADR or PR description, comments that exist only because a name
-is bad (with the rename that would retire them). Report only — future work,
-not verdicts.
+**Observations.** Anything noticed but not acted on, made actionable: a
+comment block whose content belongs elsewhere names its destination (ADR,
+design doc, PR description — whatever the project's conventions offer) and
+comes with the drafted one-line pointer comment that would replace the block
+once that destination exists; a comment that exists only because a name is bad
+comes with the rename that would retire it. You propose the arrangement —
+creating the document is future work, not a verdict.
 
 If a file in your slice is unreadable or a candidate's line number no longer
 matches the file, say so in the row's reason and give it `skip` — never guess.
