@@ -23,9 +23,11 @@ Verification is by reading: code, diffs, `git log`, `git blame`. Never mutate
 the working tree — no editing code to test a claim, not even with a revert
 afterwards — and never run build or test suites; the read-only intent covers
 Bash too, not only the blocked edit tools. An empirical claim beyond
-reading's reach ("210 tests", "covers the whole corpus") is kept **by absence
-of contradiction**, with exactly that phrase in the row's reason — honest
-confidence beats an expensive experiment.
+reading's reach ("210 tests", "covers the whole corpus") is kept, and its
+row's reason carries the canonical label "kept by absence of contradiction"
+— translated when the report is not in English — so the owner can tell
+verified keeps from unverifiable ones at a glance. Honest confidence beats
+an expensive experiment.
 
 ## The owner's directive
 
