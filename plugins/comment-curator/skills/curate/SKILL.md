@@ -95,9 +95,9 @@ here.
 ## 4. Verdict table and approval
 
 Present the merged table: `file:line` · comment (truncated) · verdict ·
-one-line reason · action (for stale and condense: the replacement text, or
-"delete" for stale). Then totals. Collapse `skip` rows (confirmed
-non-comments) into a single count — they need no user decision.
+one-line reason · action (for stale, condense, and condense-doc: the
+replacement text, or "delete" for stale). Then totals. Collapse `skip` rows
+(confirmed non-comments) into a single count — they need no user decision.
 
 Below it, the verifiers' **observations** section: things noticed but not
 acted on in this pass, each with its proposed destination and the drafted
@@ -105,10 +105,11 @@ pointer line that would replace the block once that destination exists. Report
 only — creating those documents is future work, not part of this run's edits.
 
 Then ask, via AskUserQuestion: **apply all** / **apply all except the
-riskiest class present** (name it in the option — condenses when the table
-has any, else stale rewrites; drop this option when the table holds a single
-class) / **adjust** (loop back with their exceptions, covering any arbitrary
-subset) / **abort**. Nothing is edited before an explicit choice.
+riskiest class present** (name it in the option — doc condenses
+(`condense-doc`, rewrites of public contract docs) when the table has any,
+else condenses, else stale rewrites; drop this option when the table holds a
+single class) / **adjust** (loop back with their exceptions, covering any
+arbitrary subset) / **abort**. Nothing is edited before an explicit choice.
 
 **A class withheld by convention is a question, not a result.** When the
 observations say the verifiers kept a whole class because the style looks

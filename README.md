@@ -184,7 +184,12 @@ ainda vale → keep (delete errado perde conhecimento); dúvida sobre se ela
 precisa desse *tamanho* → condense (condensar realoca conhecimento para
 `git log`/ADR/código, não apaga — o erro custa uma consulta, não uma perda);
 doc comments de API pública são contrato — corrigíveis se stale, nunca
-deletados por redundância nem condensados por verbosidade; headers de licença,
+deletados por redundância, e condensáveis só na variante `condense-doc`
+(auto-contida: sem ponteiros para código/git/ADR, porque o leitor via
+IntelliSense não tem o código do lado; sai narração de implementação,
+duplicação entre tags e prosa que reconta a assinatura — semântica, unidades,
+exceções, nullability e casos de borda são intocáveis; tratada no gate como a
+classe de edição mais arriscada); headers de licença,
 pragmas e arquivos gerados são intocáveis; em modo caminho, a barra alta
 protege a alegação, não a forma — comentário humano antigo tem prior de
 manutenção (`git log -L` distingue origem humana de LLM), mas inchaço é
