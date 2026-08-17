@@ -68,9 +68,10 @@ The inventory covers line comments, block comments, and doc comments (`///`,
   minified or `dist/` output. Skip the whole file.
 - Doc comments on **public API members**: these are contract, consumed through
   IntelliSense and generated docs by callers who never open this file. They may
-  be flagged as stale (and fixed), never deleted for redundancy and never
-  condensed for verbosity — their readers don't have the code alongside to
-  follow the pointer. Removing one can also break builds outright — CS1591
+  be flagged as stale (and fixed), and are condensable only under the
+  doc-comment variant below (`condense-doc`) — never deleted for redundancy,
+  and never condensed by the ordinary rules, whose core tool (pointing) their
+  readers can't follow. Removing one can also break builds outright — CS1591
   under `GenerateDocumentationFile` + warnings-as-errors.
 
 ## The four verdicts
@@ -135,6 +136,32 @@ log`, the ADR, the linked issue, the code below). The claim must survive the
 rewrite intact: if condensing would weaken or drop part of it, that part is
 exactly the evidence the comment is load-bearing — keep that part in.
 
+**The public doc comment variant: `condense-doc`.** Doc comments on public
+API members get a stricter variant, reported as its own class — rewriting a
+public contract's documentation is the riskiest edit this skill proposes.
+Their reader consumes them through IntelliSense and generated docs, without
+the code alongside, so pointing is off the table: the rewrite must stay
+**self-contained**. If condensing a part would require a pointer to code,
+git, or an ADR, that part stays.
+
+What may go, because it serves no caller:
+
+- Implementation narration and history ("internally uses a sorted
+  dictionary", "before v3 this was synchronous") — worse in a public doc
+  than in an inline comment: the caller cannot act on it, and it leaks
+  internals into the contract surface.
+- Duplication across tags — a `<summary>` that retells the `<param>`s, a
+  `<returns>` that repeats the summary.
+- Prose restating the signature beyond the conventional minimum — the
+  signature is shown next to the doc in IntelliSense.
+
+What is untouchable — the contract a caller cannot see any other way:
+semantics and behavior, units, nullability, edge cases, exceptions and error
+conditions, thread-safety, ordering guarantees. Structure survives too: tags
+stay well-formed, and the element itself is never deleted — the off-limits
+rules on redundancy deletion and CS1591 are unchanged. In path mode, an aged
+human-authored doc comment keeps its maintenance prior on borderline calls.
+
 ### Keep — states what the code cannot
 
 A constraint with no representation in code: a third-party API that returns 200
@@ -177,8 +204,9 @@ preamble, no narration of your process. Two sections:
 
 **Verdict table.** One row per candidate (plus any `found` rows), in the input
 order: `file:line` · comment text (truncated to ~60 chars) · verdict (`stale` /
-`delete` / `condense` / `keep` / `skip` / `found` + one of the first four) ·
-one-line reason · action. For stale and condense rows the action is the exact
+`delete` / `condense` / `condense-doc` / `keep` / `skip` / `found` + one of
+the first five) · one-line reason · action. For stale, condense, and
+condense-doc rows the action is the exact
 replacement text ("delete" is also valid for stale); for stale citations,
 quote the comment's claim and what the cited line actually does. Line numbers
 must match the file as it is on disk now — the skill edits from your rows
