@@ -76,6 +76,45 @@ evidência real por categoria e provedor (partes de um plano logam sob o slug
 próprio), e passa por cima da policy quando 3 entradas apontam na mesma
 direção.
 
+### `intent-compiler`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/intent-compiler:compile` | Compila uma intenção crua num prompt **ancorado em termos canônicos** que o modelo já carrega nos pesos. Corta a intenção em **redutível** (mecanismo, padrão, processo, convenção — tem nome, comprime) e **irredutível** (fatos do repo, regras de negócio, negações explícitas e **o critério de aceite** — passa verbatim). Pontua cada termo candidato em canonicidade, precisão de frame, aderência do frame e terreno compartilhado (0–12), e escolhe um de quatro modos: **termo puro**, **termo + aparo** (o nome faz o trabalho pesado, 1–3 linhas desligam o que do frame não vale), **pacto** (termo seu: define uma vez, abrevia depois) ou **descrição expandida**. Não executa a intenção. |
+| skill | `/intent-compiler:expand` | **O espelho.** Lê um prompt já comprimido e itemiza os frames que ele importa: o que o modelo assume como **core** (vem você querendo ou não) vs. **non-core** (vem com frequência suficiente para surpreender), quais termos ficaram com o sentido **não fixado**, e — quando você declara a intenção — a conta separada em *pedido*, *extra silencioso*, *contraditado* e *faltando*. É o detector de vazamento de entailment, antes de pagar por ele. Não reescreve o prompt. |
+| skill | `/intent-compiler:log-lexicon` | Invocada quando a tarefa termina: registra como a âncora **de fato** se comportou (`leak`: elementos do frame que ninguém pediu; `misread`: o modelo expandiu para o frame errado) ou fixa a definição de um termo local. Único caminho de escrita, via script validado. |
+| referência | `reference/compression-core.md` | O núcleo compartilhado: o corte redutível/irredutível, a rubrica de 4 dimensões, o **portão de compromisso**, a tabela de modos e os thresholds do léxico. Não nomeia termos. |
+| referência | `reference/polysemous.md` | Prior versionado dos termos que **não** comprimem — `agent`, `service`, `context`, `event`, `saga`, `projection`… — com os frames concorrentes de cada um e o que fixa o sentido. Mais os termos que derivaram (`serverless`, `RAG`, `microservice`) e os que comprimem excepcionalmente bem. Carregado por progressive disclosure. |
+| referência | `reference/lexicon.md` | Schema do léxico do projeto e regras de threshold. |
+
+Duas ideias sustentam o plugin. A primeira: **comprima o *como*, nunca o
+*pronto*** — uma descompressão errada de mecanismo aparece no diff e custa uma
+rodada; uma descompressão errada do critério de aceite é indetectável, e você
+aceita o trabalho errado. A segunda: **compressibilidade não é propriedade das
+palavras, é do par (termo, decodificador)** — `event sourcing` custa três
+tokens só porque os pesos guardam a expansão, então o compilador nunca pode ter
+um codebook maior que o do executor (daí `--target=`), e a âncora **não se
+traduz**: escreva em português e deixe o termo catalogado em inglês, porque é
+lá que está a massa de treino.
+
+O **compromisso** (quanto custa a descompressão errada) não entra na soma —
+ele é portão, não nota: a partir de 2, termo puro deixa de existir e o piso
+vira termo + aparo; em 3, o prompt compilado passa obrigatoriamente pelo
+`expand` antes de ser usado. Toda saída carrega as seções **Dropped** e
+**Risk**: compressão que esconde o que removeu não é auditável, e compressão
+não auditável é indistinguível de alucinação.
+
+O léxico em `.claude/intent-lexicon.jsonl` acumula evidência por termo e passa
+por cima do prior quando 3 entradas apontam na mesma direção — 3 com `leak > 0`
+tiram o modo puro daquele termo; 3 com `misread` dizem que ele não está no
+codebook dos seus modelos. As entradas `pact` são sua Ubiquitous Language
+legível por máquina: a definição acordada, escrita uma vez, reusada verbatim em
+vez de redescoberta a cada sessão.
+
+Fecha ciclo com o `model-router`: boa parte da "novidade" que a rubrica de
+roteamento pontua é, na verdade, ambiguidade de formulação — uma intenção bem
+ancorada pode cair um tier inteiro. Roteie o prompt compilado, não o cru.
+
 ### `codex-agents`
 
 | Componente | Nome | O que faz |
@@ -315,6 +354,18 @@ claude-tookit/
 │   │   └── skills/log-calibration/
 │   │       ├── SKILL.md
 │   │       └── log-calibration.py   # único caminho de escrita (append-only)
+│   ├── intent-compiler/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── reference/               # compartilhado pelas skills, via ${CLAUDE_PLUGIN_ROOT}
+│   │   │   ├── compression-core.md  # corte redutível/irredutível, rubrica, portão, modos
+│   │   │   ├── polysemous.md        # prior dos termos que não comprimem (progressive disclosure)
+│   │   │   ├── lexicon.md
+│   │   │   └── lexicon.example.jsonl
+│   │   ├── skills/compile/SKILL.md  # intenção crua → prompt ancorado, com o que foi removido
+│   │   ├── skills/expand/SKILL.md   # o espelho: a conta dos frames que o prompt importa
+│   │   └── skills/log-lexicon/
+│   │       ├── SKILL.md
+│   │       └── log-lexicon.py       # único caminho de escrita (append-only)
 │   ├── codex-agents/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/dispatch.md    # tiers + comando + as 6 regras de empacotamento

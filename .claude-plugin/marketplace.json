@@ -43,6 +43,25 @@
       }
     },
     {
+      "name": "intent-compiler",
+      "source": "./plugins/intent-compiler",
+      "description": "Compiles a raw intent into a prompt anchored on canonical terms the model already holds — scoring each term for canonicity, frame precision, frame fit and shared ground, gating the result on what a wrong expansion would cost, and naming everything the compression removed. Ships the mirror skill that reads a compressed prompt back and itemizes the entailments it imports, plus a project lexicon that records how each anchor actually behaved.",
+      "category": "productivity",
+      "keywords": [
+        "prompt",
+        "compression",
+        "terminology",
+        "ubiquitous-language",
+        "context",
+        "tokens",
+        "adherence"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "codex-agents",
       "source": "./plugins/codex-agents",
       "description": "Role-shaped delegation to Codex models (gpt-5.6 luna/terra/sol) from inside Claude Code: a general delegate skill plus QA and UX subagents that package this session's context into a self-contained prompt, run the analysis on a cheaper model via `codex exec`, and return findings as verified claims.",

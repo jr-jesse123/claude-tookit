@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "intent-compiler",
+  "displayName": "Intent Compiler",
+  "description": "Compiles a raw intent into a prompt anchored on canonical terms the model already holds — scoring each term for canonicity, frame precision, frame fit and shared ground, gating the result on what a wrong expansion would cost, and naming everything the compression removed. Ships the mirror skill that reads a compressed prompt back and itemizes the entailments it imports, plus a project lexicon that records how each anchor actually behaved.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": [
+    "prompt",
+    "compression",
+    "terminology",
+    "ubiquitous-language",
+    "context",
+    "tokens",
+    "adherence"
+  ]
+}
