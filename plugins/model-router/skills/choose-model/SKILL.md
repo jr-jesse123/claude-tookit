@@ -230,9 +230,11 @@ Conditional sections, each included **only** when its condition holds:
 - **Refusal risk** — an accepted policy flags the task category as
   refusal-prone (see the Anthropic policy's refusals section). State the risk
   and the policy's documented fallback.
-- **Cache note** — the recommendation implies switching models inside a running
-  conversation. State that this invalidates the prompt cache and re-reads the
-  history at full price, and that a new session or subagent avoids it.
+- **Cache note** — the recommendation implies either switching models inside a
+  running conversation, or changing effort in a way the accepted provider
+  policy says resets the cache. State the provider-specific behavior and the
+  cheapest cache-safe shape. Do not warn about cache loss when the policy says
+  the chosen model/harness supports a cache-preserving per-message effort change.
 - **External evidence** — research ran (step 4). Findings with dates and links,
   then the Proposed policy edit block.
 
