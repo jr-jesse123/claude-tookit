@@ -17,7 +17,12 @@ own logged evidence contradicts it — see `../calibration.md`.
 | mechanical | `haiku` | 200K context — disqualified when input approaches it |
 | workhorse | `sonnet` | |
 | frontier | `opus` | Current alias target: Opus 5.5 |
-| exceptional | `fable` | Current alias target: Fable 5.1. Keep as an evidence-driven exception; Opus 5.5 now matches Fable 5.1 on most work at materially lower cost |
+| exceptional | `opus` | Opus 5.5 at `xhigh`/`max`; long horizon alone no longer promotes to Fable |
+
+`fable` (Fable 5.1) sits **outside the normal tier ladder** as an evidence-gated
+escape hatch. Route to it only when project calibration, a task-specific eval,
+or a serious Opus 5.5 attempt demonstrates a capability advantage worth the
+premium.
 
 `claude-opus-4-8` sits outside the ladder: regression comparison, compatibility
 with an already-evaluated workflow, and the documented refusal fallback only.
@@ -29,7 +34,7 @@ with an already-evaluated workflow, and the documented refusal fallback only.
 | `haiku` | Bounded, mechanical, high-volume work | **omit — see note** | 200K | $1 / $5 |
 | `sonnet` | Default for daily implementation | `medium` (policy default; API/Claude Code default is `high`) | 1M | $2 / $10 |
 | `opus` | Opus 5.5: reasoning, architecture, investigation, high-risk and long-horizon work | `medium` (vendor default; raise from evidence) | 1M | $4 / $20 |
-| `fable` | Fable 5.1: demanding reasoning and exceptional long-horizon work | `high` | 1M | $10 / $50 |
+| `fable` | Fable 5.1: calibration-only escape hatch, not a normal escalation tier | `high` | 1M | $10 / $50 |
 | `claude-opus-4-8` | Regression and compatibility only | `high` | 1M | $5 / $25 |
 
 Prices reviewed 2026-09-22. Sonnet 5 remains $2/$10. Opus 5.5 is $4/$20, with $0.20/MTok cache reads and $5/MTok cache writes. Fable 5.1 remains $10/$50 with $0.25/MTok cache reads. Anthropic reports Opus 5.5 costs about 40% less than Opus 5 on typical workloads at default settings.
@@ -131,21 +136,26 @@ with hidden dependents is not a Haiku task.
 - Autonomous work across code, tests, CI, infrastructure, and documentation.
 - Long agent runs that must repeatedly validate and correct themselves.
 
-### Fable 5.1
+### Fable 5.1 — evidence-gated escape hatch
 
-- Demanding reasoning where Opus 5.5 at higher effort still falls short on this
-  project's calibration log or a task-specific evaluation.
-- Multi-repository or exceptionally large migrations.
-- Work whose human equivalent spans multiple days.
-- Very long autonomous execution where context coherence is the main risk.
-- High-value work where a small increase in success probability is worth the
-  remaining cost premium.
+Fable is no longer a task-category destination. Do **not** route to it from task
+size, duration, multi-repository scope, cache shape, or "hardest model" intuition
+alone. Those workloads remain on Opus 5.5 and should first use the Opus effort
+ladder.
 
-Do not choose Fable for ordinary review, explanation, feature work, or merely
-because a run is long/cache-heavy. Opus 5.5 cache reads are cheaper ($0.20 vs
-$0.25/MTok), and Anthropic reports Opus 5.5 matching Fable 5.1 on most work.
-Route to Fable when calibration or task-specific evidence demonstrates an
-advantage, or after a serious Opus 5.5 attempt falls short.
+Route to Fable only when one of these is true:
+
+- Project calibration contains repeatable evidence that Fable succeeds on this
+  category where Opus 5.5 does not.
+- A task-specific eval demonstrates a material capability advantage that is
+  worth the remaining price premium.
+- A serious Opus 5.5 `xhigh`/`max` attempt failed because of reasoning,
+  abstraction, or context-coherence quality rather than insufficient effort or
+  tooling.
+
+Even then, record the result. If Fable does not materially outperform Opus on
+that category, demote it again; its role is to catch proven tails, not to occupy
+a permanent rung in the ladder.
 
 ### `claude-opus-4-8`
 
@@ -164,9 +174,11 @@ overrides) fires.
 3. Sonnet `high` when the problem is familiar but needs more persistence.
 4. Opus 5.5 `medium` when reasoning or judgment is the bottleneck.
 5. Opus 5.5 `high` when task risk/horizon or calibration shows useful headroom above `medium`.
-6. Opus 5.5 `xhigh`/`max` only when demanding long-horizon work or measured gains justify the extra spend.
-7. Fable 5.1 `high` after a serious Opus 5.5 shortfall or task-specific/calibration evidence that Fable is better.
-8. Fable 5.1 `xhigh` only when that same evidence also justifies maximum long-horizon capability.
+6. Opus 5.5 `xhigh`/`max` for exceptional long-horizon work or when measured gains justify the extra spend.
+
+**Fable is not step 7.** It is an evidence-gated side path: use it only when
+calibration, a task-specific eval, or a serious Opus 5.5 failure establishes a
+reason to do so.
 
 ## Effort vs. model
 
@@ -213,8 +225,8 @@ entries confirm or demote these like any prior.
 - **Long-horizon routing changed with Opus 5.5.** Anthropic reports successful
   multi-repository runs lasting more than 18 hours and a C→Rust migration that
   finished in 9.5 hours versus 12 hours for Fable 5.1 at 51% lower cost. Treat
-  long horizon alone as an Opus 5.5 signal, not an automatic Fable promotion;
-  keep Fable evidence-driven.
+  long horizon alone as an Opus 5.5 exceptional-tier signal, not a Fable
+  promotion. Fable requires category-specific evidence.
 
 ## Token economics (input)
 
