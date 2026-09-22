@@ -1,6 +1,6 @@
 # Anthropic provider policy
 
-Last reviewed: 2026-08-05
+Last reviewed: 2026-09-22
 
 This file is the **routing data for the Anthropic provider**. The shared
 `routing-core.md` owns the rubric and the tier layer, and the skills own their
@@ -16,8 +16,8 @@ own logged evidence contradicts it — see `../calibration.md`.
 | --- | --- | --- |
 | mechanical | `haiku` | 200K context — disqualified when input approaches it |
 | workhorse | `sonnet` | |
-| frontier | `opus` | |
-| exceptional | `fable` | Costs exactly 2× Opus per token — that ratio is the whole economic argument |
+| frontier | `opus` | Current alias target: Opus 5.5 |
+| exceptional | `fable` | Current alias target: Fable 5.1. Keep as an evidence-driven exception; Opus 5.5 now matches Fable 5.1 on most work at materially lower cost |
 
 `claude-opus-4-8` sits outside the ladder: regression comparison, compatibility
 with an already-evaluated workflow, and the documented refusal fallback only.
@@ -27,12 +27,12 @@ with an already-evaluated workflow, and the documented refusal fallback only.
 | `--model` | Role | Default `--effort` | Context | $/MTok in-out |
 | --- | --- | --- | --- | --- |
 | `haiku` | Bounded, mechanical, high-volume work | **omit — see note** | 200K | $1 / $5 |
-| `sonnet` | Default for daily implementation | `medium` | 1M | $3 / $15 |
-| `opus` | Reasoning, architecture, investigation, high-risk work | `high` (`xhigh` for coding/agentic) | 1M | $5 / $25 |
-| `fable` | Exceptional long-horizon and very large tasks | `high` | 1M | $10 / $50 |
+| `sonnet` | Default for daily implementation | `medium` (policy default; API/Claude Code default is `high`) | 1M | $2 / $10 |
+| `opus` | Opus 5.5: reasoning, architecture, investigation, high-risk and long-horizon work | `medium` (vendor default; raise from evidence) | 1M | $4 / $20 |
+| `fable` | Fable 5.1: demanding reasoning and exceptional long-horizon work | `high` | 1M | $10 / $50 |
 | `claude-opus-4-8` | Regression and compatibility only | `high` | 1M | $5 / $25 |
 
-Prices as of 2026-07-28; Sonnet has a promotional $2/$10 rate through 2026-08-31.
+Prices reviewed 2026-09-22. Sonnet 5 remains $2/$10. Opus 5.5 is $4/$20, with $0.20/MTok cache reads and $5/MTok cache writes. Fable 5.1 remains $10/$50 with $0.25/MTok cache reads. Anthropic reports Opus 5.5 costs about 40% less than Opus 5 on typical workloads at default settings.
 
 > **Do not pass `--effort` with `haiku`.** Haiku 4.5 does not accept the effort
 > parameter; the four other rows accept `low`, `medium`, `high`, `xhigh`, `max`.
@@ -46,8 +46,8 @@ Prices as of 2026-07-28; Sonnet has a promotional $2/$10 rate through 2026-08-31
 | --- | --- |
 | `low` | Short, scoped, latency-sensitive work with a strong oracle |
 | `medium` | Normal implementation — the Sonnet default |
-| `high` | Judgment is the bottleneck; the Opus default |
-| `xhigh` | **Coding and agentic work on Opus**, and long execution horizons |
+| `high` | Judgment is the bottleneck or project calibration shows material gains above Opus 5.5 `medium` |
+| `xhigh` | Demanding or long-running coding/agentic work (roughly >30 minutes / million-token budgets), or other tasks whose evals show measurable headroom above `high` |
 | `max` | Correctness matters more than cost, and the task is not latency-sensitive. Prone to overthinking on simple work — never a default |
 
 ### Horizon → effort mapping
@@ -56,12 +56,15 @@ Applied to the level the rubric's dimension 2 produces:
 
 | Horizon | Sonnet | Opus |
 | --- | --- | --- |
-| 0–1 | `medium` | `high` |
-| 2 | `high` | `xhigh` |
+| 0–1 | `medium` | `medium` |
+| 2 | `high` | `high` |
 | 3 | `high` | `xhigh`, or `max` when correctness dominates cost |
 
-Coding and agentic work on Opus starts at `xhigh` regardless of horizon — that
-is the policy's starting point, not an escalation.
+Opus 5.5 defaults to `medium`. Treat that as the starting point even for substantial
+coding: Anthropic reports 54.6% on FrontierCode v1.1 and 52.5% on CursorBench 4.0
+at default `medium`, with the latter slightly above Fable 5.1 at `max`. Raise effort
+when the task's horizon, risk, or project calibration demonstrates headroom; do not
+inherit Opus 5's old `high` default mechanically.
 
 Escalating effort is cheaper than escalating model. Exhaust the ladder within a
 tier before moving up a tier, **except** when the bottleneck is judgment rather
@@ -106,7 +109,7 @@ with hidden dependents is not a Haiku task.
 - Review a medium-sized diff in detail.
 - Work through a long but conceptually familiar test failure.
 
-### Opus `high`
+### Opus 5.5 `medium` / `high`
 
 - Investigate Oracle isolation or concurrency behavior.
 - Design transaction and idempotency semantics.
@@ -117,10 +120,10 @@ with hidden dependents is not a Haiku task.
 - Diagnose an intermittent E2E failure with no clear oracle.
 - Model a complex domain in F#, or compare F# and C# representations.
 
-### Opus `xhigh`
+### Opus 5.5 `xhigh`
 
-- Any substantial coding or agentic work — this is the recommended starting
-  point for Opus on code, not an escalation from `high`.
+- Demanding coding or agentic work whose horizon or evals justify more than the
+  `high` default — especially long-running sessions with repeated tool use.
 - Large cross-project refactoring.
 - Framework or persistence migration.
 - Investigation of several competing root-cause hypotheses.
@@ -128,22 +131,27 @@ with hidden dependents is not a Haiku task.
 - Autonomous work across code, tests, CI, infrastructure, and documentation.
 - Long agent runs that must repeatedly validate and correct themselves.
 
-### Fable
+### Fable 5.1
 
+- Demanding reasoning where Opus 5.5 at higher effort still falls short on this
+  project's calibration log or a task-specific evaluation.
 - Multi-repository or exceptionally large migrations.
 - Work whose human equivalent spans multiple days.
 - Very long autonomous execution where context coherence is the main risk.
-- A task Opus `xhigh` attempted seriously and could not complete.
-- High-value work where a small increase in success probability is worth 2× cost.
+- High-value work where a small increase in success probability is worth the
+  remaining cost premium.
 
-Do not choose Fable for ordinary review, explanation, or feature work merely
-because it is the strongest model.
+Do not choose Fable for ordinary review, explanation, feature work, or merely
+because a run is long/cache-heavy. Opus 5.5 cache reads are cheaper ($0.20 vs
+$0.25/MTok), and Anthropic reports Opus 5.5 matching Fable 5.1 on most work.
+Route to Fable when calibration or task-specific evidence demonstrates an
+advantage, or after a serious Opus 5.5 attempt falls short.
 
 ### `claude-opus-4-8`
 
 Only for: regression comparison, compatibility with an already-evaluated
-workflow, or diagnosing behavior differences between Opus 4.8 and Opus 5. It is
-also the documented fallback target when Opus 5 declines a request — see
+workflow, or diagnosing behavior differences between Opus 4.8, Opus 5, and Opus 5.5. It is
+also the documented cybersecurity fallback target for most safeguarded Opus 5.5 requests — see
 [Refusals](#refusals-on-security-adjacent-work).
 
 ## Escalation ladder
@@ -154,11 +162,11 @@ overrides) fires.
 1. Haiku for obviously mechanical work.
 2. Sonnet `medium` for normal development.
 3. Sonnet `high` when the problem is familiar but needs more persistence.
-4. Opus `high` when reasoning or judgment is the bottleneck.
-5. Opus `xhigh` for coding, agentic work, or a long execution horizon.
-6. Opus `max` when correctness dominates cost and latency does not matter.
-7. Fable `high` after a serious Opus failure, or for exceptional task size.
-8. Fable `xhigh` only when maximum long-horizon capability is justified.
+4. Opus 5.5 `medium` when reasoning or judgment is the bottleneck.
+5. Opus 5.5 `high` when task risk/horizon or calibration shows useful headroom above `medium`.
+6. Opus 5.5 `xhigh`/`max` only when demanding long-horizon work or measured gains justify the extra spend.
+7. Fable 5.1 `high` after a serious Opus 5.5 shortfall or task-specific/calibration evidence that Fable is better.
+8. Fable 5.1 `xhigh` only when that same evidence also justifies maximum long-horizon capability.
 
 ## Effort vs. model
 
@@ -202,10 +210,11 @@ entries confirm or demote these like any prior.
   auditing, cross-file consistency over a large diff — summarization loses
   exactly what the task needs: score dimension 5 up and prefer the frontier
   tier over relying on compaction.
-- **Fable's context coherence.** Very long autonomous execution where context
-  coherence is the main risk is already Fable's category (above) — that is
-  the exceptional-tier answer when even Opus's window discipline is the
-  binding constraint.
+- **Long-horizon routing changed with Opus 5.5.** Anthropic reports successful
+  multi-repository runs lasting more than 18 hours and a C→Rust migration that
+  finished in 9.5 hours versus 12 hours for Fable 5.1 at 51% lower cost. Treat
+  long horizon alone as an Opus 5.5 signal, not an automatic Fable promotion;
+  keep Fable evidence-driven.
 
 ## Token economics (input)
 
@@ -222,36 +231,49 @@ tie-break (`routing-core.md` → tie-break rule 2) uses real counts:
   When price decides a cross-provider or cross-tier tie on an input-heavy
   task, run the actual input through each candidate's counter before
   comparing — one API call per candidate beats any multiplier.
-- **Caching bends the effective input rate by ~10×.** Cache reads bill at
-  ~0.1× base input; an input-heavy session with a warm cache pays a fraction
-  of sticker. This compounds with ecosystem affinity (tie-break rule 3): the provider
-  whose harness already holds the session's cache wins input-heavy ties
-  almost by default.
+- **Caching bends the effective input rate, but not uniformly.** Opus 5.5 cache
+  reads cost $0.20/MTok; Fable 5.1 cache reads cost $0.25/MTok. The unusually
+  cheap Fable cache multiplier no longer makes cache-heavy work a direct Fable
+  signal because Opus 5.5 is cheaper in absolute cached-input cost. Compare the
+  effective workload cost and let calibration decide any remaining capability
+  premium. Ecosystem affinity still matters when a warm cache already exists.
 - **No long-context surcharge** at 1M (see Context behavior) — the input rate
   is flat where OpenAI's is reportedly not.
 
 ## Refusals on security-adjacent work
 
-Opus 5 and Fable 5 ship elevated cybersecurity safeguards and can decline a
-request outright — the turn ends with a refusal rather than an error. Benign
-security tooling and life-sciences work occasionally trip them.
+Opus 5.5 and Fable 5.1 ship safety classifiers and can decline or transparently reroute a request
+— the turn ends with `stop_reason: "refusal"` rather than an error. Benign
+security or life-sciences work can still trip them.
 
 This inverts the usual direction for one category: **escalating security work up
-the ladder moves it toward the models most likely to refuse it.** When routing
-security-adjacent work, say so, and name `claude-opus-4-8` as the fallback —
-cyber-category refusals route there by design. That is the one case where the
-regression-only row is the correct destination.
+the ladder can move it toward a classifier-equipped model.** When routing
+security-adjacent work, say so and recommend using the model's documented
+fallback mechanism rather than assuming a single hard-coded target. For Opus 5.5, Anthropic says most cybersecurity tasks are transparently rerouted
+to Opus 4.8; biology and other safeguarded categories can use different fallback
+models. Do not hard-code a universal fallback target.
 
-Fable 5 additionally requires 30-day data retention and is unavailable to
-organizations configured for zero retention.
+Fable 5.1 requires 30-day data retention and is unavailable under ZDR unless
+Anthropic expressly authorizes it.
 
 ## Execution-shape notes
 
 Suggested command shape: `claude --model <alias> --effort <level>` (omit
 `--effort` for haiku). Anthropic models run natively in Claude Code — no
-harness switch, and the session's prompt cache survives.
+provider/harness switch is required.
 
-Two Opus 5 behaviors change which shape is worth recommending:
+**Model switches and effort changes are different cache events.** Switching the
+model of a running conversation still invalidates the prompt cache. Opus 5.5 and
+Fable 5.1 additionally support per-message effort via `output_config` (beta),
+which preserves the prompt cache; use that capability when the active harness
+exposes it. Other models, including Sonnet 5, restart the cache when effort is
+changed through the top-level request setting. In Claude Code, `/effort` can
+change the session effort; do not promise cache preservation unless the current
+Claude Code version is known to map that turn to per-message effort. When that
+is unknown, recommend a new session only if the cache-reset cost matters enough
+to justify it.
+
+Two Opus 5.5 behaviors change which shape is worth recommending:
 
 - **It verifies its own work unprompted.** Do not recommend a separate
   verification pass, a verifier subagent, or "double-check your answer" wording
@@ -342,4 +364,6 @@ What it changes for routing:
 
 Switching the model of a running conversation invalidates its prompt cache and
 re-reads the history at full price. Prefer a new session or a subagent over
-repeatedly switching a long-running main conversation.
+repeatedly switching a long-running main conversation. Do **not** apply that
+warning mechanically to an Opus 5.5 or Fable 5.1 effort-only change when the
+harness is using per-message effort; that path preserves the cache.
