@@ -150,8 +150,8 @@ advantage, or after a serious Opus 5.5 attempt falls short.
 ### `claude-opus-4-8`
 
 Only for: regression comparison, compatibility with an already-evaluated
-workflow, or diagnosing behavior differences between Opus 4.8 and Opus 5. It is
-also the documented fallback target when Opus 5 declines a request — see
+workflow, or diagnosing behavior differences between Opus 4.8, Opus 5, and Opus 5.5. It is
+also the documented cybersecurity fallback target for most safeguarded Opus 5.5 requests — see
 [Refusals](#refusals-on-security-adjacent-work).
 
 ## Escalation ladder
@@ -263,7 +263,7 @@ Suggested command shape: `claude --model <alias> --effort <level>` (omit
 provider/harness switch is required.
 
 **Model switches and effort changes are different cache events.** Switching the
-model of a running conversation still invalidates the prompt cache. Opus 5 and
+model of a running conversation still invalidates the prompt cache. Opus 5.5 and
 Fable 5.1 additionally support per-message effort via `output_config` (beta),
 which preserves the prompt cache; use that capability when the active harness
 exposes it. Other models, including Sonnet 5, restart the cache when effort is
@@ -365,5 +365,5 @@ What it changes for routing:
 Switching the model of a running conversation invalidates its prompt cache and
 re-reads the history at full price. Prefer a new session or a subagent over
 repeatedly switching a long-running main conversation. Do **not** apply that
-warning mechanically to an Opus 5 or Fable 5.1 effort-only change when the
+warning mechanically to an Opus 5.5 or Fable 5.1 effort-only change when the
 harness is using per-message effort; that path preserves the cache.
