@@ -128,6 +128,12 @@ with hidden dependents is not a Haiku task.
 - Large but mechanical migrations/refactors where the architectural direction is already decided.
 - Long brownfield implementation where repository understanding and tool persistence matter more than novel judgment.
 
+Launch evidence explains this placement: Anthropic reports Sonnet 5.5 at 70.6%
+on Terminal-Bench 4.0 versus 66.4% for Opus 5.5, 55.5% versus 57.8% on
+CursorBench 4.0, and 1844 versus 1846 on GDPval-AA. FrontierCode still shows a
+clearer Opus lead (Sonnet 5.5 52.1% at Xhigh versus Opus 5.5 54.4%). These are
+within-provider launch priors, not guarantees for this repository.
+
 Do not keep escalating Sonnet merely because its sticker price is lower. Anthropic's
 launch curves show that at higher effort Sonnet 5.5 can approach Opus 5.5 in both
 capability **and cost per task**. When judgment becomes the bottleneck, move to Opus
@@ -265,10 +271,10 @@ not legislated here — the calibration log measures it per category instead.
 Input-side token density is not steerable; these notes exist so the price
 tie-break (`routing-core.md` → tie-break rule 2) uses real counts:
 
-- **Tokenizers differ within this provider.** Sonnet 5's tokenizer produces
-  ~30% more tokens than Sonnet 4.6's for the same text; the Opus 4.7+/Fable
-  tokenizer runs ~1×–1.35× vs pre-4.7 models. `[vendor]` A count measured on
-  one model is invalid on another — re-measure, never scale by feel.
+- **Tokenizers differ within this provider.** Historical Sonnet/Opus releases
+  have changed token density materially. Do not assume Sonnet 5.5 inherits
+  Sonnet 5's token count for the same text; a count measured on one model is
+  invalid on another — re-measure, never scale by feel.
 - **Measure, don't estimate.** `count_tokens` is model-specific and cheap.
   When price decides a cross-provider or cross-tier tie on an input-heavy
   task, run the actual input through each candidate's counter before
