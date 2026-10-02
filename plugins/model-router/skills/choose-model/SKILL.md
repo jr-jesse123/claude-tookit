@@ -200,6 +200,8 @@ Escalate if:
 
 Suggested command: <from the provider policy's execution notes>
 
+Prompt hand-off: Run /model-router:prepare-prompt --provider <provider> --model <alias-or-id> --effort <level, omit when n/a> --harness <resolved-harness-or-unknown> "<task>"
+
 Calibration (run after the task, with the real outcomes filled in — or invoke
 /log-calibration to have them filled from the session):
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/log-calibration/log-calibration.py" \
@@ -225,8 +227,8 @@ Conditional sections, each included **only** when its condition holds:
   Orchestrated workflow). State that the Model/Effort lines above cover only
   the dominant part, and close with the hand-off:
   `Run /model-router:plan-execution "<task>" to decompose and route the parts.`
-  Skip the Suggested command and Calibration lines in this case — they belong
-  to the plan, not to a half-routed bundle.
+  Skip the Suggested command, Prompt hand-off, and Calibration lines in this
+  case — they belong to the plan, not to a half-routed bundle.
 - **Refusal risk** — an accepted policy flags the task category as
   refusal-prone (see the Anthropic policy's refusals section). State the risk
   and the policy's documented fallback.
@@ -246,4 +248,6 @@ Conditional sections, each included **only** when its condition holds:
 - Confidence is `low` whenever you scored a dimension from an assumption rather
   than from the task description or the repository — and never higher than
   `medium` when the decision leaned on external research.
+- The Prompt hand-off is advisory. Do not invoke `prepare-prompt` yourself;
+  the user may inspect the routing decision first.
 - Do not run the suggested command, and do not begin the underlying task.
