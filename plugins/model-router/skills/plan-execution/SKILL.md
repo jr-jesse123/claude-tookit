@@ -52,6 +52,8 @@ Accepted providers come from, in order of precedence:
 Then read:
 
 - `${CLAUDE_PLUGIN_ROOT}/reference/routing-core.md` — always.
+- `${CLAUDE_PLUGIN_ROOT}/reference/review-escalation.md` — always; it decides
+  whether verification remains self-contained or becomes a separate review part.
 - **Only `${CLAUDE_PLUGIN_ROOT}/reference/policies/<provider>.md` for each
   accepted provider**, including its **Execution-shape notes** — they decide
   which assembly shapes are even available in that provider's harness and what
@@ -73,8 +75,14 @@ output yet). Decompose only when at least one of these holds:
 - Independent parts could genuinely run in parallel.
 - Oracle weakness ≥ 2 with blast radius ≥ 2, or context scale = 3 — the
   structured-verification and larger-than-one-context signals.
+- The review policy resolves to **R1–R4**. An implementation can be atomic in
+  the routing sense but still need a separately routed review pass.
 
-If none holds, the task is atomic: output one line —
+Evaluate `review-escalation.md` after the unit score. Derive its
+`hypothesis dependence` signal from the task description/evidence, not from a
+blanket assumption that difficult work is hypothesis-dependent.
+
+If none holds and review stays R0, the task is atomic: output one line —
 `Atomic task — run /model-router:choose-model instead.` — optionally followed
 by the unit route you already computed, and stop. A plan for an atomic task is
 pure coordination overhead.
@@ -99,6 +107,10 @@ consists of. Prefer cut lines that fall on real seams:
   parallel.
 - **By role** — plan / implement / verify, when the planning or the
   verification genuinely needs a different tier than the implementation.
+- **By review independence** — when `review-escalation.md` resolves to R1–R4,
+  keep the primary artifact-producing part separate from its reviewer(s).
+  Reviewers get the review policy's fresh-context input contract, not the
+  author's reasoning transcript.
 - **By context** — when the working set exceeds one context window, the cut
   must make each part's input self-sufficient.
 
@@ -124,6 +136,27 @@ a whole task:
   categories at once.
 - The cheapest-that-clears-the-bar rule applies per part, and each part's plan
   entry carries its own "why not one tier cheaper" failure.
+- **Review parts are routed independently.** Score the review task itself, not
+  the author's model. A reviewer need not mechanically match the author's tier;
+  hard overrides that genuinely apply to the property under review naturally
+  floor that review part at frontier.
+- Apply the review level after the review task's capability floor is known:
+  - R1: fresh invocation of the same model/provider is allowed.
+  - R2: require a different model from the author; same provider is allowed.
+    If the provider's normal tier candidate is the author's model, use the
+    provider's review notes to find the next-cheapest different model that still
+    clears the review capability floor. Never buy diversity by dropping below
+    the floor.
+  - R3: restrict reviewer candidates to accepted providers different from the
+    author's provider, then apply the normal routing core inside that set.
+  - R4: route at most two reviewers independently, then add one adjudication
+    part. Prefer distinct model families/providers across the two reviewers
+    when available and useful; do not make the panel bigger without an explicit
+    reason.
+- If R2 cannot be represented by any different model that clears the floor,
+  escalate to R3 when another provider is accepted. If no valid alternative
+  exists, say that the requested independence level is unavailable and fall
+  back explicitly to R1 rather than labeling same-model review as R2.
 
 Two sanity checks on the finished routing:
 
@@ -145,19 +178,28 @@ multi-model shapes that `choose-model` only detects get actually planned:
 | --- | --- |
 | **Parallel scouts** | Independent read-only parts (searches, inventories, analyses) on a mechanical- or workhorse-tier model, fanned out, results joined by the caller |
 | **Advisor plus implementer** | A frontier part produces the plan/spec/review; workhorse parts implement against it. The documented pattern on both providers — see each policy's Execution-shape notes |
+| **Fresh-context review** | R1: primary part followed by a fresh invocation of the same model; buys de-anchoring without model/provider diversity |
+| **Independent peer review** | R2/R3: primary part followed by a fresh-context reviewer on a different model; R3 additionally requires a different accepted provider |
+| **Review panel** | R4: primary part, at most two independent reviewers, then one adjudication step |
 | **Agent team** | Independent workstreams with real deliverables each, under active coordination — a lead, a shared task list, native peer messaging where the harness provides them (see the policies' Execution-shape notes for mechanism, opt-in, and per-teammate model/effort constraints) |
-| **Orchestrated workflow** | Exhaustiveness or adversarial verification structured as fan-out: diverse finder lenses, independent verification of findings, judge panels. Buys coverage and confidence, not intelligence — the agents run on the same models, so it never substitutes for a higher tier |
+| **Orchestrated workflow** | Exhaustiveness or adversarial verification structured as fan-out: diverse finder lenses, independent verification of findings, judge panels. Buys coverage and confidence, not intelligence — it never substitutes for the review ladder's capability floor |
 | **Staged pipeline** | Sequential parts too large or too far apart in tier to share a session — each stage a fresh session or subagent, hand-offs written down |
 
 Constraints:
 
 - **Respect the provider's Execution-shape notes.** They are load-bearing
-  here: harness availability (an orchestrated workflow on Claude Code is
-  Workflow orchestration behind the `ultracode` opt-in; on OpenAI it is a
-  hand-built script), cost multipliers, and behavior notes (a frontier model
-  that already verifies its own work makes a same-perspective verify part
-  redundant — a verification part must add an *independent* perspective or a
-  different lens, or it is spend without safety).
+  here: harness availability, cost multipliers, and behavior notes. A model
+  that already self-verifies makes a same-transcript duplicate pass redundant;
+  when the review policy requires a separate reviewer, preserve its fresh
+  context and independence contract.
+- **Fresh context means fresh context.** For R1–R4 pass requirements,
+  constraints, artifact/diff/design, test/log evidence, and unresolved facts.
+  Do not pass the author's private reasoning or favored hypothesis on the first
+  pass. Reviewer output is findings-only; the primary/user adjudicates unless a
+  remediation part is explicitly planned.
+- **Advisor is not the same as independent review.** In-flight advisor tools
+  may see the executor transcript and are useful for consultation, but they do
+  not satisfy R1–R4's fresh-context requirement.
 - **Every fan-out gets a named cap** — scout count, verification votes, loop
   rounds, team size. An uncapped fan-out is not a plan.
 - **Hand-offs name their transport.** For each Interfaces entry, say how the
@@ -178,7 +220,8 @@ Return exactly this structure and nothing else.
 
 ```
 Task: <one line>
-Assembly shape: <shape> — <named caps, e.g. "4 scouts max, 3 verification votes">
+Assembly shape: <shape> — <named caps, e.g. "2 reviewers max + 1 adjudicator">
+Review level: <R0 | R1 | R2 | R3 | R4> — <why this is the cheapest review level that clears the bar>
 Providers: <accepted list>
 Confidence: <low | medium | high>
 
@@ -196,6 +239,7 @@ Per-part reasons:
 
 Interfaces:
 - <part> → <part>: <what is handed over, in what form>
+- For review parts: <requirements + constraints + artifact + evidence; explicitly exclude author reasoning on first pass>
 
 Suggested execution:
 - <concrete first move per the policies' execution notes: the subagent
@@ -220,11 +264,15 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/log-calibration/log-calibration.py" \
 
 ## Rules for the output
 
-- **A plan whose every part lands frontier is a failed decomposition.** Either
-  the task is atomic (defer to choose-model) or the cuts missed the cheap
-  volume — recut before outputting.
+- **A plan whose every part lands frontier is usually a failed decomposition.**
+  Either the task is atomic (defer to choose-model) or the cuts missed the cheap
+  volume — recut before outputting. Exception: review escalation R1–R4 can
+  justify same-tier parts because the payoff is independent evidence, not tier
+  spread.
 - Each part's "why not one tier cheaper" follows the routing core's rule: a
   named failure or a cheaper part.
+- Review parts use category slugs ending in `-review` when possible so their
+  calibration does not get mixed with authoring outcomes.
 - Confidence is `low` whenever part boundaries were assumed rather than read
   from the repository or the task description.
 - The plan is advisory: do not execute any part, do not invoke

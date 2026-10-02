@@ -52,6 +52,9 @@ Then read:
 
 - `${CLAUDE_PLUGIN_ROOT}/reference/routing-core.md` — always; it is the rubric
   you apply in step 2.
+- `${CLAUDE_PLUGIN_ROOT}/reference/review-escalation.md` — always; after routing
+  the primary task, use it to decide whether normal self-verification is enough
+  or whether the execution is no longer honestly single-model.
 - **Only `${CLAUDE_PLUGIN_ROOT}/reference/policies/<provider>.md` for each
   accepted provider** (progressive disclosure). Never load a policy for a
   provider that is not accepted — it costs context and can leak non-candidates
@@ -74,6 +77,9 @@ Apply `routing-core.md` in order:
 4. **Nominate candidates and break ties** across the accepted policies, naming
    which tie-break rule decided.
 5. **Effort** via the chosen provider's horizon→effort ladder.
+6. **Review gate** via `review-escalation.md`. Compute hypothesis dependence
+   from the task/evidence. R0 keeps the task single-model; R1–R4 make review a
+   separately routed part and therefore force a `plan-execution` hand-off.
 
 ### Sizing an agent definition (design-time use)
 
@@ -109,6 +115,7 @@ Exactly one:
 | **Subagent** | A bounded specialist task should use another model without disturbing the main conversation — still one task, one model | yes |
 | **Parallel scouts** | Several independent searches or analyses on a cheaper tier | **no — hand off** |
 | **Advisor plus implementer** | A frontier model analyzes and reviews; a workhorse model implements | **no — hand off** |
+| **Review escalation** | `review-escalation.md` resolves to R1–R4; the primary task needs a separately routed fresh-context reviewer or panel | **no — hand off** |
 | **Agent team** | Genuinely independent workstreams justify the coordination overhead | **no — hand off** |
 | **Orchestrated workflow** | Exhaustiveness or adversarial verification justifies structured multi-agent fan-out. Typically Oracle weakness ≥ 2 with Blast radius ≥ 2, or Context scale = 3 | **no — hand off** |
 
@@ -178,6 +185,7 @@ Model: <model alias or id from that provider's policy>
 Effort: <provider's level; omit when the model does not accept one>
 Tier: <mechanical | workhorse | frontier | exceptional>
 Execution shape: <one shape from the table above>
+Review level: <R0 | R1 | R2 | R3 | R4>
 Confidence: <low | medium | high>
 
 Score: novelty N, horizon N, oracle N, blast radius N, context N — total N/15
@@ -223,8 +231,8 @@ to the `log-calibration` skill (or the user) after the task ends.
 Conditional sections, each included **only** when its condition holds:
 
 - **Decomposition hand-off** — the execution shape is one of the multi-model
-  shapes (Parallel scouts, Advisor plus implementer, Agent team,
-  Orchestrated workflow). State that the Model/Effort lines above cover only
+  shapes (Parallel scouts, Advisor plus implementer, Review escalation, Agent
+  team, Orchestrated workflow). State that the Model/Effort lines above cover only
   the dominant part, and close with the hand-off:
   `Run /model-router:plan-execution "<task>" to decompose and route the parts.`
   Skip the Suggested command, Prompt hand-off, and Calibration lines in this
@@ -245,6 +253,9 @@ Conditional sections, each included **only** when its condition holds:
 - The **"Why not one tier cheaper"** line follows the routing core's
   cheapest-that-clears-the-bar rule: name a failure, not a feeling — and if
   you cannot name one, change the recommendation.
+- R1–R4 review is not a model upgrade for the primary task. Keep the primary
+  model/tier recommendation unchanged and hand off so `plan-execution` can
+  route the reviewer independently.
 - Confidence is `low` whenever you scored a dimension from an assumption rather
   than from the task description or the repository — and never higher than
   `medium` when the decision leaned on external research.

@@ -224,6 +224,26 @@ For GPT-6, OpenAI documents cache-preserving changes to reasoning effort and
 tool availability. Do not recommend a new session solely to change effort when
 the active GPT-6 harness can preserve the prefix.
 
+### Review notes
+
+- **GPT-6.1 Sol is the normal OpenAI peer-review candidate** when the review task
+  lands workhorse/frontier; Astra remains the premium review route when the
+  review task itself justifies exceptional capability.
+- **Use fresh context for R1–R4.** When reviewing work authored by Claude or a
+  prior Codex run, give the reviewer the requirements, constraints, artifact or
+  diff, and test/evidence bundle rather than the author's full reasoning.
+- **`codex review` is the preferred CLI surface for code/diff review** when
+  Codex is the selected harness. For programmatic orchestration, use the Codex
+  SDK/app-server or Agents API rather than the removed Codex-as-MCP-server path.
+- **Cross-provider review is a review-shape decision, not a benchmark claim.**
+  When R3 selects OpenAI against an Anthropic author, route the review part with
+  this policy; do not justify the provider switch from public cross-provider
+  benchmark rankings.
+
+Primary sources:
+https://developers.openai.com/api/docs/guides/latest-model
+https://developers.openai.com/blog/mastering-codex-remote-for-engineering
+
 ### Astra long-context memory in Codex
 
 Astra can experimentally keep notes across context windows while older context
