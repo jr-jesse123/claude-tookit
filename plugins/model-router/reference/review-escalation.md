@@ -214,12 +214,14 @@ example:
 - `migration-review`
 - `security-review`
 
-Record the reviewer provider/model, whether it found a material issue, whether
-the finding survived adjudication, and whether remediation changed the outcome.
+This revision does **not** change the calibration schema. Log review runs through
+the existing fields and put concise review-specific evidence in `note` when
+useful (for example, "material finding survived adjudication"). Do not invent
+new JSON fields here.
 
-A reviewer that repeatedly produces no surviving findings on a category is a
-candidate for a cheaper review level. A cheaper reviewer that repeatedly misses
-issues later found by a stronger/independent reviewer is a promotion signal.
+A follow-up calibration revision can formalize reviewer-specific outcomes such
+as material findings, adjudication survival, and remediation impact once the
+review shapes have real project data.
 
 ## Anti-patterns
 
