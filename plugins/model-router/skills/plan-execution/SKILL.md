@@ -202,6 +202,11 @@ Suggested execution:
   prompts to write, the command per stage, the ultracode keyword when the
   shape requires it>
 
+Prompt adaptation:
+- Before executing each part, run /model-router:prepare-prompt with that part's
+  provider, model, effort, harness, and executable task prompt. Adapt each part
+  independently; do not combine different targets into one optimized prompt.
+
 Escalate if:
 - <observable per-part or plan-level signal that would justify moving a part up>
 
@@ -222,5 +227,6 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/log-calibration/log-calibration.py" \
   named failure or a cheaper part.
 - Confidence is `low` whenever part boundaries were assumed rather than read
   from the repository or the task description.
-- The plan is advisory: do not execute any part, do not run the suggested
-  commands, and do not write anything — `Write` is disallowed here by design.
+- The plan is advisory: do not execute any part, do not invoke
+  `prepare-prompt`, do not run the suggested commands, and do not write
+  anything — `Write` is disallowed here by design.
