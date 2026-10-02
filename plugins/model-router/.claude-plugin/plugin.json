@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "model-router",
   "displayName": "Model Router",
-  "description": "Recommends the cheapest model, effort level, and execution shape that will complete a task reliably — routing atomic tasks with choose-model and decomposing multi-model work into routed execution plans with plan-execution — from versioned per-provider routing policies (Anthropic and OpenAI) and a project-local calibration log.",
+  "description": "Routes tasks to the cheapest reliable model/effort/execution shape, decomposes multi-model work, adapts routed task prompts to the selected model and harness with provider-specific prompting guidance, and closes the loop with project-local calibration.",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"
@@ -16,6 +16,8 @@
     "routing",
     "decomposition",
     "openai",
-    "multi-provider"
+    "multi-provider",
+    "prompt-engineering",
+    "prompt-adaptation"
   ]
 }
