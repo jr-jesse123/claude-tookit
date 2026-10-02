@@ -52,6 +52,8 @@ Accepted providers come from, in order of precedence:
 Then read:
 
 - `${CLAUDE_PLUGIN_ROOT}/reference/routing-core.md` — always.
+- `${CLAUDE_PLUGIN_ROOT}/reference/review-escalation.md` — always; it decides
+  whether verification remains self-contained or becomes a separate review part.
 - **Only `${CLAUDE_PLUGIN_ROOT}/reference/policies/<provider>.md` for each
   accepted provider**, including its **Execution-shape notes** — they decide
   which assembly shapes are even available in that provider's harness and what
@@ -73,8 +75,14 @@ output yet). Decompose only when at least one of these holds:
 - Independent parts could genuinely run in parallel.
 - Oracle weakness ≥ 2 with blast radius ≥ 2, or context scale = 3 — the
   structured-verification and larger-than-one-context signals.
+- The review policy resolves to **R1–R4**. An implementation can be atomic in
+  the routing sense but still need a separately routed review pass.
 
-If none holds, the task is atomic: output one line —
+Evaluate `review-escalation.md` after the unit score. Derive its
+`hypothesis dependence` signal from the task description/evidence, not from a
+blanket assumption that difficult work is hypothesis-dependent.
+
+If none holds and review stays R0, the task is atomic: output one line —
 `Atomic task — run /model-router:choose-model instead.` — optionally followed
 by the unit route you already computed, and stop. A plan for an atomic task is
 pure coordination overhead.
@@ -99,6 +107,10 @@ consists of. Prefer cut lines that fall on real seams:
   parallel.
 - **By role** — plan / implement / verify, when the planning or the
   verification genuinely needs a different tier than the implementation.
+- **By review independence** — when `review-escalation.md` resolves to R1–R4,
+  keep the primary artifact-producing part separate from its reviewer(s).
+  Reviewers get the review policy's fresh-context input contract, not the
+  author's reasoning transcript.
 - **By context** — when the working set exceeds one context window, the cut
   must make each part's input self-sufficient.
 
@@ -124,6 +136,17 @@ a whole task:
   categories at once.
 - The cheapest-that-clears-the-bar rule applies per part, and each part's plan
   entry carries its own "why not one tier cheaper" failure.
+- **Review parts are routed independently.** Score the review task itself, not
+  the author's model. A reviewer need not mechanically match the author's tier;
+  hard overrides that genuinely apply to the property under review naturally
+  floor that review part at frontier.
+- Apply the review level after the review task's capability floor is known:
+  - R1: fresh invocation of the same model/provider is allowed.
+  - R2: require a different model from the author; same provider is allowed.
+  - R3: restrict reviewer candidates to accepted providers different from the
+    author's provider, then apply the normal routing core inside that set.
+  - R4: route at most two reviewers independently, then add one adjudication
+    part. Do not make the panel bigger without an explicit reason.
 
 Two sanity checks on the finished routing:
 
