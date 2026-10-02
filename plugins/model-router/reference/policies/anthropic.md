@@ -314,13 +314,14 @@ Suggested command shape: `claude --model <alias> --effort <level>` (omit
 provider/harness switch is required.
 
 **Model switches and effort changes are different cache events.** Switching the
-model of a running conversation still invalidates the prompt cache. Opus 5.5 and
-Fable 5.1 support per-message effort via `output_config` (beta), which preserves
-the prompt cache. Sonnet 5.5's launch material documents the effort ladder but
-not cache-preserving per-message effort; until the Platform compatibility docs
-say otherwise, treat a top-level Sonnet effort change as a cache restart. In
-Claude Code, `/effort` can change the session effort; do not promise cache
-preservation unless the current version is known to use a cache-safe path.
+model of a running conversation still invalidates the prompt cache. Sonnet 5.5,
+Opus 5.5, and Fable 5.1 support per-message effort via `output_config` (beta),
+which preserves the prompt cache when the model's compatible thinking mode is
+used. On Sonnet 5.5, per-message effort changes require adaptive thinking;
+`between_tools` cannot change effort mid-conversation. In Claude Code,
+`/effort` can change the session effort; do not promise cache preservation
+unless the current version is known to map that turn to the cache-preserving
+per-message path.
 
 Two Opus 5.5 behaviors change which shape is worth recommending:
 
@@ -414,7 +415,6 @@ What it changes for routing:
 Switching the model of a running conversation invalidates its prompt cache and
 re-reads the history at full price. Prefer a new session or a subagent over
 repeatedly switching a long-running main conversation. Do **not** apply that
-warning mechanically to an Opus 5.5 or Fable 5.1 effort-only change when the
-harness is using per-message effort; that path preserves the cache. For Sonnet
-5.5, assume an effort-only change restarts the cache until Anthropic documents a
-cache-preserving per-message path.
+warning mechanically to a Sonnet 5.5, Opus 5.5, or Fable 5.1 effort-only change
+when the harness is using the model's supported per-message effort path; that
+path preserves the cache.
