@@ -333,6 +333,27 @@ Two Opus 5.5 behaviors change which shape is worth recommending:
   team on Opus, recommend a cap alongside it. Unbounded fan-out multiplies cost
   and latency without a matching gain.
 
+### Review / advisor notes
+
+- **Fresh-context review follows `review-escalation.md`.** Opus self-verification
+  satisfies R0; it does not satisfy R1–R4 because those levels exist to buy
+  de-anchoring or model/provider diversity.
+- **Fable 5.1 is valid as a peer reviewer/advisor without being a higher routing
+  tier.** Anthropic's Advisor Tool explicitly allows Fable 5.1 to advise Opus
+  5.5. Treat that as evidence that Fable can be a same-provider diversity peer,
+  not as evidence that normal Opus work should escalate to Fable.
+- **Advisor Tool is in-flight advice, not independent review.** The advisor sees
+  the executor transcript, so it cannot satisfy the fresh-context contract for
+  R1–R4. Use it when the executor should consult a peer during the work; use a
+  separate session/subagent for adversarial review.
+- **Price still matters.** Fable is substantially more expensive than Opus and
+  should not be selected merely to make the reviewer different. Route the review
+  part normally and use Fable when the selected review level/model-diversity
+  requirement justifies it.
+
+Primary source:
+https://platform.claude.com/docs/en/agents-and-tools/tool-use/advisor-tool
+
 ### Orchestrated workflow → ultracode
 
 In Claude Code the **Orchestrated workflow** shape materializes as Workflow
