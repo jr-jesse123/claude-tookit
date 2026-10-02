@@ -143,10 +143,20 @@ a whole task:
 - Apply the review level after the review task's capability floor is known:
   - R1: fresh invocation of the same model/provider is allowed.
   - R2: require a different model from the author; same provider is allowed.
+    If the provider's normal tier candidate is the author's model, use the
+    provider's review notes to find the next-cheapest different model that still
+    clears the review capability floor. Never buy diversity by dropping below
+    the floor.
   - R3: restrict reviewer candidates to accepted providers different from the
     author's provider, then apply the normal routing core inside that set.
   - R4: route at most two reviewers independently, then add one adjudication
-    part. Do not make the panel bigger without an explicit reason.
+    part. Prefer distinct model families/providers across the two reviewers
+    when available and useful; do not make the panel bigger without an explicit
+    reason.
+- If R2 cannot be represented by any different model that clears the floor,
+  escalate to R3 when another provider is accepted. If no valid alternative
+  exists, say that the requested independence level is unavailable and fall
+  back explicitly to R1 rather than labeling same-model review as R2.
 
 Two sanity checks on the finished routing:
 
