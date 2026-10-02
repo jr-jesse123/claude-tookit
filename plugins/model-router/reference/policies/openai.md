@@ -75,7 +75,7 @@ Astra supports `low` through `max` and does not support `none`.
 
 ### Horizon → effort mapping
 
-| Horizon | Luna | Sol | Astra |
+| Horizon | Luna | GPT-6.1 Sol | Astra |
 | --- | --- | --- | --- |
 | 0–1 | `low` / `medium` | `medium` | `medium` |
 | 2 | `high` only with strong oracle | `high` | `high` |
