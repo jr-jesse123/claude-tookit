@@ -197,6 +197,60 @@
       "author": {
         "name": "jr-jesse123"
       }
+    },
+    {
+      "name": "jev-code",
+      "source": {
+        "source": "github",
+        "repo": "FrancoisChastel/jev-code",
+        "sha": "cee3202c0321e30e6eb1ae968ece6a79d4181f57"
+      },
+      "displayName": "Jev for coding agents",
+      "description": "Upstream jev-code integration pinned by this marketplace: Jev typed judgment tools over MCP plus the /jev skill, with Claude Code and Codex support.",
+      "category": "productivity",
+      "keywords": [
+        "jev",
+        "typesafe",
+        "classifier",
+        "mcp",
+        "system-one",
+        "probabilistic",
+        "codex"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "François Chastel",
+        "url": "https://github.com/FrancoisChastel"
+      },
+      "homepage": "https://github.com/FrancoisChastel/jev-code#readme",
+      "repository": "https://github.com/FrancoisChastel/jev-code"
+    },
+    {
+      "name": "typesafe",
+      "source": {
+        "source": "github",
+        "repo": "typesafe-ai/skills",
+        "sha": "65a39f393687675ce170e6094757de20370365b9"
+      },
+      "displayName": "TypeSafe System One skills",
+      "description": "Official TypeSafe upstream skill pinned by this marketplace: design typed System One/Jev judgments, question schemas, workflows, and API usage.",
+      "category": "productivity",
+      "keywords": [
+        "typesafe",
+        "jev",
+        "system-one",
+        "skills",
+        "probabilistic",
+        "classification",
+        "decision-model"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "TypeSafe AI",
+        "url": "https://typesafe.ai"
+      },
+      "homepage": "https://typesafe.ai",
+      "repository": "https://github.com/typesafe-ai/skills"
     }
   ]
 }

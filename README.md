@@ -10,6 +10,8 @@ skills, agents, commands, hooks e MCP servers.
 /plugin marketplace add jr-jesse123/claude-tookit
 /plugin install code-review@jr-claude-toolkit
 /plugin install devops-tools@jr-claude-toolkit
+/plugin install jev-code@jr-claude-toolkit
+/plugin install typesafe@jr-claude-toolkit
 ```
 
 Depois de instalado, tudo fica sob o namespace do plugin:
@@ -78,6 +80,27 @@ Os advisors só recomendam; nunca executam (`Edit`/`Write` em
 evidência real por categoria e provedor (partes de um plano logam sob o slug
 próprio), e passa por cima da policy quando 3 entradas apontam na mesma
 direção.
+
+### Jev / TypeSafe upstreams
+
+Estes dois plugins são **upstreams externos publicados pelo nosso marketplace,
+não forks**. O `marketplace.json` aponta diretamente para os repositórios
+originais e fixa um commit conhecido; atualizar a integração é uma mudança
+explícita no toolkit, não um movimento silencioso de `main`.
+
+| Plugin no marketplace | Upstream | O que fornece |
+| --- | --- | --- |
+| `jev-code@jr-claude-toolkit` | `FrancoisChastel/jev-code` — v0.3.0 pinned | MCP/CLI para `jev_classify`, `jev_check`, `jev_score`, `jev_rank`, `jev_ask` e a skill `/jev-code:jev`. Suporta TypeSafe, OpenRouter ou Vercel AI Gateway e também integração com Codex. |
+| `typesafe@jr-claude-toolkit` | `typesafe-ai/skills` — v0.5.7 pinned | Skill oficial `/typesafe:typesafe-ai` para desenhar workflows System One/Jev, escolher primitives, tratar confidence e consultar a documentação/API/SDK atual. |
+
+As responsabilidades permanecem separadas de propósito: `jev-code` é a
+**integração executável para coding agents**; `typesafe` é a **fonte canônica
+de design e uso do System One**. O `model-router` ainda não depende de nenhum
+dos dois nesta etapa.
+
+Para usar Jev de fato, configure uma credencial suportada pelo `jev-code`
+(`TYPESAFE_API_KEY`, `OPENROUTER_API_KEY` ou `AI_GATEWAY_API_KEY`). A
+skill oficial TypeSafe por si só não exige credencial para ser lida.
 
 ### `intent-compiler`
 
