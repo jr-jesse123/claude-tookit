@@ -251,6 +251,17 @@
       },
       "homepage": "https://typesafe.ai",
       "repository": "https://github.com/typesafe-ai/skills"
+    },
+    {
+      "name": "execution-router",
+      "source": "./plugins/execution-router",
+      "description": "Advises on computation form using a cheap grounding gate, optional Jev opportunity scan, and local deterministic policy; hands generative work to the independent model-router.",
+      "category": "productivity",
+      "keywords": ["execution", "routing", "deterministic", "typed-decisions", "jev", "grounding"],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
     }
   ]
 }

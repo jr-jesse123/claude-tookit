@@ -19,6 +19,9 @@ jobs:
       - name: Validate marketplace and plugins
         run: node scripts/validate-marketplace.mjs
 
+      - name: Check execution routing policy and skill references
+        run: node --test plugins/execution-router/tests/*.test.mjs
+
       # @zabaca/mermaid-validate ships a bun-target binary (#!/usr/bin/env bun)
       - uses: oven-sh/setup-bun@v2
 

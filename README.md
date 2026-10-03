@@ -12,6 +12,7 @@ skills, agents, commands, hooks e MCP servers.
 /plugin install devops-tools@jr-claude-toolkit
 /plugin install jev-code@jr-claude-toolkit
 /plugin install typesafe@jr-claude-toolkit
+/plugin install execution-router@jr-claude-toolkit
 ```
 
 Depois de instalado, tudo fica sob o namespace do plugin:
@@ -80,6 +81,38 @@ Os advisors só recomendam; nunca executam (`Edit`/`Write` em
 evidência real por categoria e provedor (partes de um plano logam sob o slug
 próprio), e passa por cima da policy quando 3 entradas apontam na mesma
 direção.
+
+### `execution-router`
+
+`/execution-router:choose-execution` advises on **what form of computation**
+fits large, repetitive, mixed, or paradigm-ambiguous work. It first distinguishes
+self-contained, cheaply-groundable, and discovery-dependent evidence. When
+finding the state already requires the judgment, it hands off generatively.
+Otherwise, an optional single Jev scan reports independent exact-computation,
+typed-decision, generative-necessity, payoff, and insufficient-evidence signals.
+A local deterministic policy chooses the recommendation.
+
+The direction is **execution-router -> model-router**. Model-router remains
+independently useful for generative work; its routing core, provider policies,
+review ladder, planner, and calibration are unchanged. Obviously deterministic
+tasks may need neither router. The advisor leaves the repository unchanged and
+does not execute the proposed task or invoke its handoffs.
+
+```text
+/execution-router:choose-execution "Assess the supplied recurring triage workload and evidence"
+/execution-router:choose-execution "Assess this task using local evidence only" --no-scan
+```
+
+Install/configure `jev-code` separately to enable scanning. If it is unavailable,
+the advisor returns a generative handoff; it does not install tools or request
+credentials. TypeSafe remains the separate canonical design skill. The current
+release identifies opportunities only: `determinize`, `typify`, and residual
+orchestration are not implemented yet. An opportunity does not remove any work
+from the original task until a transformation has actually been designed.
+
+- [Full architecture and staged roadmap](plugins/execution-router/reference/architecture.md)
+- [Scanner contract and policy](plugins/execution-router/reference/shape-scan.md)
+- [Behavioral acceptance cases and validation limits](plugins/execution-router/tests/acceptance.md)
 
 ### Jev / TypeSafe upstreams
 
@@ -387,6 +420,15 @@ claude-tookit/
 │   │   └── skills/log-calibration/
 │   │       ├── SKILL.md
 │   │       └── log-calibration.py   # único caminho de escrita (append-only)
+│   ├── execution-router/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/choose-execution/SKILL.md
+│   │   ├── reference/
+│   │   │   ├── architecture.md    # end-state design and staged delivery
+│   │   │   ├── shape-scan.md      # optional Jev contract and local policy
+│   │   │   └── scan-request.json  # fixed independent questions and thresholds
+│   │   ├── scripts/route-scan.mjs # pure policy; stdin JSON -> stdout JSON
+│   │   └── tests/                # policy tests and behavioral acceptance cases
 │   ├── intent-compiler/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/               # compartilhado pelas skills, via ${CLAUDE_PLUGIN_ROOT}

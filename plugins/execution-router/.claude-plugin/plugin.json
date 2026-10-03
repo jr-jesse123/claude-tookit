@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "execution-router",
+  "displayName": "Execution Router",
+  "description": "Advises on computation form with a cheap grounding gate and optional Jev opportunity scan. Keeps deterministic policy local and hands generative work to the independent model-router.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["execution", "routing", "deterministic", "typed-decisions", "jev", "grounding"]
+}
