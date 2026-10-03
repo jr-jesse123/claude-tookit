@@ -20,6 +20,7 @@
     "devops-tools@jr-claude-toolkit": true,
     "arch-docs@jr-claude-toolkit": true,
     "jev-code@jr-claude-toolkit": true,
-    "typesafe@jr-claude-toolkit": true
+    "typesafe@jr-claude-toolkit": true,
+    "execution-router@jr-claude-toolkit": true
   }
 }
