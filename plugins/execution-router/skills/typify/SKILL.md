@@ -156,3 +156,6 @@ unresolved judgments, forwarding explicit `--providers=` unchanged. Without
 model-router, return the same self-contained handoff text. Do not choose the
 provider/model here, recursively typify the residual, or change the R0-R4 ladder.
 For a matching design dilemma, read the relevant [worked example](examples.md).
+If this design came from a pending `/execution-router:compose-execution`
+checkpoint, suggest returning this full output there with its input revision;
+the coordinator retains earlier contracts and terminates reshaping.

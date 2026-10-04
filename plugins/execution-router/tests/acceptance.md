@@ -69,6 +69,33 @@ are not established by those checks.
 | Criterion requires exact proof | Preserve that requirement; typed probability cannot discharge it |
 | Normal typed branch covers task but exceptions need a person/model | Retain conditional fallback work in the residual |
 
+## Composition acceptance cases
+
+Review [compose-execution](../skills/compose-execution/SKILL.md) and the
+[record/termination examples](../reference/residual-record.md). The synthetic
+`compose-residual.test.mjs` suite checks deterministic accounting, not the truth
+of supplied economics, semantic coverage, or an agent's adherence to checkpoints.
+
+| Input/evidence | Expected composition behavior |
+| --- | --- |
+| Exact extraction changes a nonempty residual | Retain exact contract and pending work; fresh cheap gate for current evidence and payoff |
+| Fresh scan still supports exact and typed opportunities | Exact attempt stays spent; independent typed signal may advance typify |
+| Exact attempt rejects an uneconomic candidate; evidence unchanged | Keep input unchanged; supported typed opportunity may advance without another scan |
+| Rejected exact design exposes stale evidence | Invalidate signals; stop reshaping without another collection pass |
+| Missing/interrupted design response | Retain pending consumed attempt; wait or explicitly record failure; never reissue automatically |
+| No-change design, including reordered criterion IDs | No accepted extraction or rescan; advance to unused typed opportunity or stop |
+| Typed normal path succeeds but exceptions require a person/model | Keep conditional fallback in residual; stop after typify |
+| Claimed empty residual omits criteria, review or pending execution | Reject malformed accounting; preserve full record for repair |
+| Full semantic coverage with valid design | Design complete only; implementation, evaluation, execution and assembly still pending |
+| Third scan, second transformation attempt, stale revision, wrong stage or extra step | Repair record; no silent budget reset |
+| Domain-level coverage check would require deep reasoning | Coordinator preserves input instead of performing another design pass |
+
+Before the evidence-gated planner increment, run representative real mixed
+workflows and record original criteria, every residual/contract, checkpoint
+friction, actual call counts, wall time and total modeling/grounding/fallback
+cost. Keep those observations distinct from the synthetic tests and proposed
+examples; do not change model-router calibration to store them in this increment.
+
 ## Reproducible local checks
 
 From the repository root:

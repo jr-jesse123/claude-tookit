@@ -255,7 +255,7 @@
     {
       "name": "execution-router",
       "source": "./plugins/execution-router",
-      "description": "Advises on computation form using a cheap grounding gate, optional Jev scan, and local policy; designs exact extractions and typed decisions with explicit verification, uncertainty and residuals while keeping model-router independent.",
+      "description": "Advises on computation form with cheap grounding, optional Jev scanning, exact and typed design, and bounded residual composition; preserves pending work and model-router independence.",
       "category": "productivity",
       "keywords": ["execution", "routing", "deterministic", "typed-decisions", "jev", "grounding"],
       "license": "MIT",

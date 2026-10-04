@@ -1,9 +1,9 @@
 # Execution routing: architecture and staged delivery
 
-Status: grounding and scanning shipped in #41, exact extraction design in #42.
-This increment adds the independently invocable, read-only `typify` design skill.
-Residual orchestration, cross-paradigm planning, and assurance refactoring below
-remain future work, not current behavior.
+Status: grounding and scanning shipped in #41, exact extraction design in #42,
+and typed-decision design in #43. This increment adds bounded, resumable advisory
+composition. Automatic dispatch, cross-paradigm execution planning and assurance
+refactoring remain outside current behavior.
 
 ## Responsibilities
 
@@ -48,7 +48,7 @@ policy consumes them. Jev never chooses models or discovers transformations.
 The fixed scan is itself a bounded typed decision, separate from general
 `typify` design. Probabilities remain inspectable and uncertainty has a fallback.
 
-## Intended residual pipeline
+## Bounded residual pipeline
 
 ```text
 raw task -> grounding gate -> eligible cheap shape scan
@@ -58,11 +58,29 @@ raw task -> grounding gate -> eligible cheap shape scan
 
 Each stage may be skipped. Discovery-dependent work goes directly to generative
 routing. Defaults: at most one determinize attempt and one typify attempt per
-original task; at most the initial scan plus one scan per changed residual.
+original task; at most two scans, initially and after an accepted exact extraction
+changes a nonempty residual. There is no scan after typify: no transformation
+remains to inform.
 An attempt that extracts nothing or changes no residual advances or stops; it
 does not retry with cosmetic rewording. An exception needs a concrete new fact
-or measured payoff and an explicit budget before another attempt. These are
-future orchestration rules; the shipped entry skill permits one scan only.
+or measured payoff and an explicit budget before another attempt; the current
+helper does not implement overrides. The standalone entry skill still permits
+one scan only.
+
+[`compose-execution`](../skills/compose-execution/SKILL.md) connects the existing
+advisors through caller-invoked checkpoints. Its pure accounting helper replays
+a chat-carried [residual record](residual-record.md), consumes a design attempt
+before handoff, retains accepted contracts and pending execution, and stops on
+missing/conflicting history. It does not automatically invoke user-only skills,
+select models or build a scheduler. The cheap coordinator compares supplied
+coverage; if that comparison requires deep design, it preserves the input instead.
+
+Rejected/unchanged exact designs can advance to the same scan's independent
+typed opportunity only while evidence remains valid. Accepted changed residuals
+invalidate earlier signals and payoff, requiring a fresh cheap gate. Local policy
+skips consumed stages even when a fresh scan still reports an exact opportunity.
+Criterion accounting is mechanically checked; semantic preservation, actual
+economics and truthful history still require the caller's explicit check.
 
 `determinize` uses generative reasoning to discover **how** an exact portion
 can be extracted. Its contract names the portion, deterministic mechanism,
@@ -119,14 +137,16 @@ GitHub-assigned PR numbers. Each increment must be reviewable on its own.
 | --- | --- | --- |
 | 41: entry (shipped) | Plugin, grounding gate, fixed Jev shape scan, local policy, advisory handoff | No transformation or model-router changes; failure and mixed-signal cases covered |
 | 42: determinize (shipped) | Exact extraction design skill and worked examples | Preserves meaning, names mechanism/oracle, returns residual or no extraction; no task execution |
-| 43: typify (this increment) | Typed-contract design skill and worked examples | Official TypeSafe guidance, Jev adapter separation, explicit uncertainty/fallback; no live decision execution |
-| 44: composition | Bounded residual pipeline | Separability and economics at each relevant gate; changed-state rescans only; termination examples |
+| 43: typify (shipped) | Typed-contract design skill and worked examples | Official TypeSafe guidance, Jev adapter separation, explicit uncertainty/fallback; no live decision execution |
+| 44: composition (this increment) | Bounded advisory residual pipeline with resumable records | Separability and economics at each relevant gate; changed-state rescans only; deterministic termination/accounting tests; no automatic dispatch |
 | 45: planner, evidence-gated | Cross-paradigm execution planning | Real mixed workflows demonstrate that moving/generalizing plan-execution is worth it |
 | 46: assurance, evidence-gated | Assurance requirement separate from executor family | Real review contracts justify a change beyond today's R0-R4 ladder |
 
-Before composition, collect examples where extraction succeeds, fails, or is
-uneconomic, recording original acceptance criteria and the actual residual.
-Before a planner move, demonstrate interfaces such as deterministic parser ->
+The extraction skills supply worked success, failure and uneconomic cases;
+composition adds synthetic accounting tests and termination cases. These are
+design evidence, not measured live use. Before a planner move, collect real
+original criteria, residuals, handoff friction and end-to-end cost; demonstrate
+interfaces such as deterministic parser ->
 Jev classification -> generative implementation -> deterministic tests ->
 independent review. Preserve model-router:plan-execution's current multi-model
 generative behavior until that evidence exists.

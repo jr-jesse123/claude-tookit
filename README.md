@@ -105,6 +105,12 @@ work. Official TypeSafe guidance supplies the design knowledge; jev-code supplie
 the execution mapping. The skill does not run Jev or treat probabilities as exact
 proof. Conditional human/generative fallback work remains explicit in the residual.
 
+`/execution-router:compose-execution` connects those advisors through resumable,
+caller-invoked checkpoints. It retains contracts and pending execution, permits
+at most one determinize and one typify attempt, and rescans only a changed exact
+residual when another transformation could still help. Its local accounting
+helper prevents out-of-order continuation; it does not dispatch skills or run work.
+
 The direction is **execution-router -> model-router**. Model-router remains
 independently useful for generative work; its routing core, provider policies,
 review ladder, planner, and calibration are unchanged. Obviously deterministic
@@ -116,6 +122,7 @@ does not execute the proposed task or invoke its handoffs.
 /execution-router:choose-execution "Assess this task using local evidence only" --no-scan
 /execution-router:determinize "Extract the exact portion of the supplied recurring reconciliation task; preserve its acceptance criteria"
 /execution-router:typify "Design independent labels for the supplied recurring support queue; preserve uncertainty and reply-writing as residual work"
+/execution-router:compose-execution "Coordinate reshaping of the supplied recurring reconciliation and triage task, preserving all acceptance criteria"
 ```
 
 Install/configure `jev-code` separately to enable scanning. If it is unavailable,
@@ -124,13 +131,15 @@ credentials. `determinize` works without Jev or TypeSafe; it performs generative
 design and never invokes the scanner. TypeSafe remains the separate canonical
 typed-decision design skill, read by typify through the installed skill or its
 pinned upstream. Typify can design without a running Jev service when its adapter
-contract is verified. Residual orchestration is not implemented yet: each design
-skill returns an inspectable contract and advisory handoff without execution.
+contract is verified. Composition is advisory and read-only: each design skill
+returns an inspectable contract to the coordinator without execution. Empty
+semantic residue never means the proposed mechanism has been implemented or run.
 
 - [Full architecture and staged roadmap](plugins/execution-router/reference/architecture.md)
 - [Scanner contract and policy](plugins/execution-router/reference/shape-scan.md)
 - [Exact extraction contract and examples](plugins/execution-router/skills/determinize/SKILL.md)
 - [Typed decision contract and examples](plugins/execution-router/skills/typify/SKILL.md)
+- [Residual composition and checkpoint format](plugins/execution-router/skills/compose-execution/SKILL.md)
 - [Behavioral acceptance cases and validation limits](plugins/execution-router/tests/acceptance.md)
 
 ### Jev / TypeSafe upstreams
@@ -442,6 +451,7 @@ claude-tookit/
 │   ├── execution-router/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── skills/choose-execution/SKILL.md
+│   │   ├── skills/compose-execution/SKILL.md # bounded advisory checkpoints
 │   │   ├── skills/determinize/
 │   │   │   ├── SKILL.md           # exact extraction contract and semantic residual
 │   │   │   └── examples.md        # partial, rejected, uneconomic and already-exact cases
@@ -452,8 +462,10 @@ claude-tookit/
 │   │   │   ├── architecture.md    # end-state design and staged delivery
 │   │   │   ├── shape-scan.md      # optional Jev contract and local policy
 │   │   │   ├── scan-request.json  # fixed independent questions and thresholds
+│   │   │   ├── residual-record.md # resumable accounting and termination cases
 │   │   │   └── typed-decisions.md # canonical TypeSafe guidance and Jev adapter mapping
 │   │   ├── scripts/route-scan.mjs # pure policy; stdin JSON -> stdout JSON
+│   │   ├── scripts/compose-residual.mjs # pure residual accounting; no dispatch
 │   │   └── tests/                # policy tests and behavioral acceptance cases
 │   ├── intent-compiler/
 │   │   ├── .claude-plugin/plugin.json

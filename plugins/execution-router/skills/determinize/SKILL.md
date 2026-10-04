@@ -144,6 +144,9 @@ needs neither router. If model-router is absent, return the same self-contained
 handoff for a generative session. A clearly bounded typed opportunity may be
 handed to `/execution-router:typify` with its evidence and payoff basis. This is
 advisory only; do not auto-invoke it or orchestrate a residual pipeline here.
+If this design came from a pending `/execution-router:compose-execution`
+checkpoint, suggest returning this full output there with its input revision;
+let that coordinator account for attempts and choose the next stage.
 
 For a matching example or a disputed exact/residual split, read only the relevant
 section of [worked examples](examples.md). They illustrate contracts, not measured
