@@ -90,7 +90,8 @@ The upstream transport may have its own bounded retries; this skill adds none.
 
 Done when the helper returns a recommendation, or a failure is recorded. This
 skill stops there. `determinize` and `typify` are separate, advisory design
-handoffs; residual rescans remain a future increment. Read
+handoffs. For bounded multi-stage composition and residual rescans, the caller
+may use `/execution-router:compose-execution`; this invocation still stops here. Read
 `${CLAUDE_PLUGIN_ROOT}/reference/architecture.md` only for architecture or
 roadmap questions, never as a runtime prerequisite.
 
@@ -100,7 +101,7 @@ roadmap questions, never as a runtime prerequisite.
 Task: <objective and acceptance criteria>
 Evidence: <self-contained | cheaply-groundable | discovery-dependent>
 Grounding: <sources actually read; missing state; why collection was separable>
-Scan: <skipped + reason | completed | failed + reason>
+Scan: <skipped + reason | completed | failed + reason; retain full raw response for composition>
 Signals: <IDs, raw probabilities and local verdicts; omit if scan did not complete>
 Recommendation: <direct-deterministic | generative | consider-determinize | consider-typify>
 Reason: <bypass reason or helper reason; cite the supplied payoff evidence>
