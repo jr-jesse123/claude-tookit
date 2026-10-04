@@ -111,6 +111,14 @@ at most one determinize and one typify attempt, and rescans only a changed exact
 residual when another transformation could still help. Its local accounting
 helper prevents out-of-order continuation; it does not dispatch skills or run work.
 
+`/execution-router:plan-execution` is an **experimental mixed-work planner** for
+daily trials. It accepts that composition record or an already explicit mixed
+task, and organizes deterministic, typed and generative parts with dependencies,
+input/output contracts, conditional fallbacks and assembly. It separates designing
+or implementing a mechanism from executing it. Generative parts get model-router
+handoffs; model/effort remain pending until matching routes are returned. It does
+not replace `/model-router:plan-execution`, invoke advisors or execute the plan.
+
 The direction is **execution-router -> model-router**. Model-router remains
 independently useful for generative work; its routing core, provider policies,
 review ladder, planner, and calibration are unchanged. Obviously deterministic
@@ -123,6 +131,7 @@ does not execute the proposed task or invoke its handoffs.
 /execution-router:determinize "Extract the exact portion of the supplied recurring reconciliation task; preserve its acceptance criteria"
 /execution-router:typify "Design independent labels for the supplied recurring support queue; preserve uncertainty and reply-writing as residual work"
 /execution-router:compose-execution "Coordinate reshaping of the supplied recurring reconciliation and triage task, preserving all acceptance criteria"
+/execution-router:plan-execution "Plan the supplied exact and typed contracts, their pending implementation, and the remaining generative work"
 ```
 
 Install/configure `jev-code` separately to enable scanning. If it is unavailable,
@@ -140,6 +149,7 @@ semantic residue never means the proposed mechanism has been implemented or run.
 - [Exact extraction contract and examples](plugins/execution-router/skills/determinize/SKILL.md)
 - [Typed decision contract and examples](plugins/execution-router/skills/typify/SKILL.md)
 - [Residual composition and checkpoint format](plugins/execution-router/skills/compose-execution/SKILL.md)
+- [Experimental mixed planner and daily Claude Code trial](plugins/execution-router/skills/plan-execution/plan-contract.md)
 - [Behavioral acceptance cases and validation limits](plugins/execution-router/tests/acceptance.md)
 
 ### Jev / TypeSafe upstreams
@@ -452,6 +462,9 @@ claude-tookit/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── skills/choose-execution/SKILL.md
 │   │   ├── skills/compose-execution/SKILL.md # bounded advisory checkpoints
+│   │   ├── skills/plan-execution/
+│   │   │   ├── SKILL.md           # experimental cross-family advisory plan
+│   │   │   └── plan-contract.md   # family contracts, examples and daily trial
 │   │   ├── skills/determinize/
 │   │   │   ├── SKILL.md           # exact extraction contract and semantic residual
 │   │   │   └── examples.md        # partial, rejected, uneconomic and already-exact cases

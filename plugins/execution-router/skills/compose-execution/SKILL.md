@@ -100,3 +100,9 @@ For remaining generative design/implementation/judgments, suggest
 `--providers=`. If absent, give that same text for a generative session.
 Do not allocate models across exact/typed work, move plan-execution, select
 reviewer families, or modify provider policy, R0-R4 or calibration.
+
+When the caller wants sequencing and assembly across the retained contracts and
+residual, suggest the experimental `/execution-router:plan-execution` with the
+entire record and all pending work. This optional planning handoff neither
+executes work nor resets transformation budgets; direct generative handoffs
+remain valid when no mixed plan is needed.

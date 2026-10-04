@@ -1,8 +1,9 @@
 # Execution routing: architecture and staged delivery
 
 Status: grounding and scanning shipped in #41, exact extraction design in #42,
-and typed-decision design in #43. This increment adds bounded, resumable advisory
-composition. Automatic dispatch, cross-paradigm execution planning and assurance
+typed-decision design in #43, and bounded advisory composition in #44. This
+increment adds an opt-in experimental mixed execution planner for daily trials.
+Automatic dispatch, migration of the existing generative planner and assurance
 refactoring remain outside current behavior.
 
 ## Responsibilities
@@ -128,6 +129,31 @@ grounding, evaluation and coordination cost. Exact guarantees can justify a
 one-off transformation; mere technical possibility cannot. Unknown economics
 does not become an invented ROI. Measure total workflow cost, not only Jev time.
 
+## Experimental mixed execution planning
+
+[`execution-router:plan-execution`](../skills/plan-execution/SKILL.md) organizes
+supplied exact/typed contracts, pending implementation and residual judgments into
+a bounded dependency plan. Unlike composition, it owns sequencing, artifact
+interfaces, activation/fallback joins and assembly. Unlike model-router's planner,
+it does not score generative work or own provider/model/review policy.
+
+It accepts a complete composition record or an already explicit mixed task.
+Unknown paradigms still use the cheap gate; discovery stays generative rather
+than becoming a costly planning preflight. Design, implementation and execution
+are separate obligations. Accepted extraction contracts do not imply readiness.
+
+Generative parts receive caller-invoked model-router handoffs; returned routes
+must match the same part and input contract. Until then their model/effort remain
+pending. Exact/typed execution and human fallbacks never receive generative model
+assignments. Existing model-router review contracts are retained, not replaced
+by a new assurance scheme. The planner is read-only and launches no workers.
+
+This experiment was explicitly requested before real-workflow evidence was
+available so composition and planning can be tried together. That changes the
+delivery order, not the evidence: the planner is additive and experimental,
+not a validated successor to model-router:plan-execution. Its existing behavior
+remains unchanged. See [contracts and daily-trial examples](../skills/plan-execution/plan-contract.md).
+
 ## Increment boundaries and evidence gates
 
 Numbers below are roadmap labels from the design discussion, not promises of
@@ -138,13 +164,14 @@ GitHub-assigned PR numbers. Each increment must be reviewable on its own.
 | 41: entry (shipped) | Plugin, grounding gate, fixed Jev shape scan, local policy, advisory handoff | No transformation or model-router changes; failure and mixed-signal cases covered |
 | 42: determinize (shipped) | Exact extraction design skill and worked examples | Preserves meaning, names mechanism/oracle, returns residual or no extraction; no task execution |
 | 43: typify (shipped) | Typed-contract design skill and worked examples | Official TypeSafe guidance, Jev adapter separation, explicit uncertainty/fallback; no live decision execution |
-| 44: composition (this increment) | Bounded advisory residual pipeline with resumable records | Separability and economics at each relevant gate; changed-state rescans only; deterministic termination/accounting tests; no automatic dispatch |
-| 45: planner, evidence-gated | Cross-paradigm execution planning | Real mixed workflows demonstrate that moving/generalizing plan-execution is worth it |
+| 44: composition (shipped) | Bounded advisory residual pipeline with resumable records | Separability and economics at each relevant gate; changed-state rescans only; deterministic termination/accounting tests; no automatic dispatch |
+| 45: planner (experimental, this increment) | Additive cross-paradigm advisory planning for daily trials | Supplied contracts, bounded dependency/coverage plan and model-router handoffs; migration/promotion remains evidence-gated |
 | 46: assurance, evidence-gated | Assurance requirement separate from executor family | Real review contracts justify a change beyond today's R0-R4 ladder |
 
 The extraction skills supply worked success, failure and uneconomic cases;
 composition adds synthetic accounting tests and termination cases. These are
-design evidence, not measured live use. Before a planner move, collect real
+design evidence, not measured live use. Before promoting the experimental planner
+or moving the existing generative planner, collect real
 original criteria, residuals, handoff friction and end-to-end cost; demonstrate
 interfaces such as deterministic parser ->
 Jev classification -> generative implementation -> deterministic tests ->

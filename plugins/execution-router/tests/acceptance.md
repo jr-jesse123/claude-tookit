@@ -90,11 +90,43 @@ of supplied economics, semantic coverage, or an agent's adherence to checkpoints
 | Third scan, second transformation attempt, stale revision, wrong stage or extra step | Repair record; no silent budget reset |
 | Domain-level coverage check would require deep reasoning | Coordinator preserves input instead of performing another design pass |
 
-Before the evidence-gated planner increment, run representative real mixed
+To evaluate the experimental planner before promoting it, run real mixed
 workflows and record original criteria, every residual/contract, checkpoint
 friction, actual call counts, wall time and total modeling/grounding/fallback
 cost. Keep those observations distinct from the synthetic tests and proposed
 examples; do not change model-router calibration to store them in this increment.
+
+## Experimental mixed-planner acceptance cases
+
+Use [plan-execution](../skills/plan-execution/SKILL.md) with the
+[worked contracts and daily trial](../skills/plan-execution/plan-contract.md).
+These are behavioral evaluation cases, not automated evidence that the planner
+obeys them. The existing automated suite validates reference paths and the
+scanner/composition helpers; it does not execute this generative skill.
+
+| Input/evidence | Expected planner behavior |
+| --- | --- |
+| Wholly generative or already exact task | Cheap direct handoff; no mixed plan or new investigation |
+| Unknown state needed to identify any useful exact/typed portion | Keep discovery generative; no expensive preflight or Jev call |
+| Explicit mixed parts with supplied mechanisms and contracts | Plan directly without forcing a scan or composition prerequisite |
+| Composition result has a pending attempt or invalid history | Stop for the matching result/repair; do not reset budgets |
+| Composition reports design-complete but implementation remains | Plan pending implementation/evaluation/execution, not a completion report |
+| Two implementations share writes or depend on each other's artifacts | Sequential dependencies, not speculative parallelism |
+| Normal typed path plus conditional fallback | Explicit activation and skipped outcome; join waits for resolved normal-or-fallback output |
+| Fallback requires a human but no responsible process is available | Visible blocker; no generative substitution or automatic acceptance |
+| Typed threshold or required state is unresolved | Block applicable runtime acceptance; use only an already-defined viable fallback policy |
+| Artifact consumed without a producer or supplied source | Mark unresolved; do not claim a runnable plan |
+| Required work exceeds the current 2–7 parts | Stage it; keep deferred criteria and dependencies explicit |
+| No supplied generative route or model-router missing | Self-contained routing handoff, model/effort pending; no remembered model choice |
+| Returned route belongs to a changed part/provider scope | Reroute only that affected generative part; preserve composition history |
+| Expected input artifact fails its promised contract | Block dependent work and invalidate affected provisional routes |
+| Model-router requires separate review | Retain the complete subplan or explicit review parts; tests do not discharge R1–R4 |
+| User requests a plan, not execution | No task commands, writes, Jev calls, installs, worker dispatch or calibration entries |
+
+For a daily trial, carry the same real task through composition and mixed
+planning, then return per-part model-router outputs. Check all original criteria,
+conditional branches, readiness and review contracts against the resulting plan.
+Record actual relay friction and total cost separately from proposed savings.
 
 ## Reproducible local checks
 
