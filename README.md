@@ -92,6 +92,13 @@ Otherwise, an optional single Jev scan reports independent exact-computation,
 typed-decision, generative-necessity, payoff, and insufficient-evidence signals.
 A local deterministic policy chooses the recommendation.
 
+`/execution-router:determinize` designs the useful exact portion: mechanism,
+input/output contract, oracle, criterion coverage, economics, and semantic
+residual. It can reject extraction or recognize an already-exact task. The
+contract is a proposal; implementation and execution remain explicitly pending,
+even when no semantic judgment remains. Invoke it directly with evidence and a
+payoff basis, or from choose-execution's advisory handoff.
+
 The direction is **execution-router -> model-router**. Model-router remains
 independently useful for generative work; its routing core, provider policies,
 review ladder, planner, and calibration are unchanged. Obviously deterministic
@@ -101,17 +108,20 @@ does not execute the proposed task or invoke its handoffs.
 ```text
 /execution-router:choose-execution "Assess the supplied recurring triage workload and evidence"
 /execution-router:choose-execution "Assess this task using local evidence only" --no-scan
+/execution-router:determinize "Extract the exact portion of the supplied recurring reconciliation task; preserve its acceptance criteria"
 ```
 
 Install/configure `jev-code` separately to enable scanning. If it is unavailable,
 the advisor returns a generative handoff; it does not install tools or request
-credentials. TypeSafe remains the separate canonical design skill. The current
-release identifies opportunities only: `determinize`, `typify`, and residual
-orchestration are not implemented yet. An opportunity does not remove any work
-from the original task until a transformation has actually been designed.
+credentials. `determinize` works without Jev or TypeSafe; it performs generative
+design and never invokes the scanner. TypeSafe remains the separate canonical
+typed-decision design skill. `typify` and residual orchestration are not
+implemented yet. Choose-execution identifies opportunities; determinize designs
+one exact extraction without executing it or automatically routing the residual.
 
 - [Full architecture and staged roadmap](plugins/execution-router/reference/architecture.md)
 - [Scanner contract and policy](plugins/execution-router/reference/shape-scan.md)
+- [Exact extraction contract and examples](plugins/execution-router/skills/determinize/SKILL.md)
 - [Behavioral acceptance cases and validation limits](plugins/execution-router/tests/acceptance.md)
 
 ### Jev / TypeSafe upstreams
@@ -423,6 +433,9 @@ claude-tookit/
 │   ├── execution-router/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── skills/choose-execution/SKILL.md
+│   │   ├── skills/determinize/
+│   │   │   ├── SKILL.md           # exact extraction contract and semantic residual
+│   │   │   └── examples.md        # partial, rejected, uneconomic and already-exact cases
 │   │   ├── reference/
 │   │   │   ├── architecture.md    # end-state design and staged delivery
 │   │   │   ├── shape-scan.md      # optional Jev contract and local policy

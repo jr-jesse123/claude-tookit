@@ -1,8 +1,9 @@
 # Execution routing: architecture and staged delivery
 
-Status: the grounding gate and opportunity scanner ship in this increment.
-Transformation skills, residual orchestration, cross-paradigm planning, and
-assurance refactoring below are intended future work, not current behavior.
+Status: the grounding gate and opportunity scanner shipped in #41. This increment
+adds the independently invocable, read-only `determinize` design skill. Typed
+transformation, residual orchestration, cross-paradigm planning, and assurance
+refactoring below remain future work, not current behavior.
 
 ## Responsibilities
 
@@ -63,10 +64,26 @@ does not retry with cosmetic rewording. An exception needs a concrete new fact
 or measured payoff and an explicit budget before another attempt. These are
 future orchestration rules; the shipped entry skill permits one scan only.
 
-`determinize` will use generative reasoning to discover **how** an exact portion
-can be extracted. Its contract must name the portion, deterministic mechanism,
-oracle, preserved semantics, preconditions, and semantic residual. It may return
-no extraction. A regex that drops meaning is not a successful transformation.
+`determinize` uses generative reasoning to discover **how** an exact portion
+can be extracted. Its contract names the portion, deterministic mechanism,
+oracle, preserved semantics, preconditions, criterion coverage, and semantic
+residual. It returns a proposal, no extraction, or an already-exact fast exit.
+A regex that drops meaning is not a successful transformation. Designing the
+contract never counts as implementing, executing or validating it: even an
+empty semantic residual carries explicit remaining execution obligations.
+
+The design skill uses `opus` / `high` for its common hard case: finding a useful
+exact contract without losing meaning when the oracle is incomplete. This is
+a design-time judgment consistent with the existing generative planner; it
+does not import or change model-router policy at runtime. The cheap Haiku gate
+never auto-invokes this more expensive step. `determinize` checks candidate-specific
+payoff before a bounded design pass and rejects unsupported or uneconomic
+extractions. A supplied exact mechanism can exit without new modeling.
+
+See the [skill contract](../skills/determinize/SKILL.md) and
+[worked examples](../skills/determinize/examples.md) when using or reviewing that
+design step. It works without a scan or either upstream integration, and neither
+recurses on its residual nor invokes model-router automatically.
 
 `typify` will use generative reasoning to model state, independent questions,
 Noul/Choice/Score/candidate-ranking outputs, and uncertainty/threshold/fallback
@@ -87,8 +104,8 @@ GitHub-assigned PR numbers. Each increment must be reviewable on its own.
 
 | Increment | Deliverable | Acceptance boundary |
 | --- | --- | --- |
-| 41: entry | Plugin, grounding gate, fixed Jev shape scan, local policy, advisory handoff | No transformation or model-router changes; failure and mixed-signal cases covered |
-| 42: determinize | Exact extraction skill and worked examples | Preserves meaning, names mechanism/oracle, returns residual or no extraction |
+| 41: entry (shipped) | Plugin, grounding gate, fixed Jev shape scan, local policy, advisory handoff | No transformation or model-router changes; failure and mixed-signal cases covered |
+| 42: determinize (this increment) | Exact extraction design skill and worked examples | Preserves meaning, names mechanism/oracle, returns residual or no extraction; no task execution |
 | 43: typify | Typed-contract design skill and worked examples | Official TypeSafe guidance, Jev adapter separation, explicit uncertainty/fallback |
 | 44: composition | Bounded residual pipeline | Separability and economics at each relevant gate; changed-state rescans only; termination examples |
 | 45: planner, evidence-gated | Cross-paradigm execution planning | Real mixed workflows demonstrate that moving/generalizing plan-execution is worth it |

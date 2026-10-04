@@ -23,6 +23,29 @@ and end-to-end latency/cost require runs in a configured harness.
 | Jev generative signal is no | Never declare completion or remove work solely from this signal |
 | Model-router absent | Self-contained generative handoff remains useful; no dependency install |
 
+## Determinize acceptance cases
+
+For the determinize increment, also review these cases against the
+[skill](../skills/determinize/SKILL.md) and
+[worked examples](../skills/determinize/examples.md). These are behavioral
+expectations, not automated evidence of generative skill adherence.
+
+| Input/evidence | Expected determinize behavior |
+| --- | --- |
+| Recurring reconciliation with supplied exact identity/amount rules, plus explanation | Propose exact comparison, preserve causal explanation as residual, account for every criterion |
+| Missing refund policy with a proposed keyword shortcut | No extraction; name lost semantics and preserve original task; do not invent policy |
+| One-off note with three already listed IDs and no additional guarantee requirement | No extraction for lack of payoff; stop before modeling a parser |
+| Supplied exact mechanism and adequate oracle covering all criteria | Already-exact fast exit, no new framework, explicit pending execution |
+| Strong scan payoff came from a different portion | Recheck this candidate; no extraction if its benefit is unsupported |
+| One criterion partly exact, partly semantic | Name both obligations and their recomposition; do not mark the whole criterion covered |
+| One exact portion extracted while another is deliberately left untouched | Preserve the untouched obligation in the residual; it need not be purely generative |
+| Schema/compiler succeeds but cannot prove the business criterion | Report oracle limitation; unsupported meaning remains residual |
+| Exact calculation depends on an unresolved upstream judgment | Preserve that judgment and parameter contract as dependencies; do not invent input values |
+| No Jev scan and no installed model-router | Direct design still works; optional generative handoff is self-contained |
+| Essential meaning requires repository-wide investigation | Stop the design pass with no extraction and unresolved evidence; no scan or recursive discovery |
+| Proposed extraction would alter precision, ordering or duplicate handling | Preserve the original semantics or reject the candidate |
+| All semantic work covered by a proposed exact contract | Residual may be none; implementation, validation and execution still remain |
+
 ## Reproducible local checks
 
 From the repository root:
@@ -34,7 +57,7 @@ git diff --check
 git diff --exit-code origin/main -- plugins/model-router
 ```
 
-The last check is the first-increment invariant, not a permanent restriction on
+The last check is the current architectural invariant, not a permanent restriction on
 future separately scoped work. Marketplace validation covers JSON manifests and
 skill frontmatter; the plugin tests also verify local reference targets.
 
