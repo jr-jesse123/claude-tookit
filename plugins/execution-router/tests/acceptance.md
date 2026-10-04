@@ -46,6 +46,29 @@ expectations, not automated evidence of generative skill adherence.
 | Proposed extraction would alter precision, ordering or duplicate handling | Preserve the original semantics or reject the candidate |
 | All semantic work covered by a proposed exact contract | Residual may be none; implementation, validation and execution still remain |
 
+## Typify acceptance cases
+
+For typify, review the [contract](../skills/typify/SKILL.md) and
+[examples](../skills/typify/examples.md) against these additional behavioral
+cases. Reference checks are automated; generative adherence and live inference
+are not established by those checks.
+
+| Input/evidence | Expected typify behavior |
+| --- | --- |
+| Two labels may apply to the same message | Independent Noul questions, not an exclusive Choice |
+| Score mean is identical for concentrated and split distributions | Preserve distribution/confidence for policy; do not equate mean with certainty |
+| Ranking candidates are all irrelevant or omit the correct answer | No forced winner; coverage/no-match policy and explicit fallback |
+| A question needs another answer to construct its state | Separate bounded request or residual dependency, never same-batch answer access |
+| Active branch valid, unused branch uncertain | Ignore irrelevant uncertainty; validate applicable outputs |
+| Missing, malformed, stale or truncated required evidence/output | Explicit fallback, never a confidently negative answer |
+| Thresholds lack domain evidence | Mark unvalidated; unresolved thresholds cannot enable auto-acceptance |
+| A fallback is missing or unavailable | Preserve unresolved judgment, not automatic acceptance |
+| No running Jev integration, but verified docs | Produce design with execution/setup pending; no installs or calls |
+| Official skill/docs inaccessible locally and remotely | No extraction with named prerequisite; no invented API |
+| Acquiring state requires solving the semantic problem | No extraction before investigation |
+| Criterion requires exact proof | Preserve that requirement; typed probability cannot discharge it |
+| Normal typed branch covers task but exceptions need a person/model | Retain conditional fallback work in the residual |
+
 ## Reproducible local checks
 
 From the repository root:

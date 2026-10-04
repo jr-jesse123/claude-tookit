@@ -89,8 +89,8 @@ Do not retry, call another scanner, or approximate the probabilities yourself.
 The upstream transport may have its own bounded retries; this skill adds none.
 
 Done when the helper returns a recommendation, or a failure is recorded. This
-skill stops there. `determinize` is a separate, advisory design handoff;
-`typify` and residual rescans remain future increments. Read
+skill stops there. `determinize` and `typify` are separate, advisory design
+handoffs; residual rescans remain a future increment. Read
 `${CLAUDE_PLUGIN_ROOT}/reference/architecture.md` only for architecture or
 roadmap questions, never as a runtime prerequisite.
 
@@ -121,10 +121,11 @@ This is an opportunity requiring generative design, not a ready exact executor.
 The caller may inspect the recommendation before invoking the skill; do not
 load its instructions or start designing here.
 
-For `consider-typify`, the specialized skill is not shipped yet. Suggest
-`choose-model` for the bounded generative design task: preserve the original
-acceptance criteria, identify only the covered judgment and its typed contract,
-and return remaining work. Do not emit a runnable typify command.
+For `consider-typify`, suggest
+`/execution-router:typify "<original task, constraints, acceptance criteria, evidence, opportunity signals and payoff basis>"`.
+Carry explicit `--providers=` unchanged for later generative handoffs. This
+designs a contract, not a completed judgment. Do not load typify instructions
+or invoke it from this cheap gate.
 
 The scan's overall payoff is preliminary: recheck the economics of the actual
 proposed extraction before committing to modeling or execution work.
@@ -133,4 +134,4 @@ into the handoff; do not declare the residual empty based on a scan.
 
 For handoffs requiring model-router, if it is absent, return the same
 self-contained text for a generative session and name the optional plugin.
-The determinize handoff does not depend on model-router. Do not copy its policy here.
+The transformation handoffs do not depend on model-router. Do not copy its policy here.

@@ -99,6 +99,12 @@ contract is a proposal; implementation and execution remain explicitly pending,
 even when no semantic judgment remains. Invoke it directly with evidence and a
 payoff basis, or from choose-execution's advisory handoff.
 
+`/execution-router:typify` designs a bounded semantic decision: state, typed
+questions, deterministic threshold/fallback policy, evaluation cases and residual
+work. Official TypeSafe guidance supplies the design knowledge; jev-code supplies
+the execution mapping. The skill does not run Jev or treat probabilities as exact
+proof. Conditional human/generative fallback work remains explicit in the residual.
+
 The direction is **execution-router -> model-router**. Model-router remains
 independently useful for generative work; its routing core, provider policies,
 review ladder, planner, and calibration are unchanged. Obviously deterministic
@@ -109,19 +115,22 @@ does not execute the proposed task or invoke its handoffs.
 /execution-router:choose-execution "Assess the supplied recurring triage workload and evidence"
 /execution-router:choose-execution "Assess this task using local evidence only" --no-scan
 /execution-router:determinize "Extract the exact portion of the supplied recurring reconciliation task; preserve its acceptance criteria"
+/execution-router:typify "Design independent labels for the supplied recurring support queue; preserve uncertainty and reply-writing as residual work"
 ```
 
 Install/configure `jev-code` separately to enable scanning. If it is unavailable,
 the advisor returns a generative handoff; it does not install tools or request
 credentials. `determinize` works without Jev or TypeSafe; it performs generative
 design and never invokes the scanner. TypeSafe remains the separate canonical
-typed-decision design skill. `typify` and residual orchestration are not
-implemented yet. Choose-execution identifies opportunities; determinize designs
-one exact extraction without executing it or automatically routing the residual.
+typed-decision design skill, read by typify through the installed skill or its
+pinned upstream. Typify can design without a running Jev service when its adapter
+contract is verified. Residual orchestration is not implemented yet: each design
+skill returns an inspectable contract and advisory handoff without execution.
 
 - [Full architecture and staged roadmap](plugins/execution-router/reference/architecture.md)
 - [Scanner contract and policy](plugins/execution-router/reference/shape-scan.md)
 - [Exact extraction contract and examples](plugins/execution-router/skills/determinize/SKILL.md)
+- [Typed decision contract and examples](plugins/execution-router/skills/typify/SKILL.md)
 - [Behavioral acceptance cases and validation limits](plugins/execution-router/tests/acceptance.md)
 
 ### Jev / TypeSafe upstreams
@@ -436,10 +445,14 @@ claude-tookit/
 │   │   ├── skills/determinize/
 │   │   │   ├── SKILL.md           # exact extraction contract and semantic residual
 │   │   │   └── examples.md        # partial, rejected, uneconomic and already-exact cases
+│   │   ├── skills/typify/
+│   │   │   ├── SKILL.md           # state, questions, policy, evaluation and residual
+│   │   │   └── examples.md        # independent labels, ranking and rejected designs
 │   │   ├── reference/
 │   │   │   ├── architecture.md    # end-state design and staged delivery
 │   │   │   ├── shape-scan.md      # optional Jev contract and local policy
-│   │   │   └── scan-request.json  # fixed independent questions and thresholds
+│   │   │   ├── scan-request.json  # fixed independent questions and thresholds
+│   │   │   └── typed-decisions.md # canonical TypeSafe guidance and Jev adapter mapping
 │   │   ├── scripts/route-scan.mjs # pure policy; stdin JSON -> stdout JSON
 │   │   └── tests/                # policy tests and behavioral acceptance cases
 │   ├── intent-compiler/
