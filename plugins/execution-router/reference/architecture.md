@@ -1,9 +1,9 @@
 # Execution routing: architecture and staged delivery
 
-Status: the grounding gate and opportunity scanner shipped in #41. This increment
-adds the independently invocable, read-only `determinize` design skill. Typed
-transformation, residual orchestration, cross-paradigm planning, and assurance
-refactoring below remain future work, not current behavior.
+Status: grounding and scanning shipped in #41, exact extraction design in #42.
+This increment adds the independently invocable, read-only `typify` design skill.
+Residual orchestration, cross-paradigm planning, and assurance refactoring below
+remain future work, not current behavior.
 
 ## Responsibilities
 
@@ -45,8 +45,8 @@ might have worked.
 An eligible scan asks independent opportunity, generative-necessity, payoff, and
 evidence-sufficiency questions. Jev supplies typed judgments; local deterministic
 policy consumes them. Jev never chooses models or discovers transformations.
-The fixed scan is itself a bounded typed decision, not the future general
-`typify` skill. Probabilities remain inspectable and uncertainty has a fallback.
+The fixed scan is itself a bounded typed decision, separate from general
+`typify` design. Probabilities remain inspectable and uncertainty has a fallback.
 
 ## Intended residual pipeline
 
@@ -85,11 +85,24 @@ See the [skill contract](../skills/determinize/SKILL.md) and
 design step. It works without a scan or either upstream integration, and neither
 recurses on its residual nor invokes model-router automatically.
 
-`typify` will use generative reasoning to model state, independent questions,
+`typify` uses generative reasoning to model state, independent questions,
 Noul/Choice/Score/candidate-ranking outputs, and uncertainty/threshold/fallback
-policy. It will use the official TypeSafe skill for design and jev-code for
+policy. It uses the official TypeSafe skill for design and jev-code for
 execution capability, while keeping the contract independent of adapter details.
-Its output names the covered judgment, evaluation cases, and generative residue.
+It produces a proposed contract or no extraction; it never calls Jev. Read the
+[skill](../skills/typify/SKILL.md) for its contract and
+[canonical guidance/mapping](typed-decisions.md) only on that design branch.
+The Opus/high design-time default addresses the common hard case of preserving
+meaning while defining sufficient state and an adequate fallback; no runtime
+model-router dependency or policy change is introduced.
+
+Its output covers every original criterion, evaluation cases and residual work,
+including conditional human/generative fallbacks and exact work left outside
+the contract. Ranking is a candidate contract implemented with judgments and
+deterministic ordering, not a fourth System One primitive. Confidence never
+replaces an exact guarantee. Unvalidated thresholds are identified, and unresolved
+thresholds cannot enable automatic acceptance. Missing tools leave execution
+pending; missing official guidance is reported rather than silently invented.
 
 Economic justification includes expected reuse/scale, execution savings, or a
 required reliability/guarantee gain that materially exceeds modeling,
@@ -105,8 +118,8 @@ GitHub-assigned PR numbers. Each increment must be reviewable on its own.
 | Increment | Deliverable | Acceptance boundary |
 | --- | --- | --- |
 | 41: entry (shipped) | Plugin, grounding gate, fixed Jev shape scan, local policy, advisory handoff | No transformation or model-router changes; failure and mixed-signal cases covered |
-| 42: determinize (this increment) | Exact extraction design skill and worked examples | Preserves meaning, names mechanism/oracle, returns residual or no extraction; no task execution |
-| 43: typify | Typed-contract design skill and worked examples | Official TypeSafe guidance, Jev adapter separation, explicit uncertainty/fallback |
+| 42: determinize (shipped) | Exact extraction design skill and worked examples | Preserves meaning, names mechanism/oracle, returns residual or no extraction; no task execution |
+| 43: typify (this increment) | Typed-contract design skill and worked examples | Official TypeSafe guidance, Jev adapter separation, explicit uncertainty/fallback; no live decision execution |
 | 44: composition | Bounded residual pipeline | Separability and economics at each relevant gate; changed-state rescans only; termination examples |
 | 45: planner, evidence-gated | Cross-paradigm execution planning | Real mixed workflows demonstrate that moving/generalizing plan-execution is worth it |
 | 46: assurance, evidence-gated | Assurance requirement separate from executor family | Real review contracts justify a change beyond today's R0-R4 ladder |

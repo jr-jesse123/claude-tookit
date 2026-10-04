@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "execution-router",
   "displayName": "Execution Router",
-  "description": "Advises on computation form with a cheap grounding gate and optional Jev scan, and designs exact extractions with explicit oracles and semantic residuals. Keeps routing policy local and model-router independent.",
+  "description": "Advises on computation form with a cheap grounding gate and optional Jev scan. Designs exact extractions and bounded typed decisions with explicit verification, uncertainty policy and residuals, keeping model-router independent.",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"
