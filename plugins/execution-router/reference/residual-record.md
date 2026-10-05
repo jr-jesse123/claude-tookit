@@ -149,5 +149,7 @@ a silent restart. Preserve the original task if restoration is impossible.
 At a generative handoff the residual may still contain exact work. List that
 work separately rather than sending deterministic execution or human decisions
 to model-router. Route only remaining generative implementation/design/judgment.
-Do not turn this ledger into a scheduler or a new review hierarchy. The next
-planner/assurance changes require observed mixed-workflow evidence first.
+This ledger remains accounting, not a scheduler or a new review hierarchy.
+The optional experimental [mixed planner](../skills/plan-execution/SKILL.md)
+can consume it without resetting budgets. Promotion/migration of that planner
+and assurance changes still require observed mixed-workflow evidence.

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "execution-router",
   "displayName": "Execution Router",
-  "description": "Advises on computation form with cheap grounding and an optional Jev scan. Designs exact and typed portions and composes bounded residual handoffs with explicit pending work, keeping model-router independent.",
+  "description": "Advises on computation form, designs exact and typed portions, and composes bounded residual handoffs. Includes an experimental mixed execution planner with generative routing delegated to the independent model-router.",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"
