@@ -39,7 +39,7 @@ with an already-evaluated workflow, and the documented refusal fallback only.
 
 Prices reviewed 2026-10-07. Haiku 5.5 is $0.10/$0.50 for prompts up to 100K and $0.50/$2.50 over 100K, with cache reads at $0.01/$0.05; Anthropic reports about 75% lower cost per workload than Haiku 4.5. Sonnet 5.5 remains $2/$10, but cache reads dropped from $0.20 to $0.10/MTok on 2026-10-07; Anthropic estimates this makes most agentic work about 20% cheaper. Opus 5.5 is $4/$20, with $0.20/MTok cache reads and $5/MTok cache writes. Fable 5.1 remains $10/$50 with $0.25/MTok cache reads.
 
- > **Haiku 5.5 supports adjustable effort.** It is the first Haiku-class model to
+> **Haiku 5.5 supports adjustable effort.** It is the first Haiku-class model to
 > expose the same cost/intelligence control. Use `low` by default for mechanical
 > work; raise effort only while the task still belongs in the mechanical tier.
 
