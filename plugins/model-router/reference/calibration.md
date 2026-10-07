@@ -55,7 +55,7 @@ for a populated sample.
 | `date` | ISO date the task ran |
 | `provider` | `anthropic` or `openai`. Entries written before this field existed are `anthropic`. |
 | `category` | Short task-category slug, reused across entries — this is the join key |
-| `model` / `effort` | What was actually started with, not what was recommended. `effort` is `null` where the model takes none (haiku; OpenAI at `none`, log the literal level instead). |
+| `model` / `effort` | What was actually started with, not what was recommended. Current Anthropic aliases all take an explicit effort level; for OpenAI at `none`, log the literal `none` level. |
 | `escalated` | Whether a stronger model or effort was needed mid-task |
 | `corrections` | Number of user corrections during the task |
 | `minutes` | Wall-clock duration |
