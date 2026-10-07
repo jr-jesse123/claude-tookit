@@ -36,7 +36,7 @@ From the current session, determine:
 | --- | --- |
 | `category` | Read the existing log first (`.claude/model-calibration.jsonl`) and **reuse a slug** when one fits — inventing near-duplicate slugs is what stops categories from ever reaching the three-entry threshold. If the advisor ran, its calibration command names the slug it chose. |
 | `provider` | `anthropic` (default) or `openai` — the provider of the model the task ran on. |
-| `model` / `effort` | What the task **actually started with**, not what was recommended. Omit `effort` for models that take none (haiku); each provider has its own level names — log the literal level used. |
+| `model` / `effort` | What the task **actually started with**, not what was recommended. Current Anthropic aliases, including Haiku 5.5, take an effort level. Each provider has its own level names — log the literal level used. |
 | `escalated` | `true` only if a stronger model or higher effort was actually needed mid-task (the user switched, or the work had to be redone on a stronger tier). |
 | `corrections` | Count the user turns that corrected your work — wrong approach, wrong output, missed requirement. Clarifications and scope additions are not corrections. |
 | `minutes` | Wall-clock duration if it is evident or the user tells you. Omit otherwise. |
