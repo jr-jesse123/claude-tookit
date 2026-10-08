@@ -1,6 +1,6 @@
 # Anthropic prompting policy
 
-Last reviewed: 2026-10-02
+Last reviewed: 2026-10-07
 
 Apply **Common** plus exactly one selected-model section. These are prompt
 adaptation deltas, not routing rules; model and effort are already chosen.
@@ -32,18 +32,21 @@ tool/search behavior only if the harness exposes it.
 
 ### Alias mapping
 
-- `haiku` -> current Haiku profile (Haiku 4.5 until routing policy changes)
+- `haiku` -> Haiku 5.5
 - `sonnet` -> Sonnet 5.5
 - `opus` -> Opus 5.5
 - `fable` -> Fable 5.1
 
 Exact version IDs use the matching section when recognizable.
 
-## Haiku / Haiku 4.5
+## Haiku 5.5
 
-Anthropic's current general prompting reference includes Haiku 4.5 but does not
-publish the same dedicated current-model delta page that exists for Sonnet 5.5,
-Opus 5.5, and Fable 5.1.
+Source:
+https://www.anthropic.com/claude-haiku-5-5
+
+Haiku 5.5 is the first Haiku with adjustable effort. Keep the task bounded and
+let the router's effort setting control how much work the model spends; do not
+simulate effort with "think harder" prompt prose.
 
 **Project rule:** keep Haiku prompts compact and bounded:
 - state the concrete transformation/task;
@@ -51,8 +54,11 @@ Opus 5.5, and Fable 5.1.
 - specify exact scope when repository breadth could expand accidentally;
 - avoid optional exploration, broad research, or elaborate planning scaffolds.
 
-Do not add "think harder" instructions. If the task needs nuanced judgment or a
-weak oracle, that is a routing concern, not a prompting fix.
+For focused coding, subagent work, browser/computer use, classification,
+summarization, routing, and compaction, give a crisp output contract and the
+available oracle. Do not add "think harder" instructions. If the task needs
+nuanced judgment or a weak oracle, that is a routing concern, not a prompting
+fix.
 
 ## Sonnet 5.5
 

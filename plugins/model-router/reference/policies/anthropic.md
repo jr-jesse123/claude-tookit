@@ -1,6 +1,6 @@
 # Anthropic provider policy
 
-Last reviewed: 2026-09-28
+Last reviewed: 2026-10-07
 
 This file is the **routing data for the Anthropic provider**. The shared
 `routing-core.md` owns the rubric and the tier layer, and the skills own their
@@ -14,7 +14,7 @@ own logged evidence contradicts it — see `../calibration.md`.
 
 | Tier | Model | Notes |
 | --- | --- | --- |
-| mechanical | `haiku` | 200K context — disqualified when input approaches it |
+| mechanical | `haiku` | Current alias target: Haiku 5.5; 200K context — disqualified when input approaches it |
 | workhorse | `sonnet` | Current alias target: Sonnet 5.5; keep scoped long-running work here when judgment/oracle/risk remain favorable |
 | frontier | `opus` | Current alias target: Opus 5.5 |
 | exceptional | `opus` | Opus 5.5 at `xhigh`/`max`; long horizon alone no longer promotes to Fable |
@@ -31,16 +31,17 @@ with an already-evaluated workflow, and the documented refusal fallback only.
 
 | `--model` | Role | Default `--effort` | Context | $/MTok in-out |
 | --- | --- | --- | --- | --- |
-| `haiku` | Bounded, mechanical, high-volume work | **omit — see note** | 200K | $1 / $5 |
+| `haiku` | Haiku 5.5: bounded, high-volume, latency-sensitive work and focused subagent coding | `low` (policy default; raise when the task remains mechanical but needs more persistence) | 200K | $0.10 / $0.50 up to 100K prompt; $0.50 / $2.50 over 100K |
 | `sonnet` | Sonnet 5.5: default for daily implementation, bug fixing, review, and scoped agentic coding | `medium` (policy default; Claude Code/apps default `medium`, Claude Platform default `high`) | 1M | $2 / $10 |
 | `opus` | Opus 5.5: careful judgment, architecture, investigation, weak-oracle and high-risk work | `medium` (vendor default; raise from evidence) | 1M | $4 / $20 |
 | `fable` | Fable 5.1: calibration-only escape hatch, not a normal escalation tier | `high` | 1M | $10 / $50 |
 | `claude-opus-4-8` | Regression and compatibility only | `high` | 1M | $5 / $25 |
 
-Prices reviewed 2026-09-28. Sonnet 5.5 remains $2/$10 with $0.20/MTok cache reads; Anthropic reports 30%+ faster generation than Sonnet 5 and up to 30% lower cost per task from fewer tokens/tool calls. Opus 5.5 is $4/$20, with $0.20/MTok cache reads and $5/MTok cache writes. Fable 5.1 remains $10/$50 with $0.25/MTok cache reads.
+Prices reviewed 2026-10-07. Haiku 5.5 is $0.10/$0.50 for prompts up to 100K and $0.50/$2.50 over 100K, with cache reads at $0.01/$0.05; Anthropic reports about 75% lower cost per workload than Haiku 4.5. Sonnet 5.5 remains $2/$10, but cache reads dropped from $0.20 to $0.10/MTok on 2026-10-07; Anthropic estimates this makes most agentic work about 20% cheaper. Opus 5.5 is $4/$20, with $0.20/MTok cache reads and $5/MTok cache writes. Fable 5.1 remains $10/$50 with $0.25/MTok cache reads.
 
-> **Do not pass `--effort` with `haiku`.** Haiku 4.5 does not accept the effort
-> parameter; the four other rows accept `low`, `medium`, `high`, `xhigh`, `max`.
+> **Haiku 5.5 supports adjustable effort.** It is the first Haiku-class model to
+> expose the same cost/intelligence control. Use `low` by default for mechanical
+> work; raise effort only while the task still belongs in the mechanical tier.
 
 > **Haiku's context is 200K, not 1M.** A task whose input alone approaches that
 > ceiling is disqualified from Haiku regardless of how mechanical it is.
@@ -59,11 +60,11 @@ Prices reviewed 2026-09-28. Sonnet 5.5 remains $2/$10 with $0.20/MTok cache read
 
 Applied to the level the rubric's dimension 2 produces:
 
-| Horizon | Sonnet | Opus |
-| --- | --- | --- |
-| 0–1 | `medium` | `medium` |
-| 2 | `high` | `high` |
-| 3 | `xhigh` when the task remains well-scoped with a strong oracle | `xhigh`, or `max` when correctness dominates cost |
+| Horizon | Haiku | Sonnet | Opus |
+| --- | --- | --- | --- |
+| 0–1 | `low` | `medium` | `medium` |
+| 2 | `medium` only when novelty/oracle/blast-radius/context remain mechanical | `high` | `high` |
+| 3 | promote to Sonnet | `xhigh` when the task remains well-scoped with a strong oracle | `xhigh`, or `max` when correctness dominates cost |
 
 Sonnet 5.5 changes the horizon rule: long duration by itself is no longer a good
 reason to promote to Opus. Anthropic reports multi-hour Sonnet work and strong
@@ -89,7 +90,13 @@ thinking before answering, and a tight cap truncates mid-answer.
 These reflect this repository owner's stack. Retune them from logged evidence,
 not from intuition.
 
-### Haiku
+### Haiku 5.5
+
+Haiku 5.5 materially widens the mechanical tier, but does not replace Sonnet for
+complex agentic coding. Anthropic reports 39.2% on Terminal-Bench 4.0 versus
+70.6% for Sonnet 5.5, while FrontierCode 1.1 is much closer (46.4% versus 52.1%
+at Sonnet `xhigh`). Treat those as launch priors: Haiku is now a credible
+executor for focused code edits with a strong oracle, not a general workhorse.
 
 - Locate all implementations of an interface.
 - Inventory projects and dependencies.
@@ -98,6 +105,10 @@ not from intuition.
 - Classify test failures.
 - Draft a commit message from an existing diff.
 - Independent repository-scanning subtasks running in parallel.
+- Apply small, explicit code edits that follow an existing pattern and have a strong compiler/test oracle.
+- Run cheap subagent work such as triage, search, compaction, classification, and bounded browser/computer-use steps.
+
+Prefer `low` for short mechanical work and `medium` when a still-mechanical task needs more persistence. If the work needs architectural judgment, broad hypothesis generation, or weak-oracle reasoning, promote the model instead of buying more Haiku effort.
 
 Do not choose Haiku because the requested *change* looks short. A one-line edit
 with hidden dependents is not a Haiku task.
@@ -194,7 +205,7 @@ also the documented cybersecurity fallback target for most safeguarded Opus 5.5 
 Apply in order unless a hard override (see `routing-core.md` → Hard
 overrides) fires.
 
-1. Haiku for obviously mechanical work.
+1. Haiku 5.5 `low` for obviously mechanical work; `medium` is allowed for a broader focused task that still has a strong oracle.
 2. Sonnet 5.5 `medium` for normal development.
 3. Sonnet 5.5 `high` for broader familiar work that needs more persistence/verification.
 4. Sonnet 5.5 `xhigh` for long-running but well-scoped work with a strong oracle.
@@ -279,13 +290,7 @@ tie-break (`routing-core.md` → tie-break rule 2) uses real counts:
   When price decides a cross-provider or cross-tier tie on an input-heavy
   task, run the actual input through each candidate's counter before
   comparing — one API call per candidate beats any multiplier.
-- **Caching bends the effective input rate, but not uniformly.** Sonnet 5.5 and
-  Opus 5.5 both cost $0.20/MTok for cache reads even though fresh input is
-  $2 vs $4/MTok. A warm, input-heavy session therefore narrows the Sonnet→Opus
-  price gap; output/tool volume and task completion efficiency matter more than
-  sticker input price. Fable 5.1 cache reads cost $0.25/MTok, so cache-heavy work
-  is still not a direct Fable signal. Compare effective workload cost and let
-  calibration decide any remaining capability premium.
+- **Caching bends the effective input rate, but not uniformly.** Haiku 5.5 cache reads are $0.01/MTok up to 100K prompt and $0.05 above 100K. Sonnet 5.5 cache reads are now $0.10/MTok, while Opus 5.5 remains $0.20/MTok. Warm, input-heavy sessions therefore make Haiku especially cheap for repeated mechanical/subagent work and narrow the fresh-input gap between Sonnet and Opus; output/tool volume and task completion efficiency still matter more than sticker input price. Fable 5.1 cache reads cost $0.25/MTok, so cache-heavy work is still not a direct Fable signal. Compare effective workload cost and let calibration decide any remaining capability premium.
 - **No long-context surcharge** at 1M (see Context behavior) — the input rate
   is flat where OpenAI's is reportedly not.
 
@@ -309,13 +314,12 @@ Anthropic expressly authorizes it.
 
 ## Execution-shape notes
 
-Suggested command shape: `claude --model <alias> --effort <level>` (omit
-`--effort` for haiku). Anthropic models run natively in Claude Code — no
+Suggested command shape: `claude --model <alias> --effort <level>`. Haiku 5.5 now accepts effort like the larger current models. Anthropic models run natively in Claude Code — no
 provider/harness switch is required.
 
 **Model switches and effort changes are different cache events.** Switching the
-model of a running conversation still invalidates the prompt cache. Sonnet 5.5,
-Opus 5.5, and Fable 5.1 support per-message effort via `output_config` (beta),
+model of a running conversation still invalidates the prompt cache. Haiku 5.5, Sonnet 5.5,
+Opus 5.5, and Fable 5.1 support adjustable effort; current API/harness support for cache-preserving per-message changes must be checked per model before relying on it. Sonnet 5.5, Opus 5.5, and Fable 5.1 support per-message effort via `output_config` (beta),
 which preserves the prompt cache when the model's compatible thinking mode is
 used. On Sonnet 5.5, per-message effort changes require adaptive thinking;
 `between_tools` cannot change effort mid-conversation. In Claude Code,

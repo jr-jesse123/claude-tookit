@@ -87,13 +87,9 @@ def main() -> int:
     if args.effort is not None and args.effort not in spec["efforts"]:
         print(f"error: effort {args.effort!r} is not a {args.provider} level {spec['efforts']}", file=sys.stderr)
         return 1
-    if args.provider == "anthropic":
-        if args.model == "haiku" and args.effort is not None:
-            print("error: haiku does not accept --effort; omit it", file=sys.stderr)
-            return 1
-        if args.model != "haiku" and args.effort is None:
-            print(f"error: --effort is required for anthropic model {args.model!r}", file=sys.stderr)
-            return 1
+    if args.provider == "anthropic" and args.effort is None:
+        print(f"error: --effort is required for current anthropic model {args.model!r}", file=sys.stderr)
+        return 1
     if args.date is not None:
         try:
             datetime.date.fromisoformat(args.date)
