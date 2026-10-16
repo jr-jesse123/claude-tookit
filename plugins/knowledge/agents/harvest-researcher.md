@@ -2,6 +2,7 @@
 name: harvest-researcher
 description: Researches one approved knowledge candidate for the harvest skill - reads the existing note first, then primary sources (code, config, specs), docs, tickets and the web as the prompt allows, and returns a claim list where every claim carries one source and is marked seen or inferred. Facts only, no prose note. Read-only. Invoked by the knowledge:harvest skill; not for direct use.
 model: opus
+effort: medium
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

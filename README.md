@@ -424,8 +424,8 @@ recomendar menos, o `adr` sabe recusar decisão insignificante, e o
 | Componente | Nome | O que faz |
 | --- | --- | --- |
 | skill | `/knowledge:harvest` | **Orquestração.** Transforma o que uma sessão ensinou (a atual, uma anterior via `--session <id>`, ou só os tópicos que você nomear) em notas de conhecimento duráveis, sem notas rasas nem enganosas. Faz triagem de candidatos duráveis (conceitos, sistemas, componentes, mecanismos, processos, decisões), descarta efêmeros (status, CI, erro pontual, workaround de hoje), busca na base para classificar cada um como **coberto**, **estende** nota X ou **novo**, e escolhe o caminho: **full** (pesquisa + revisão) ou **light** (só revisão, para fatos que a sessão já viu com fonte). Para e espera aprovação em dois pontos: a lista de candidatos e o rascunho da nota. Nada é escrito antes do sim. |
-| agent | `knowledge:harvest-researcher` | **Pesquisa.** Um por candidato full, em paralelo, em Opus. Lê a nota alvo primeiro (sem auditá-la), vai às fontes primárias (código/config/spec > docs > tickets/chat > web > memória) e devolve uma **lista de claims**: um fato por linha, uma fonte específica (`arquivo:linha`, id de página, chave de ticket, URL), marcado `seen` ou `inferred`, mais extension points para outras notas e perguntas abertas. Só-leitura. |
-| agent | `knowledge:harvest-reviewer` | **Revisão.** Um por lista, em Sonnet, com contexto limpo: recebe só os claims, nunca a pesquisa nem a conversa. Reabre a fonte de cada claim e dá um veredito — `confirmed`, `downgrade` (vira inferência marcada ou `[question]`), `cut` ou `unverified` (nunca vira fato) — mais duplicatas, lacunas, notas contraditas e credenciais. Só-leitura. |
+| agent | `knowledge:harvest-researcher` | **Pesquisa.** Um por candidato full, em paralelo, em Opus `medium`. Lê a nota alvo primeiro (sem auditá-la), vai às fontes primárias (código/config/spec > docs > tickets/chat > web > memória) e devolve uma **lista de claims**: um fato por linha, uma fonte específica (`arquivo:linha`, id de página, chave de ticket, URL), marcado `seen` ou `inferred`, mais extension points para outras notas e perguntas abertas. Só-leitura. |
+| agent | `knowledge:harvest-reviewer` | **Revisão.** Um por lista, em Sonnet `medium`, com contexto limpo: recebe só os claims, nunca a pesquisa nem a conversa. Reabre a fonte de cada claim e dá um veredito — `confirmed`, `downgrade` (vira inferência marcada ou `[question]`), `cut` ou `unverified` (nunca vira fato) — mais duplicatas, lacunas, notas contraditas e credenciais. Só-leitura. |
 | referência | `reference/config.md` | `.claude/knowledge.json` (projeto) ou `~/.claude/knowledge.json` (pessoal): store, idioma das notas, pasta por tipo de conhecimento, guia de escrita próprio, fontes e o ranking delas, mais o bloco opcional de permissões para só-leitura dura. Sem config, a skill detecta defaults e oferece salvar; `--setup` faz isso de forma interativa. Exemplo em `reference/config.example.json`. |
 | referência | `reference/stores/` | Um adaptador por tipo de store, carregado por progressive disclosure, mapeando as quatro operações (search, read, create, edit): `markdown` (default, zero dependência — pasta no repo ou vault do Obsidian), `basic-memory`, e `mcp` genérico (Notion, Confluence, wiki interna…). |
 | referência | `reference/claims.md`, `reference/note-writing.md` | O contrato da lista de claims e dos vereditos, compartilhado pela skill e pelos dois agentes; e o guia de escrita default (substituível pelo `style` da config). |
@@ -605,8 +605,8 @@ claude-tookit/
 │       │   ├── SKILL.md             # triagem → pesquisa → revisão → rascunho, com dois gates
 │       │   └── session-transcript.py # JSONL de sessão anterior → transcript legível
 │       └── agents/
-│           ├── harvest-researcher.md # claims com fonte, em Opus, read-only
-│           └── harvest-reviewer.md   # veredito por claim, contexto limpo, em Sonnet
+│           ├── harvest-researcher.md # claims com fonte, Opus medium, read-only
+│           └── harvest-reviewer.md   # veredito por claim, contexto limpo, Sonnet medium
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
 ├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml

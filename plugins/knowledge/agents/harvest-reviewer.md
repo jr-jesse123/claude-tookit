@@ -2,6 +2,7 @@
 name: harvest-reviewer
 description: Reviews a harvest claim list with a clean context - reopens the cited source of every claim and returns a verdict per claim (confirmed, downgrade, cut, unverified) plus findings on duplicates, gaps, contradicted notes and credentials. Read-only. Invoked by the knowledge:harvest skill; not for direct use.
 model: sonnet
+effort: medium
 disallowedTools: Write, Edit, NotebookEdit
 ---
 
