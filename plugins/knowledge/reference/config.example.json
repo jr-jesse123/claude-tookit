@@ -1,0 +1,24 @@
+{
+  "store": { "type": "basic-memory", "project": "acme" },
+  "language": "en",
+  "placement": {
+    "concept": "concepts",
+    "system": "systems",
+    "component": "components",
+    "screen": "screens",
+    "mechanism": "mechanisms",
+    "process": "processes",
+    "environment": "environments",
+    "decision": "decisions"
+  },
+  "style": "docs/knowledge/WRITING.md",
+  "sources": [
+    { "name": "repo", "kind": "code", "where": "." },
+    { "name": "infra", "kind": "config", "where": "/home/me/dev/acme-infra" },
+    { "name": "Confluence", "kind": "docs", "hint": "site acme.atlassian.net, spaces ENG and OPS" },
+    { "name": "Jira", "kind": "tickets", "hint": "projects ABC and OPS on acme.atlassian.net" },
+    { "name": "Azure DevOps", "kind": "pr", "hint": "org acme, project Platform; MCP only, never the az CLI" },
+    { "name": "web", "kind": "web" }
+  ],
+  "max": 3
+}

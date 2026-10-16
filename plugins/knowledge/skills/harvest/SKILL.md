@@ -1,7 +1,7 @@
 ---
 name: harvest
 description: "Turns what a session taught into durable knowledge notes without shallow or misleading ones. Triages the session (or the topics you name) for durable candidates - concepts, systems, components, mechanisms, processes, decisions - and drops ephemera; after you approve the list, researches each candidate in a read-only harvest-researcher agent, checks every claim against its source in a clean-context harvest-reviewer agent, then drafts the note for your approval. Store-agnostic (plain markdown by default; Basic Memory or another MCP store by config) and source-agnostic (whatever the project declares or has connected)."
-argument-hint: "[topics; empty = triage the whole session] [--session <id>] [--max N]"
+argument-hint: "[topics; empty = triage the whole session] [--session <id>] [--max N] | --setup"
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -27,6 +27,8 @@ Arguments: whatever the user wrote with the invocation.
   of the transcript file (a unique prefix is enough; a `sess_` or `session_`
   prefix is ignored). A bare UUID anywhere in the arguments counts too.
 - `--max N`: candidates to propose (default: the config's `max`, else 3).
+- `--setup`: configure only — run **Setup** below and stop. No triage, no
+  research, no notes.
 
 **Scratchpad.** Use the session scratchpad directory if the system prompt
 names one; otherwise `${TMPDIR:-/tmp}/harvest/<YYYY-MM-DD>/`. Create it with
@@ -47,6 +49,39 @@ Read `${CLAUDE_PLUGIN_ROOT}/reference/config.md` and resolve the config
 When the config was detected rather than read, show it as JSON in one block
 and offer to save it; carry on either way. State in one line which store,
 note language and sources this harvest uses.
+
+### Setup (`--setup` only)
+
+Configure the knowledge base interactively, then stop. Read-only until the
+final write.
+
+1. **Start from what exists.** If a config file is found, load it and check
+   it: the store's tools (or root folder) are reachable, and each source's
+   tools or path are available now. Report what is reachable and what is not.
+   Otherwise start from detection.
+2. **Inventory the tools.** List every connected MCP server with a one-line
+   guess of what it is for — store candidate, source (with its kind), or
+   neither — from its tool names and descriptions. Add the repository and the
+   web tools if present. Say plainly that this is a reading of tool names,
+   not a guarantee.
+3. **Probe each source once, read-only, for hints.** One cheap listing call
+   per MCP source where its tools allow it (spaces, projects, repositories,
+   databases), so the user picks from real names instead of typing them. Skip
+   a source whose listing would be large or slow; never call a tool that
+   writes.
+4. **Ask** the user, in one message: which store; which sources to keep and,
+   for each, the hint (site, space, project, keys, restrictions such as "MCP
+   only"); the note language; extra kinds for `placement`; a `style` guide if
+   the project has one. Offer the detected answer as the default for each.
+5. **Draft** the config as JSON, plus — when MCP write tools were found — a
+   permissions block per the "Hard read-only" section of `config.md` (`ask`
+   for the store's write tools, `deny` for writes on source systems and for
+   CLIs that bypass them), using the real tool names found in step 2.
+6. **Write on a yes**: the config to `.claude/knowledge.json` (project) or
+   `~/.claude/knowledge.json` (personal), as the user chooses. The
+   permissions block is a separate yes: merge it into
+   `.claude/settings.json` without removing existing entries, and show the
+   diff. Then stop and say that `/knowledge:harvest` will use it.
 
 ## 1. Triage
 

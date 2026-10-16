@@ -14,6 +14,9 @@ The first file found wins as a whole; fields are not merged across files.
 
 ## Fields
 
+A fuller example, with Basic Memory, several sources and a custom kind, is in
+`config.example.json` next to this file.
+
 ```json
 {
   "store": { "type": "markdown", "root": "docs/knowledge" },
@@ -92,3 +95,44 @@ WebFetch is available.
 Show the detected config to the user once, as JSON. Offer to save it to
 `.claude/knowledge.json` (project) or `~/.claude/knowledge.json` (personal);
 saving needs a yes, and a harvest can run on the detected config without it.
+`/knowledge:harvest --setup` runs only this part, interactively (see the
+skill).
+
+## Hard read-only (optional)
+
+The researcher and reviewer agents cannot use Write, Edit or NotebookEdit.
+MCP write tools are barred only by their instructions, because their names
+depend on how each server was registered. Permission rules in
+`.claude/settings.json` make that hard — but they apply to the whole session,
+the harvest's own write step included. So:
+
+- **`ask`** for the store's write tools: the session's approved write prompts
+  once more, and an agent that tries to write shows up as a prompt you
+  decline.
+- **`deny`** for what no step of a harvest should ever do: ticket edits and
+  transitions, page creation or update on source systems, CLIs that bypass
+  the MCP servers.
+
+```json
+{
+  "permissions": {
+    "ask": [
+      "mcp__basic-memory__write_note",
+      "mcp__basic-memory__edit_note"
+    ],
+    "deny": [
+      "mcp__basic-memory__delete_note",
+      "mcp__basic-memory__move_note",
+      "mcp__atlassian__editJiraIssue",
+      "mcp__atlassian__transitionJiraIssue",
+      "mcp__atlassian__updateConfluencePage",
+      "mcp__atlassian__createConfluencePage",
+      "Bash(az:*)",
+      "Bash(gcloud:*)"
+    ]
+  }
+}
+```
+
+Use your servers' actual names (the middle part of `mcp__<server>__<tool>`).
+`--setup` can draft this block from the tools it finds.
