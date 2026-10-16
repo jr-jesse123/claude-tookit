@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "knowledge",
+  "displayName": "Knowledge",
+  "description": "Turns what a session taught into durable knowledge notes without shallow or misleading ones: triages the session for concepts, systems and mechanisms worth keeping, researches each in a read-only agent, checks every claim against its source in a clean-context reviewer, and drafts the note for approval. Store-agnostic (plain markdown by default, Basic Memory or any MCP-backed store by config) and source-agnostic (code, docs, tickets, web — whatever the project declares or has connected).",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["knowledge", "notes", "research", "documentation", "basic-memory", "obsidian", "zettelkasten"]
+}

@@ -253,6 +253,17 @@
       "repository": "https://github.com/typesafe-ai/skills"
     },
     {
+      "name": "knowledge",
+      "source": "./plugins/knowledge",
+      "description": "Harvests durable knowledge from a session (or from topics you name) into notes: triage of concepts, systems and mechanisms worth keeping, deep research in a read-only agent, claim-by-claim source review in a clean-context agent, and an approval gate before anything is written. Plain markdown store by default; Basic Memory or any MCP-backed store by config; sources are whatever the project declares or has connected.",
+      "category": "productivity",
+      "keywords": ["knowledge", "notes", "research", "documentation", "basic-memory", "obsidian"],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
+    },
+    {
       "name": "execution-router",
       "source": "./plugins/execution-router",
       "description": "Advises on computation form with cheap grounding, exact and typed design, bounded residual composition, and experimental mixed planning; preserves pending work and model-router independence.",

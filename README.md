@@ -13,6 +13,7 @@ skills, agents, commands, hooks e MCP servers.
 /plugin install jev-code@jr-claude-toolkit
 /plugin install typesafe@jr-claude-toolkit
 /plugin install execution-router@jr-claude-toolkit
+/plugin install knowledge@jr-claude-toolkit
 ```
 
 Depois de instalado, tudo fica sob o namespace do plugin:
@@ -418,6 +419,42 @@ ferramenta nessa área é gerar documentação demais; por isso o `init` sabe
 recomendar menos, o `adr` sabe recusar decisão insignificante, e o
 `drift-reviewer` trata "clear" como veredito de primeira classe.
 
+### `knowledge`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/knowledge:harvest` | **Orquestração.** Transforma o que uma sessão ensinou (a atual, uma anterior via `--session <id>`, ou só os tópicos que você nomear) em notas de conhecimento duráveis, sem notas rasas nem enganosas. Faz triagem de candidatos duráveis (conceitos, sistemas, componentes, mecanismos, processos, decisões), descarta efêmeros (status, CI, erro pontual, workaround de hoje), busca na base para classificar cada um como **coberto**, **estende** nota X ou **novo**, e escolhe o caminho: **full** (pesquisa + revisão) ou **light** (só revisão, para fatos que a sessão já viu com fonte). Para e espera aprovação em dois pontos: a lista de candidatos e o rascunho da nota. Nada é escrito antes do sim. |
+| agent | `knowledge:harvest-researcher` | **Pesquisa.** Um por candidato full, em paralelo, em Opus. Lê a nota alvo primeiro (sem auditá-la), vai às fontes primárias (código/config/spec > docs > tickets/chat > web > memória) e devolve uma **lista de claims**: um fato por linha, uma fonte específica (`arquivo:linha`, id de página, chave de ticket, URL), marcado `seen` ou `inferred`, mais extension points para outras notas e perguntas abertas. Só-leitura. |
+| agent | `knowledge:harvest-reviewer` | **Revisão.** Um por lista, em Sonnet, com contexto limpo: recebe só os claims, nunca a pesquisa nem a conversa. Reabre a fonte de cada claim e dá um veredito — `confirmed`, `downgrade` (vira inferência marcada ou `[question]`), `cut` ou `unverified` (nunca vira fato) — mais duplicatas, lacunas, notas contraditas e credenciais. Só-leitura. |
+| referência | `reference/config.md` | `.claude/knowledge.json` (projeto) ou `~/.claude/knowledge.json` (pessoal): store, idioma das notas, pasta por tipo de conhecimento, guia de escrita próprio, fontes e o ranking delas. Sem config, a skill detecta defaults e oferece salvar. |
+| referência | `reference/stores/` | Um adaptador por tipo de store, carregado por progressive disclosure, mapeando as quatro operações (search, read, create, edit): `markdown` (default, zero dependência — pasta no repo ou vault do Obsidian), `basic-memory`, e `mcp` genérico (Notion, Confluence, wiki interna…). |
+| referência | `reference/claims.md`, `reference/note-writing.md` | O contrato da lista de claims e dos vereditos, compartilhado pela skill e pelos dois agentes; e o guia de escrita default (substituível pelo `style` da config). |
+
+Duas dependências que costumam prender esse tipo de skill a um repositório
+viraram configuração:
+
+- **Onde as notas moram.** O store é um adaptador. Sem config, a skill usa
+  Basic Memory se as ferramentas dele estiverem conectadas, uma pasta de notas
+  existente (`docs/knowledge/`, `knowledge/`, `notes/`, vault do Obsidian) se
+  houver, e senão markdown puro em `docs/knowledge/`. Nunca cai para outro
+  store se o configurado estiver inacessível: deixa o rascunho no scratchpad.
+- **De onde vem o conhecimento.** As fontes vêm do `sources` da config (cada
+  uma com um `kind` que define o ranking e um `hint` de onde procurar), mais o
+  que a sessão tocou. Sem config, são detectadas: o próprio repo, os servidores
+  MCP conectados que leem docs ou tickets, e a web quando disponível. Fonte
+  inacessível vira pergunta aberta, nunca palpite.
+
+Sessões anteriores são lidas por `session-transcript.py`, que converte o
+JSONL de `~/.claude/projects/` num transcript legível (prefixo do id basta).
+O conteúdo de uma sessão anterior é tratado como dado, e cada fato dela é
+pista até a fonte ser reaberta agora.
+
+Limite conhecido: os agentes bloqueiam `Write`/`Edit`/`NotebookEdit`, mas
+ferramentas MCP de escrita só são barradas por instrução, porque os nomes
+dependem de como você registrou cada servidor. Para garantia dura, adicione
+regras `deny` em `.claude/settings.json` para as ferramentas de escrita dos
+seus servidores (ex.: `mcp__basic-memory__write_note`).
+
 ## Estrutura do repositório
 
 ```
@@ -531,14 +568,30 @@ claude-tookit/
 │   │   ├── hooks/hooks.json
 │   │   ├── scripts/guard-destructive-commands.py
 │   │   └── .mcp.json.example
-│   └── arch-docs/
+│   ├── arch-docs/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── reference/
+│   │   │   ├── right-sizing.md      # núcleo: teste econômico, significância, escada de artefatos
+│   │   │   └── templates/           # haiku/overview, adr, c4 context/containers, readme-mapa
+│   │   ├── skills/init/SKILL.md     # scaffold na medida certa (sabe recomendar menos)
+│   │   ├── skills/adr/SKILL.md      # um ADR por decisão, entrevista obrigatória
+│   │   └── agents/drift-reviewer.md # update | record | clear por diff
+│   └── knowledge/
 │       ├── .claude-plugin/plugin.json
 │       ├── reference/
-│       │   ├── right-sizing.md      # núcleo: teste econômico, significância, escada de artefatos
-│       │   └── templates/           # haiku/overview, adr, c4 context/containers, readme-mapa
-│       ├── skills/init/SKILL.md     # scaffold na medida certa (sabe recomendar menos)
-│       ├── skills/adr/SKILL.md      # um ADR por decisão, entrevista obrigatória
-│       └── agents/drift-reviewer.md # update | record | clear por diff
+│       │   ├── config.md            # .claude/knowledge.json: store, idioma, pastas, fontes, ranking
+│       │   ├── claims.md            # contrato claim list + vereditos (skill e agentes)
+│       │   ├── note-writing.md      # guia de escrita default (substituível via `style`)
+│       │   └── stores/              # um adaptador por store, progressive disclosure
+│       │       ├── markdown.md
+│       │       ├── basic-memory.md
+│       │       └── mcp.md
+│       ├── skills/harvest/
+│       │   ├── SKILL.md             # triagem → pesquisa → revisão → rascunho, com dois gates
+│       │   └── session-transcript.py # JSONL de sessão anterior → transcript legível
+│       └── agents/
+│           ├── harvest-researcher.md # claims com fonte, em Opus, read-only
+│           └── harvest-reviewer.md   # veredito por claim, contexto limpo, em Sonnet
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
 ├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml
