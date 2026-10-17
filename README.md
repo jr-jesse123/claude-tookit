@@ -9,6 +9,7 @@ skills, agents, commands, hooks e MCP servers.
 ```
 /plugin marketplace add jr-jesse123/claude-tookit
 /plugin install code-review@jr-claude-toolkit
+/plugin install mutation-testing@jr-claude-toolkit
 /plugin install devops-tools@jr-claude-toolkit
 /plugin install jev-code@jr-claude-toolkit
 /plugin install typesafe@jr-claude-toolkit
@@ -81,6 +82,21 @@ ficam em `skills/pr-tour/html.md`, compartilhado pelos dois tours.
   remota (`CLAUDE_CODE_REMOTE=true`), sem `npx`, ou quando o tour vai para o
   GitHub, a skill volta para o markdown e diz por quê.
 - Não depende do plugin `lavish` instalado: os tours chamam o CLI direto.
+
+### `mutation-testing`
+
+A skill `/mutation-testing:incremental-dotnet-mutation` valida **somente o
+código C# alterado** por testes de mutação com Stryker.NET, usando **testes
+unitários já existentes**. Se não houver testes unitários elegíveis, ela
+simplesmente pula a execução. Testes E2E, de integração (inclusive in-memory
+nesta primeira versão), e testes com dependências externas ficam de fora.
+
+A skill prepara o Stryker em diretório temporário quando necessário, restringe
+as mutações a arquivos novos ou a intervalos de métodos alterados e não adiciona
+Stryker ao projeto, ao CI ou ao manifesto de ferramentas. Modos:
+`--validate` (somente relatório) e `--improve` (padrão: pode melhorar
+testes unitários existentes). O helper de intervalos fica em
+`plugins/mutation-testing/scripts/line-span.py`.
 
 ### `model-router`
 
@@ -533,6 +549,12 @@ claude-tookit/
 │   │   └── agents/
 │   │       ├── security-reviewer.md
 │   │       └── mapper.md            # pr-tour em diff grande: fatos por grupo, em Sonnet
+│   ├── mutation-testing/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/incremental-dotnet-mutation/SKILL.md
+│   │   ├── reference/runbook.md
+│   │   ├── scripts/line-span.py
+│   │   └── tests/                # conversão de spans + casos de aceitação
 │   ├── model-router/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/               # compartilhado pelas skills, via ${CLAUDE_PLUGIN_ROOT}
