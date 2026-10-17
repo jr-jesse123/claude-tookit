@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "mutation-testing",
+  "displayName": "Mutation Testing",
+  "description": "Incremental ephemeral Stryker.NET mutation testing for changed C# code with existing unit tests.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": [
+    "mutation-testing",
+    "stryker",
+    "dotnet",
+    "unit-tests",
+    "quality"
+  ]
+}
