@@ -20,5 +20,6 @@
     { "name": "Azure DevOps", "kind": "pr", "hint": "org acme, project Platform; MCP only, never the az CLI" },
     { "name": "web", "kind": "web" }
   ],
-  "max": 3
+  "max": 3,
+  "budget": 12
 }

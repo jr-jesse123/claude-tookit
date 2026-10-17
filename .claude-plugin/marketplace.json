@@ -297,7 +297,7 @@
     {
       "name": "knowledge",
       "source": "./plugins/knowledge",
-      "description": "Harvests durable knowledge from a session (or from topics you name) into notes: triage of concepts, systems and mechanisms worth keeping, deep research in a read-only agent, claim-by-claim source review in a clean-context agent, and an approval gate before anything is written. Plain markdown store by default; Basic Memory or any MCP-backed store by config; sources are whatever the project declares or has connected.",
+      "description": "Harvests durable knowledge from a session (or from topics you name) into notes: triage of concepts, systems and mechanisms worth keeping, routed to review only (the default), budgeted research in a read-only agent when a reason is named, or recording what the user stated; claim-by-claim source review in a clean-context agent; evidence levels (stated, verified, corroborated) on every note; --deepen to corroborate a note later; and an approval gate before anything is written. Plain markdown store by default; Basic Memory or any MCP-backed store by config; sources are whatever the project declares or has connected.",
       "category": "productivity",
       "keywords": [
         "knowledge",

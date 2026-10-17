@@ -26,7 +26,12 @@ short paragraphs and lists over tables, except for genuinely tabular facts.
 ## Truth markers
 
 - A fact carries its source inline, in the most specific form you have:
-  `` `src/auth/refresh.ts:42` ``, a page id, an issue key, a URL.
+  `` `src/auth/refresh.ts:42` ``, a page id, an issue key, a URL. A
+  corroborated fact cites both of its independent sources; one cited source
+  means one source was checked.
+- A fact only the user stated says so: "(stated by the user, 2026-10-17)".
+  It is recorded knowledge, not a checked one; keep it out of sentences that
+  also carry sourced facts.
 - An inference is marked as one: "(inferred from …)".
 - Anything unsettled is a `[question]`, never a confident sentence.
 - When sources disagree, say so and cite both.
@@ -50,8 +55,19 @@ notes already there. Absent a convention:
 title: <Title Case name of the subject>
 type: <kind, from the placement map>
 tags: [<2-5 tags>]
+evidence: <stated | verified | corroborated>
 updated: <YYYY-MM-DD>
 ---
 ```
+
+**`evidence`** is the weakest level (from `reference/claims.md`) among the
+note's load-bearing facts — the ones its lead and mechanism rest on — so a
+reader knows at a glance how far to trust it: `stated` (someone said it),
+`verified` (one source checked), `corroborated` (two independent sources
+agree). When extending a note, it becomes the weaker of its current value
+and the new load-bearing facts' level. A note without the field keeps it
+absent on an extension unless the user agrees to set it; `--deepen` sets it.
+A store without frontmatter carries it as the note's last line,
+`Evidence: <level>`.
 
 Follow the existing notes' conventions over this guide whenever the two differ.

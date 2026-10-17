@@ -37,7 +37,8 @@ A fuller example, with Basic Memory, several sources and a custom kind, is in
     { "name": "Jira", "kind": "tickets", "hint": "project ABC" },
     { "name": "web", "kind": "web" }
   ],
-  "max": 3
+  "max": 3,
+  "budget": 12
 }
 ```
 
@@ -49,6 +50,7 @@ A fuller example, with Basic Memory, several sources and a custom kind, is in
 | `style` | Path to the project's own note-writing guide. Replaces `reference/note-writing.md` entirely when set. | the plugin's guide |
 | `sources` | Sources research may use, each with a `kind` (ranking below) and an optional `where` (path, URL) or `hint` (site, space, project key — anything that tells a researcher where to look). | detected |
 | `max` | Default `--max`. | `3` |
+| `budget` | Source reads (files, pages, tickets, commits, web pages opened) each researcher may spend on one candidate before it stops and lists the rest as open questions. Research is most of a harvest's cost; raise it for a knowledge base where notes must go deep, lower it to save tokens. | `12` |
 
 ## Store types
 
