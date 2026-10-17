@@ -1,8 +1,8 @@
 ---
 name: pr-tour
 description: Build a guided tour of a pull request or branch — how the changes connect (narrative plus Mermaid diagrams when they help), a contracts section when the diff introduces, changes, or removes a promise other code relies on (types/interfaces, events, endpoints, schemas, config keys, CLI flags — promise delta with before→after where both exist, a new contract has no before and a removed one no after, compatibility verdict, blast radius), and a suggested file-by-file reading order with what to focus on in each. Use when the user wants to understand or start reviewing a PR, not to find bugs.
-argument-hint: [PR number/URL or branch; defaults to current branch vs default branch]
-allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
+argument-hint: [PR number/URL or branch; defaults to current branch vs default branch] [--html]
+allowed-tools: Bash(git fetch:*), Bash(git diff:*), Bash(git log:*), Bash(git show:*), Bash(git merge-base:*), Bash(git symbolic-ref:*), Bash(gh pr view:*), Bash(gh pr diff:*), Bash(npx --yes @zabaca/mermaid-validate:*), Bash(env LAVISH_AXI_TELEMETRY=0 npx --yes lavish-axi@0.1.89:*), Read, Grep, Glob, Edit(.lavish/**)
 ---
 
 # PR tour
@@ -13,6 +13,14 @@ connect, then say in what order to read the files and what matters in each.
 This skill does not review. It reports no bugs, no style issues, no missing
 tests — for findings, point the user to `/code-review:quick-review`. Write the
 tour in the language the user is speaking.
+
+**Output surface.** By default the tour is markdown in this conversation.
+With `--html` in `$ARGUMENTS` (strip it before resolving the target), build
+the same tour, then follow `${CLAUDE_SKILL_DIR}/html.md` to write it as a
+page and open it in Lavish, where the reviewer annotates nodes, contracts,
+and reading-order items and the feedback comes back here. Read that file
+only in this mode. File writes are allowed for that page under `.lavish/`
+and for nothing else.
 
 ## Resolve the target
 

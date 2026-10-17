@@ -12,6 +12,7 @@ skills, agents, commands, hooks e MCP servers.
 /plugin install devops-tools@jr-claude-toolkit
 /plugin install jev-code@jr-claude-toolkit
 /plugin install typesafe@jr-claude-toolkit
+/plugin install lavish@jr-claude-toolkit
 /plugin install execution-router@jr-claude-toolkit
 /plugin install knowledge@jr-claude-toolkit
 ```
@@ -45,8 +46,8 @@ sem reinstalar).
 | Componente | Nome | O que faz |
 | --- | --- | --- |
 | skill | `/code-review:quick-review` | Revisa as mudanças não commitadas: correção, edge cases, sobras de debug, contratos quebrados, testes faltando. |
-| skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, seção de **contratos** quando o diff cria, muda ou remove uma promessa que outro código consome (tipos/interfaces, eventos, endpoints, schemas — delta da promessa citado na linguagem do contrato — antes→depois quando os dois lados existem; contrato novo não tem antes, removido não tem depois —, veredito de compatibilidade com direção, e raio de alcance incluindo consumidores *fora* do diff), e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. |
-| skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair — um ou mais diagramas, cada um respondendo uma pergunta diferente, como no `pr-tour`), nomeia os contratos que o plano vai criar, mudar ou remover (promessa de hoje citada do código → promessa planejada, compatibilidade, raio de alcance — consumidores que o plano não menciona viram discrepância), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. |
+| skill | `/code-review:pr-tour` | Tour guiado de um PR ou branch antes de revisar: narrativa de como as mudanças se conectam (com diagramas Mermaid quando ajudam, inclusive múltiplos cortes/zooms), grupos independentes separados, seção de **contratos** quando o diff cria, muda ou remove uma promessa que outro código consome (tipos/interfaces, eventos, endpoints, schemas — delta da promessa citado na linguagem do contrato — antes→depois quando os dois lados existem; contrato novo não tem antes, removido não tem depois —, veredito de compatibilidade com direção, e raio de alcance incluindo consumidores *fora* do diff), e ordem de leitura com o motivo da posição e o foco de cada arquivo. Não aponta bugs — orienta. Com `--html`, o mesmo tour vira uma página aberta no Lavish (veja abaixo). |
+| skill | `/code-review:plan-tour` | O espelho do `pr-tour` no tempo: aterra um plano de implementação no código real *antes* de codar. Explora o terreno que o plano toca, narra como funciona hoje e como o plano o transforma, pinta o delta prospectivo em Mermaid (existente esmaecido, ⊕ para o que vai nascer, ⊖ para o que vai sair — um ou mais diagramas, cada um respondendo uma pergunta diferente, como no `pr-tour`), nomeia os contratos que o plano vai criar, mudar ou remover (promessa de hoje citada do código → promessa planejada, compatibilidade, raio de alcance — consumidores que o plano não menciona viram discrepância), e reporta discrepâncias factuais plano-vs-código ("o plano assume X; o código mostra Y", sempre com citação) mais as perguntas que o plano deixou em aberto. Não planeja nem implementa — orienta. Também aceita `--html`. |
 | agent | `code-review:security-reviewer` | Subagente que audita injection, authn/authz, segredos, path traversal, desserialização e cripto. Só lê — nunca edita. |
 | agent | `code-review:mapper` | Subagente do `pr-tour` para diffs grandes (>~20 arquivos ou vários grupos independentes): um mapper por grupo, em paralelo, em Sonnet. Traça o grafo de chamadas do grupo, cita os deltas de contrato verbatim com raio de alcance via Grep e devolve um mapa estruturado — só fatos. Narrativa, escolha/pintura de diagramas e vereditos de compatibilidade ficam na sessão, no modelo cheio: coleta delega bem, julgamento não. Em diff pequeno o tour segue inline, sem agente. |
 
@@ -56,6 +57,30 @@ pinta o delta *prometido* e, depois da implementação, o `pr-tour` pinta o
 delta *entregue* — dá para comparar os dois no fim. Fluxo típico:
 plano → `plan-tour` → (ajusta o plano se houver discrepância) →
 implementação → `pr-tour`.
+
+**Modo `--html` (Lavish).** `/code-review:pr-tour 123 --html` (ou
+`plan-tour … --html`) faz o mesmo mapeamento e o mesmo tour, mas escreve o
+resultado em `.lavish/<skill>-<slug>.html` e abre no
+[Lavish](https://github.com/kunchenguid/lavish-axi): os diagramas Mermaid
+aparecem renderizados e você anota qualquer nó, contrato, item da ordem de
+leitura, discrepância ou pergunta em aberto. Ao clicar em *Send*, a anotação
+volta para a sessão. Como os nós têm o nome do caminho real, a anotação chega
+apontando para o arquivo. A sessão responde perguntas, corrige o tour quando a
+correção se confirma no código e continua sem apontar bugs. As convenções
+ficam em `skills/pr-tour/html.md`, compartilhado pelos dois tours.
+
+- O CLI roda fixado (`npx --yes lavish-axi@0.1.89`), com
+  `LAVISH_AXI_TELEMETRY=0` (a telemetria do Lavish vem ligada por padrão) e
+  nunca com `share`, que publica em host de terceiros.
+- Os diagramas ficam em `data-lavish-mermaid`, nunca em `class="mermaid"`.
+  O Lavish converte o segundo em quadro Excalidraw, e a conversão mantém a
+  pintura dos nós (`classDef`) mas descarta a das arestas (`linkStyle`):
+  verificado no navegador com o exemplo de `examples/flowchart.md`. O
+  primeiro mantém o SVG do próprio Mermaid e ainda permite anotar nó a nó.
+- Só funciona em sessão local, com navegador na mesma máquina. Em sessão
+  remota (`CLAUDE_CODE_REMOTE=true`), sem `npx`, ou quando o tour vai para o
+  GitHub, a skill volta para o markdown e diz por quê.
+- Não depende do plugin `lavish` instalado: os tours chamam o CLI direto.
 
 ### `model-router`
 
@@ -173,6 +198,25 @@ dos dois nesta etapa.
 Para usar Jev de fato, configure uma credencial suportada pelo `jev-code`
 (`TYPESAFE_API_KEY`, `OPENROUTER_API_KEY` ou `AI_GATEWAY_API_KEY`). A
 skill oficial TypeSafe por si só não exige credencial para ser lida.
+
+### Lavish upstream
+
+| Plugin no marketplace | Upstream | O que fornece |
+| --- | --- | --- |
+| `lavish@jr-claude-toolkit` | `kunchenguid/lavish-axi`: commit `18cb923` (CLI 0.1.89) fixado | Skill `/lavish:lavish`. Transforma planos, comparações, diagramas e relatórios em páginas HTML abertas num navegador local, onde você anota elementos e envia o feedback de volta ao agente (`lavish-axi poll`). |
+
+Mesmo modelo do Jev/TypeSafe: upstream externo, não fork, com commit fixado.
+O upstream não tem `.claude-plugin/plugin.json`, e o Claude Code descobre a
+`skills/lavish` sozinho. Isso foi verificado com um marketplace isolado:
+instala e custa ~115 tokens fixos por sessão.
+
+Ressalva: a skill do upstream manda rodar `npx -y lavish-axi` sem versão e
+deixa a telemetria ligada, ou seja, o CLI mais recente. O fixe no SHA vale
+para o texto da skill, não para o CLI que ela baixa. Para desligar a
+telemetria em todo uso, ponha `"LAVISH_AXI_TELEMETRY": "0"` no `env` do seu
+`settings.json`. O modo `--html` dos tours não tem esse problema: fixa o CLI e
+desliga a telemetria no próprio comando. O Lavish também exige sessão local
+com navegador.
 
 ### `intent-compiler`
 
@@ -481,6 +525,7 @@ claude-tookit/
 │   │   ├── skills/quick-review/SKILL.md
 │   │   ├── skills/pr-tour/
 │   │   │   ├── SKILL.md
+│   │   │   ├── html.md              # modo --html (Lavish), compartilhado com o plan-tour
 │   │   │   └── examples/            # few-shot por tipo de diagrama + prosa + contratos, via ${CLAUDE_SKILL_DIR}
 │   │   ├── skills/plan-tour/
 │   │   │   ├── SKILL.md             # delta prospectivo: reusa os examples do pr-tour via ${CLAUDE_PLUGIN_ROOT}

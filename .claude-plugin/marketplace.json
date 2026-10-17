@@ -253,6 +253,31 @@
       "repository": "https://github.com/typesafe-ai/skills"
     },
     {
+      "name": "lavish",
+      "source": {
+        "source": "github",
+        "repo": "kunchenguid/lavish-axi",
+        "sha": "18cb9236416d905837eef56130445da0c2ef58e3"
+      },
+      "displayName": "Lavish Editor",
+      "description": "Upstream lavish-axi skill pinned by this marketplace: turns plans, comparisons, diagrams and reports into HTML pages opened in a local browser, where you annotate elements and send the feedback back to the agent. code-review's pr-tour and plan-tour use the same CLI for their --html mode.",
+      "category": "productivity",
+      "keywords": [
+        "html",
+        "review",
+        "annotation",
+        "visualization",
+        "feedback"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "Kun Chen",
+        "url": "https://github.com/kunchenguid"
+      },
+      "homepage": "https://github.com/kunchenguid/lavish-axi#readme",
+      "repository": "https://github.com/kunchenguid/lavish-axi"
+    },
+    {
       "name": "knowledge",
       "source": "./plugins/knowledge",
       "description": "Harvests durable knowledge from a session (or from topics you name) into notes: triage of concepts, systems and mechanisms worth keeping, deep research in a read-only agent, claim-by-claim source review in a clean-context agent, and an approval gate before anything is written. Plain markdown store by default; Basic Memory or any MCP-backed store by config; sources are whatever the project declares or has connected.",
