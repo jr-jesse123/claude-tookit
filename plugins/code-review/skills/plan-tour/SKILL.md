@@ -1,8 +1,8 @@
 ---
 name: plan-tour
 description: Ground an implementation plan in the real codebase before any code is written — trace the terrain the plan touches, narrate how it works today and how the plan transforms it, paint a prospective Mermaid delta (existing code dimmed, planned additions ⊕, planned removals ⊖), state the contracts the plan will introduce, change, or remove (today's promise quoted from the code → the planned promise — a created contract has no today, a removed one no after — compatibility, blast radius), and report factual plan-vs-code discrepancies plus the open questions the plan leaves. Use after a plan exists and before implementing — not for touring diffs (pr-tour) or finding bugs (quick-review).
-argument-hint: [path to a plan file, or pasted plan text; defaults to the plan in this conversation]
-allowed-tools: Bash(git log:*), Bash(git show:*), Bash(npx --yes @zabaca/mermaid-validate:*), Read, Grep, Glob
+argument-hint: [path to a plan file, or pasted plan text; defaults to the plan in this conversation] [--html]
+allowed-tools: Bash(git log:*), Bash(git show:*), Bash(npx --yes @zabaca/mermaid-validate:*), Bash(env LAVISH_AXI_TELEMETRY=0 npx --yes lavish-axi@0.1.89:*), Read, Grep, Glob, Edit(.lavish/**)
 ---
 
 # Plan tour
@@ -19,6 +19,15 @@ where the plan and the code factually disagree — with citations. Deciding
 what to do with a discrepancy (fix the plan, accept the difference) belongs
 to the user and to plan mode, not here. Write the tour in the language the
 user is speaking.
+
+**Output surface.** By default the tour is markdown in this conversation.
+With `--html` in `$ARGUMENTS` (strip it before resolving the plan), build
+the same tour, then follow `${CLAUDE_PLUGIN_ROOT}/skills/pr-tour/html.md`
+(the `pr-tour` skill's folder, sibling of this one, if the variable is
+unavailable) to write it as a page and open it in Lavish — each
+plan-vs-code entry and open question becomes something the reviewer can
+annotate. Read that file only in this mode. File writes are allowed for that
+page under `.lavish/` and for nothing else; the code stays untouched.
 
 ## Resolve the plan
 
@@ -200,7 +209,8 @@ answer — one line.
 - No planning: no step sequences, no alternatives, no estimates, no
   "consider instead". The plan's content is the user's; only its collisions
   with reality are yours.
-- No implementation, no scaffolding — every tool here is read-only.
+- No implementation, no scaffolding — every tool here is read-only, except
+  the `.lavish/` page in `--html` mode.
 - No code review of the existing terrain. A bug noticed while tracing gets
   one line at the end ("possible issue in X — run
   `/code-review:quick-review` to confirm") at most.
