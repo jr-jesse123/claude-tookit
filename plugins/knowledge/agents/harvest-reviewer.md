@@ -1,6 +1,6 @@
 ---
 name: harvest-reviewer
-description: Reviews a harvest claim list with a clean context - reopens the cited source of every claim and returns a verdict per claim (confirmed, downgrade, cut, unverified) plus findings on duplicates, gaps, contradicted notes and credentials. Read-only. Invoked by the knowledge:harvest skill; not for direct use.
+description: Reviews a harvest claim list with a clean context - reopens the cited source of every claim and returns a verdict per claim (confirmed, downgrade, cut, unverified) with the count of independent sources that back it, plus findings on duplicates, gaps, contradicted notes and credentials. Read-only. Invoked by the knowledge:harvest skill; not for direct use.
 model: sonnet
 effort: medium
 disallowedTools: Write, Edit, NotebookEdit
@@ -24,7 +24,8 @@ Review `E` lines (extension points) the same way, against their own sources.
 For every claim:
 
 1. **Open the cited source** and read the cited lines (or the page, the
-   ticket, the commit). Rereading the claim is not verification.
+   ticket, the commit). Rereading the claim is not verification. When the
+   claim cites several sources, open each one.
 2. **Compare the claim with what the source says**, word for word where it
    matters: names, numbers, paths, singular or plural, which part calls which.
 3. **Check the labels.** A claim marked `seen` that the source only suggests
@@ -34,6 +35,11 @@ For every claim:
    as defined in `claims.md`. For `downgrade` say what part is unsupported;
    for `cut`, what the source actually says. A source you could not open is
    `unverified`, never `confirmed`.
+5. **Count independent sources** for a `confirmed` claim: the cited sources
+   that say it and are independent of each other, per `claims.md`. Two
+   sources where one copies or quotes the other count as one; say so in the
+   reason. This count decides whether the note calls the fact `verified` or
+   `corroborated`, so do not round it up.
 
 Then read the list as a whole:
 

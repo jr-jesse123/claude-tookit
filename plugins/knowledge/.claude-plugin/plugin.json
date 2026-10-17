@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "knowledge",
   "displayName": "Knowledge",
-  "description": "Turns what a session taught into durable knowledge notes without shallow or misleading ones: triages the session for concepts, systems and mechanisms worth keeping, researches each in a read-only agent, checks every claim against its source in a clean-context reviewer, and drafts the note for approval. Store-agnostic (plain markdown by default, Basic Memory or any MCP-backed store by config) and source-agnostic (code, docs, tickets, web — whatever the project declares or has connected).",
+  "description": "Turns what a session taught into durable knowledge notes without shallow or misleading ones: triages the session for concepts, systems and mechanisms worth keeping, routes each to confirm (review only, the default), budgeted research in a read-only agent (only with a named reason) or record (what the user stated), checks every sourced claim in a clean-context reviewer, and drafts the note for approval with each fact marked stated, verified or corroborated; --deepen corroborates an existing note later. Store-agnostic (plain markdown by default, Basic Memory or any MCP-backed store by config) and source-agnostic (code, docs, tickets, web — whatever the project declares or has connected).",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"
