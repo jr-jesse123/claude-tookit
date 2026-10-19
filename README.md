@@ -11,6 +11,7 @@ skills, agents, commands, hooks e MCP servers.
 /plugin install code-review@jr-claude-toolkit
 /plugin install mutation-testing@jr-claude-toolkit
 /plugin install devops-tools@jr-claude-toolkit
+/plugin install playwright-guard@jr-claude-toolkit
 /plugin install jev-code@jr-claude-toolkit
 /plugin install typesafe@jr-claude-toolkit
 /plugin install lavish@jr-claude-toolkit
@@ -460,6 +461,18 @@ repositório.
 O hook está em [`plugins/devops-tools/scripts/guard-destructive-commands.py`](plugins/devops-tools/scripts/guard-destructive-commands.py).
 Edite a lista `RULES` para ajustar ao seu ambiente.
 
+### `playwright-guard`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| hook | `PreToolUse` em `browser_run_code_unsafe` e `browser_evaluate` da Playwright MCP | **Pergunta por padrão** antes de código Playwright rodar. `browser_run_code_unsafe` (RCE no processo do servidor) sempre pergunta, exceto num formato só: um **arquivo** de script na pasta configurada (`PLAYWRIGHT_GUARD_SCRIPTS_GLOB`, default `.playwright-mcp/guarded-scripts/*.js`), sem tokens de escape para o Node (`require(`, `process`, `eval(`…) e sem HTTP direto além de `.request.get`/`.request.head` — esse roda com `allow` explícito, sem prompt. `browser_evaluate` pergunta quando a função faz chamada de rede. Funciona com o nome do servidor `playwright` ou com o nome de servidor vindo de plugin (`mcp__plugin_<plugin>_<server>__…`). |
+
+É um filtro léxico, não uma sandbox: pega engano e código injetado ingênuo, não
+um bypass deliberado. A tabela de decisão, a configuração, o comportamento por
+permission mode e as lacunas conhecidas estão no
+[README do plugin](plugins/playwright-guard/README.md). Testes:
+`plugins/playwright-guard/hooks/test.sh` (roda no CI).
+
 ### `arch-docs`
 
 | Componente | Nome | O que faz |
@@ -649,6 +662,12 @@ claude-tookit/
 │   │   ├── hooks/hooks.json
 │   │   ├── scripts/guard-destructive-commands.py
 │   │   └── .mcp.json.example
+│   ├── playwright-guard/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── hooks/hooks.json
+│   │   ├── hooks/playwright-code-guard.sh   # guard léxico: ask por padrão, allow só para script limpo na pasta
+│   │   ├── hooks/test.sh                    # fixtures em dir temporário, os dois formatos de nome de tool
+│   │   └── README.md
 │   ├── arch-docs/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── reference/
@@ -730,6 +749,7 @@ complementa o validador deste repo (ele checa frontmatter contra o schema real).
 ```
 node scripts/validate-marketplace.mjs
 node scripts/validate-diagrams.mjs
+plugins/playwright-guard/hooks/test.sh
 ```
 
 Sem dependências, Node 18+. Rodam no CI a cada push ([`validate.yml`](.github/workflows/validate.yml)).

@@ -1,0 +1,17 @@
+{
+  "description": "Ask before Playwright MCP code runs, except clean script files in the allowed folder.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^mcp__.*playwright.*__browser_(run_code_unsafe|evaluate)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/playwright-code-guard.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

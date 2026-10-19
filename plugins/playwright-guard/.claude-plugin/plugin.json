@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "playwright-guard",
+  "displayName": "Playwright Guard",
+  "description": "PreToolUse guard for the Playwright MCP code tools: asks before browser_run_code_unsafe and networked browser_evaluate calls, and lets only clean script files from one configured folder run without a prompt.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["playwright", "mcp", "security", "hooks", "permissions"]
+}
