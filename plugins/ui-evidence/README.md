@@ -15,7 +15,7 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
 
 | Component | Name | What it does |
 | --- | --- | --- |
-| skill | `/ui-evidence:ui-evidence <ticket-or-label> [what to verify]` | The workflow: configure, agree cases, prepare, run and record, before/after images, restore, write up and hand over. User-invoked only. |
+| skill | `/ui-evidence:ui-evidence <ticket-or-label> [what to verify]` | The workflow: configure, agree cases, prepare, run and record, before/after images, restore, write up and hand over. Invoked by you, or by a workflow that hands it an approved case file (a delegated run, below); its description keeps it from triggering on a quick look at a page. |
 | hook | `PreToolUse` on the Playwright MCP's `browser_run_code_unsafe` and `browser_evaluate` | Lets an evidence script run without a prompt, asks for any other Playwright code. |
 | reference | `references/recording.md` | The script harness, techniques by situation (appearance, virtualised content, drags, repeated components), the safe-video rules, README and timeline format. |
 | reference | `references/config.md` | `.claude/ui-evidence.json`: discovery, fields, defaults. |
@@ -35,6 +35,18 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
 - For the hook: `bash`, `jq`, `grep` and GNU coreutils (`realpath -m`). On
   macOS install coreutils. Without `jq` the hook exits 2, which blocks the
   call.
+
+## Delegated runs
+
+Another skill or a subagent can run the browser part on its own: the main
+session agrees the cases and the writes with you, writes them with your
+approval to `<evidence folder>/cases.md`, and the delegated run works from
+that file. A subagent cannot ask you questions, so in a delegated run the file
+stands in for step 1's yes and for each write's yes, and the run stops and
+returns instead of asking whenever something is not in it: no approval line,
+a case to change, a write not listed, a login that needs a person, no config.
+The skill's "Delegated runs" section has the exact rules. A subagent preloads
+the skill with `skills: [ui-evidence:ui-evidence]` in its frontmatter.
 
 ## Configuration
 
