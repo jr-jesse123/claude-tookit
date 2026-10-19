@@ -20,7 +20,6 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
 | reference | `references/recording.md` | The script harness, the safe-video rules, README and timeline format. |
 | reference | `references/config.md` | `.claude/ui-evidence.json`: discovery, fields, defaults. |
 | reference | `references/compose.md` | Before/after captures, compose page, comment text. |
-| reference | `references/ag-grid.md` | Generic AG Grid techniques (scoping, virtualised columns, computed style, real-mouse drags, highlights). |
 
 ## Requirements
 
@@ -48,9 +47,9 @@ credentials: a secret-looking key makes the skill stop and the hook ask for
 everything. Details in
 [`skills/ui-evidence/references/config.md`](skills/ui-evidence/references/config.md).
 
-Project procedures (how to start the app, app-specific grid components, test
-data) are not fields: they go in project reference files listed under
-`references`, kept in the project, not in this plugin.
+Project procedures (how to start the app, how to read the UI libraries the
+app uses, test data) are not fields: they go in project reference files
+listed under `references`, kept in the project, not in this plugin.
 
 ## The guard hook
 

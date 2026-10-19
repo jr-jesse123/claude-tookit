@@ -37,9 +37,9 @@ the folder that holds that `.claude/`.
   where evidence goes), offer to write `.claude/ui-evidence.json` at the
   project root, and carry on either way with the defaults from `config.md`.
 - Load each entry of `references` whose `when` matches this run (for example
-  "AG Grid screen", "local environment not reachable"). Generic techniques
-  live next to this file: `references/ag-grid.md` for AG Grid screens,
-  `references/compose.md` for before/after images.
+  "screen with the app's data grid", "local environment not reachable").
+  Techniques for specific UI libraries are project references, not part of
+  this skill.
 
 The evidence folder is `<root>/<evidenceRoot>/<folderPattern>` with `{date}`
 (today, `YYYY-MM-DD`), `{label}` (the ticket id or label) and `{slug}` (two to

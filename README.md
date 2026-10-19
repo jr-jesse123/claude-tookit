@@ -537,10 +537,10 @@ ferramentas; o formato está em `reference/config.md`.
 | skill | `/ui-evidence:ui-evidence <ticket-ou-rótulo> [o que verificar]` | Verifica comportamento de UI num navegador real via Playwright MCP e deixa evidência que revisor, QA ou PM confiam sem rodar de novo. Casos de teste (`ID \| Ação \| Esperado`) acordados antes de abrir o navegador; um script por grupo de casos na pasta de evidência; vídeo WebM com um capítulo por caso; leitura do DOM antes e depois de cada ação com horário real ("screenshot mostra; valor retornado prova"); `README.md` com tabela PASS / FAIL / não coberto e `timeline.txt`. Imagens antes/depois com destaque e texto de comentário só quando pedido. Nunca faz upload, anexa ou posta nada. Escritas em ambiente compartilhado pedem um sim por escrita. |
 | hook | `PreToolUse` em `browser_run_code_unsafe` e `browser_evaluate` do Playwright MCP | Libera sem prompt só um script de evidência (`<raiz>/<evidenceRoot>/<pasta>/scripts/*.js`, caminho absoluto, `EVIDENCE_DIR` igual à própria pasta, todo `path:` derivado dele, `screencast.stop` em `finally`, sem tokens de escape, rede, HTTP direto, cookies ou digitação de senha). Qualquer outro código pede confirmação — inclusive no modo `auto`. `browser_evaluate` só pede quando usa rede ou grava arquivo. |
 | referência | `references/recording.md` | O harness dos scripts e as regras de vídeo seguro: gravar só depois do login, `hideActions()` em volta de preenchimento sensível (o título da ação mostra o texto digitado, até em campo de senha), `mask` com `maskSelectors`, gravação sempre parada. |
-| referência | `references/config.md`, `compose.md`, `ag-grid.md` | Config `.claude/ui-evidence.json` (achada por `$UI_EVIDENCE_CONFIG` ou subindo a partir do diretório atual), composição antes/depois, técnicas genéricas de AG Grid. |
+| referência | `references/config.md`, `compose.md` | Config `.claude/ui-evidence.json` (achada por `$UI_EVIDENCE_CONFIG` ou subindo a partir do diretório atual) e composição antes/depois. |
 
-O que é do projeto (como subir o app local, componentes próprios do grid,
-dados de teste) não vira campo de config: fica em arquivos de referência do
+O que é do projeto (como subir o app local, como ler as bibliotecas de UI que
+o app usa, como grids, dados de teste) não vira campo de config: fica em arquivos de referência do
 próprio projeto, listados em `references` da config. O plugin não traz servidor
 MCP; fixe a versão do `@playwright/mcp` que você usa. Limites do guard,
 respostas verificadas (permissões, nomes de ferramenta, versão do Playwright)
@@ -705,8 +705,7 @@ claude-tookit/
 │           └── references/
 │               ├── recording.md     # harness + vídeo seguro + formato do README/timeline
 │               ├── config.md        # .claude/ui-evidence.json
-│               ├── compose.md       # imagens antes/depois
-│               └── ag-grid.md       # técnicas genéricas de AG Grid
+│               └── compose.md       # imagens antes/depois
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
 ├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml

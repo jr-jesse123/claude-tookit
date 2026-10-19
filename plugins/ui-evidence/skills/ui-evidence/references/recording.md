@@ -79,6 +79,13 @@ Notes on the parts:
 - Drags: use `page.mouse` with real moves (`move` to the source, `down`, about
   15 `move` steps, a short wait, `up`). Many drag-and-drop libraries ignore a
   synthetic jump from source to target.
+- Virtualised lists and grids render only what is near the viewport: a DOM
+  read returns what is rendered, not what exists. Prefer a count or value the
+  UI shows, or scroll in steps and collect by a stable key (an id, an
+  `aria-rowindex` or `aria-colindex`) until nothing new appears.
+- Appearance cases (colour, weight, visibility, width) are proven with
+  `getComputedStyle` values, not class names: a class says what the code
+  intended, not what the user sees.
 - Screenshots: `clip` or `locator.screenshot()` to frame the part under test;
   always pass `mask` when anything on screen matches `maskSelectors`.
 - Errors land in `steps` with their time, and `finally` stops the recording,
