@@ -16,6 +16,7 @@ skills, agents, commands, hooks e MCP servers.
 /plugin install lavish@jr-claude-toolkit
 /plugin install execution-router@jr-claude-toolkit
 /plugin install knowledge@jr-claude-toolkit
+/plugin install ui-evidence@jr-claude-toolkit
 ```
 
 Depois de instalado, tudo fica sob o namespace do plugin:
@@ -529,6 +530,24 @@ transicionar tickets, criar ou atualizar páginas nas fontes, CLIs que
 contornam o MCP). O `--setup` rascunha esse bloco com os nomes reais das
 ferramentas; o formato está em `reference/config.md`.
 
+### `ui-evidence`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/ui-evidence:ui-evidence <ticket-ou-rótulo> [o que verificar]` | Verifica comportamento de UI num navegador real via Playwright MCP e deixa evidência que revisor, QA ou PM confiam sem rodar de novo. Casos de teste (`ID \| Ação \| Esperado`) acordados antes de abrir o navegador; um script por grupo de casos na pasta de evidência; vídeo WebM com um capítulo por caso; leitura do DOM antes e depois de cada ação com horário real ("screenshot mostra; valor retornado prova"); `README.md` com tabela PASS / FAIL / não coberto e `timeline.txt`. Imagens antes/depois com destaque e texto de comentário só quando pedido. Nunca faz upload, anexa ou posta nada. Escritas em ambiente compartilhado pedem um sim por escrita. |
+| hook | `PreToolUse` em `browser_run_code_unsafe` e `browser_evaluate` do Playwright MCP | Libera sem prompt só um script de evidência (`<raiz>/<evidenceRoot>/<pasta>/scripts/*.js`, caminho absoluto, `EVIDENCE_DIR` igual à própria pasta, todo `path:` derivado dele, `screencast.stop` em `finally`, sem tokens de escape, rede, HTTP direto, cookies ou digitação de senha). Qualquer outro código pede confirmação — inclusive no modo `auto`. `browser_evaluate` só pede quando usa rede ou grava arquivo. |
+| referência | `references/recording.md` | O harness dos scripts e as regras de vídeo seguro: gravar só depois do login, `hideActions()` em volta de preenchimento sensível (o título da ação mostra o texto digitado, até em campo de senha), `mask` com `maskSelectors`, gravação sempre parada. |
+| referência | `references/config.md`, `compose.md`, `ag-grid.md` | Config `.claude/ui-evidence.json` (achada por `$UI_EVIDENCE_CONFIG` ou subindo a partir do diretório atual), composição antes/depois, técnicas genéricas de AG Grid. |
+
+O que é do projeto (como subir o app local, componentes próprios do grid,
+dados de teste) não vira campo de config: fica em arquivos de referência do
+próprio projeto, listados em `references` da config. O plugin não traz servidor
+MCP; fixe a versão do `@playwright/mcp` que você usa. Limites do guard,
+respostas verificadas (permissões, nomes de ferramenta, versão do Playwright)
+e o que foi testado de ponta a ponta estão em
+[`plugins/ui-evidence/README.md`](plugins/ui-evidence/README.md). Testes do
+hook: `bash plugins/ui-evidence/hooks/test.sh`.
+
 ## Estrutura do repositório
 
 ```
@@ -657,23 +676,37 @@ claude-tookit/
 │   │   ├── skills/init/SKILL.md     # scaffold na medida certa (sabe recomendar menos)
 │   │   ├── skills/adr/SKILL.md      # um ADR por decisão, entrevista obrigatória
 │   │   └── agents/drift-reviewer.md # update | record | clear por diff
-│   └── knowledge/
+│   ├── knowledge/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── reference/
+│   │   │   ├── config.md            # .claude/knowledge.json: store, idioma, pastas, fontes, ranking
+│   │   │   ├── config.example.json  # exemplo completo: basic-memory + várias fontes
+│   │   │   ├── claims.md            # contrato claim list + vereditos (skill e agentes)
+│   │   │   ├── note-writing.md      # guia de escrita default (substituível via `style`)
+│   │   │   └── stores/              # um adaptador por store, progressive disclosure
+│   │   │       ├── markdown.md
+│   │   │       ├── basic-memory.md
+│   │   │       └── mcp.md
+│   │   ├── skills/harvest/
+│   │   │   ├── SKILL.md             # triagem → pesquisa → revisão → rascunho, com dois gates
+│   │   │   └── session-transcript.py # JSONL de sessão anterior → transcript legível
+│   │   └── agents/
+│   │       ├── harvest-researcher.md # claims com fonte, Opus medium, read-only
+│   │       └── harvest-reviewer.md   # veredito por claim, contexto limpo, Sonnet medium
+│   └── ui-evidence/
 │       ├── .claude-plugin/plugin.json
-│       ├── reference/
-│       │   ├── config.md            # .claude/knowledge.json: store, idioma, pastas, fontes, ranking
-│       │   ├── config.example.json  # exemplo completo: basic-memory + várias fontes
-│       │   ├── claims.md            # contrato claim list + vereditos (skill e agentes)
-│       │   ├── note-writing.md      # guia de escrita default (substituível via `style`)
-│       │   └── stores/              # um adaptador por store, progressive disclosure
-│       │       ├── markdown.md
-│       │       ├── basic-memory.md
-│       │       └── mcp.md
-│       ├── skills/harvest/
-│       │   ├── SKILL.md             # triagem → pesquisa → revisão → rascunho, com dois gates
-│       │   └── session-transcript.py # JSONL de sessão anterior → transcript legível
-│       └── agents/
-│           ├── harvest-researcher.md # claims com fonte, Opus medium, read-only
-│           └── harvest-reviewer.md   # veredito por claim, contexto limpo, Sonnet medium
+│       ├── README.md                # regras do guard, limites, fatos verificados, aceite
+│       ├── hooks/
+│       │   ├── hooks.json
+│       │   ├── playwright-code-guard.sh  # allow só para script de evidência; o resto pede
+│       │   └── test.sh              # bash/jq, temp dir, roda no CI
+│       └── skills/ui-evidence/
+│           ├── SKILL.md             # casos → preparar → gravar → antes/depois → restaurar → entregar
+│           └── references/
+│               ├── recording.md     # harness + vídeo seguro + formato do README/timeline
+│               ├── config.md        # .claude/ui-evidence.json
+│               ├── compose.md       # imagens antes/depois
+│               └── ag-grid.md       # técnicas genéricas de AG Grid
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
 ├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml

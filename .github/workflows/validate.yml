@@ -22,6 +22,9 @@ jobs:
       - name: Check execution routing policy and skill references
         run: node --test plugins/execution-router/tests/*.test.mjs
 
+      - name: Test ui-evidence Playwright guard hook
+        run: bash plugins/ui-evidence/hooks/test.sh
+
       - name: Test .NET mutation span helper
         run: python3 -m unittest discover -s plugins/mutation-testing/tests -p 'test_*.py'
 

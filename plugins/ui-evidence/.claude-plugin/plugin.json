@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ui-evidence",
+  "displayName": "UI Evidence",
+  "description": "Verifies UI behaviour in a browser through the Playwright MCP and leaves evidence a reviewer can trust: agreed test cases, a WebM video with one chapter per case recorded safely (after login, no secrets on camera, PII masked, always stopped), DOM reads before and after each action, screenshots, a README with PASS / FAIL / not covered and a timeline. Ships a guard hook that lets evidence scripts run without a prompt and asks for any other Playwright code.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["playwright", "ui", "evidence", "qa", "video", "screenshots", "hooks"]
+}
