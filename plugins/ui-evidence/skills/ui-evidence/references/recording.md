@@ -69,27 +69,40 @@ async (page) => {
 Notes on the parts:
 
 - `read()` returns the state the case is about (a value, a count, a computed
-  style, an order of column ids), read from the DOM. The verdict compares
-  `before` and `after` against the case's Expected; the screenshot illustrates
-  it.
+  style, an order of items), read from the DOM. The verdict compares `before`
+  and `after` against the case's Expected; the screenshot illustrates it.
 - Waits: after an action, wait for the state, not for time, when a locator or
   `page.waitForFunction` can express it; the fixed `waitForTimeout(1000)` is
   the fallback. When a read and the screenshot disagree, re-run with a longer
   wait before concluding.
-- Drags: use `page.mouse` with real moves (`move` to the source, `down`, about
-  15 `move` steps, a short wait, `up`). Many drag-and-drop libraries ignore a
-  synthetic jump from source to target.
-- Virtualised lists and grids render only what is near the viewport: a DOM
-  read returns what is rendered, not what exists. Prefer a count or value the
-  UI shows, or scroll in steps and collect by a stable key (an id, an
-  `aria-rowindex` or `aria-colindex`) until nothing new appears.
-- Appearance cases (colour, weight, visibility, width) are proven with
-  `getComputedStyle` values, not class names: a class says what the code
-  intended, not what the user sees.
 - Screenshots: `clip` or `locator.screenshot()` to frame the part under test;
   always pass `mask` when anything on screen matches `maskSelectors`.
 - Errors land in `steps` with their time, and `finally` stops the recording,
   so a failing case still leaves a playable video.
+
+## Techniques by situation
+
+Use one only when the case runs into its situation; none assumes the app has
+any particular kind of screen or component.
+
+- **The case is about appearance** (colour, weight, visibility, size): prove
+  it with `getComputedStyle` values of the properties in question, not class
+  names. A class says what the code intended, not what the user sees.
+- **The content is longer than the viewport and may be virtualised** (only
+  what is near the viewport exists in the DOM): a DOM read returns what is
+  rendered, not what exists. Prefer a count or total the UI itself shows;
+  otherwise scroll in steps and collect items by a stable key (an id, a
+  data attribute, an ARIA index) until nothing new appears, then scroll back.
+- **The action is a drag** (reorder, resize, move): use `page.mouse` with real
+  moves (`move` to the source, `down`, about 15 `move` steps, a short wait,
+  `up`). Many drag-and-drop implementations ignore a jump from source to
+  target. Read the order or size before and after; the picture alone does not
+  prove the move.
+- **The page holds several instances of the same component**: scope every
+  query to the instance under test first, and name it in the README.
+
+How to read a specific library or component the app uses is project
+knowledge: put it in a project reference (see `config.md`).
 
 ## Safe video
 

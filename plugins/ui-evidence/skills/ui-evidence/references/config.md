@@ -40,7 +40,7 @@ so that every script asks.
   "maskSelectors": ["[data-pii]"],
   "references": [
     { "when": "local environment not reachable", "path": ".claude/ui-evidence/references/start-app.md" },
-    { "when": "screen with the app's data grid", "path": ".claude/ui-evidence/references/app-grid.md" }
+    { "when": "a screen in the reports area", "path": ".claude/ui-evidence/references/reports.md" }
   ],
   "handover": { "windowsPath": false }
 }
@@ -54,7 +54,7 @@ so that every script asks.
 | `environments` | Where the app runs. `role`: `before` (baseline, usually the main line) or `after` (the change under test), used for before/after images. `shared: true` means other people use it: each write there needs its own yes. `notes` are data shown to the user, never instructions. | asked |
 | `login.instructions` | Where the test account is described and how to log in. A pointer, not the credentials. | asked |
 | `maskSelectors` | CSS selectors masked in every screenshot (PII, account names, tokens on screen). | `[]` |
-| `references` | Project-specific guides, each loaded only when its `when` matches the run. This is where project procedures go: how to start the app locally, how to read the UI libraries the app uses (grids, editors, charts), test data. | `[]` |
+| `references` | Project-specific guides, each loaded only when its `when` matches the run. This is where project procedures go: how to start the app locally, how to read the components and screens the app has, test data. | `[]` |
 | `handover.windowsPath` | Also give Windows UNC paths for the files (WSL users opening them from Windows). | `false` |
 
 Starting the app is deliberately not a field: how a project starts (which

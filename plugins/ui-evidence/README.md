@@ -17,7 +17,7 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
 | --- | --- | --- |
 | skill | `/ui-evidence:ui-evidence <ticket-or-label> [what to verify]` | The workflow: configure, agree cases, prepare, run and record, before/after images, restore, write up and hand over. User-invoked only. |
 | hook | `PreToolUse` on the Playwright MCP's `browser_run_code_unsafe` and `browser_evaluate` | Lets an evidence script run without a prompt, asks for any other Playwright code. |
-| reference | `references/recording.md` | The script harness, the safe-video rules, README and timeline format. |
+| reference | `references/recording.md` | The script harness, techniques by situation (appearance, virtualised content, drags, repeated components), the safe-video rules, README and timeline format. |
 | reference | `references/config.md` | `.claude/ui-evidence.json`: discovery, fields, defaults. |
 | reference | `references/compose.md` | Before/after captures, compose page, comment text. |
 
@@ -47,8 +47,8 @@ credentials: a secret-looking key makes the skill stop and the hook ask for
 everything. Details in
 [`skills/ui-evidence/references/config.md`](skills/ui-evidence/references/config.md).
 
-Project procedures (how to start the app, how to read the UI libraries the
-app uses, test data) are not fields: they go in project reference files
+Project procedures (how to start the app, how to read the components and
+screens the app has, test data) are not fields: they go in project reference files
 listed under `references`, kept in the project, not in this plugin.
 
 ## The guard hook

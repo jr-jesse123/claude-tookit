@@ -539,8 +539,8 @@ ferramentas; o formato está em `reference/config.md`.
 | referência | `references/recording.md` | O harness dos scripts e as regras de vídeo seguro: gravar só depois do login, `hideActions()` em volta de preenchimento sensível (o título da ação mostra o texto digitado, até em campo de senha), `mask` com `maskSelectors`, gravação sempre parada. |
 | referência | `references/config.md`, `compose.md` | Config `.claude/ui-evidence.json` (achada por `$UI_EVIDENCE_CONFIG` ou subindo a partir do diretório atual) e composição antes/depois. |
 
-O que é do projeto (como subir o app local, como ler as bibliotecas de UI que
-o app usa, como grids, dados de teste) não vira campo de config: fica em arquivos de referência do
+O que é do projeto (como subir o app local, como ler os componentes e telas
+que o app tem, dados de teste) não vira campo de config: fica em arquivos de referência do
 próprio projeto, listados em `references` da config. O plugin não traz servidor
 MCP; fixe a versão do `@playwright/mcp` que você usa. Limites do guard,
 respostas verificadas (permissões, nomes de ferramenta, versão do Playwright)
