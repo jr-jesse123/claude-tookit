@@ -1,15 +1,17 @@
 ---
 name: ui-evidence
-description: "Verifies UI behaviour in a browser through the Playwright MCP and leaves evidence a reviewer, QA or PM can trust: test cases agreed before the browser opens, a WebM video with one chapter per case recorded safely (after login, secrets never typed on camera, PII masked, recording always stopped), per-case screenshots, values read from the DOM before and after each action with real timestamps, a README with a PASS / FAIL / not covered table and a timeline. Optional before/after images with highlights for a ticket or PR comment. Never uploads or posts anything."
+description: "Verifies UI behaviour in a real browser through the Playwright MCP and leaves evidence a reviewer, QA or PM can trust: test cases agreed before the browser opens, a WebM video with one chapter per case recorded safely (after login, secrets never typed on camera, PII masked, recording always stopped), per-case screenshots, values read from the DOM before and after each action with real timestamps, a README with a PASS / FAIL / not covered table and a timeline; optional before/after images for a ticket or PR comment. Never uploads or posts anything. Use when the user asks to verify, test or demonstrate a UI change or bug fix in the browser, to record evidence, a video or screenshots of UI behaviour, or to prepare before/after images of a screen."
 argument-hint: "<ticket-or-label> [what to verify]"
-disable-model-invocation: true
 ---
 
 # UI evidence
 
 Verify a UI change in a real browser and leave evidence someone else can
 check without re-running it. Arguments: a ticket id or a short label (used in
-the folder name), then optionally what to verify.
+the folder name), then optionally what to verify. When the skill loads without
+arguments (invoked by the model, or by the user with none), take both from the
+conversation; ask only for what is still unclear. Either way, nothing opens in
+the browser before the user approves the cases in step 1.
 
 Rules that hold for the whole run:
 

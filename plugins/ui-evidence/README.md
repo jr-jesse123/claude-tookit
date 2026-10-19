@@ -15,7 +15,7 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
 
 | Component | Name | What it does |
 | --- | --- | --- |
-| skill | `/ui-evidence:ui-evidence <ticket-or-label> [what to verify]` | The workflow: configure, agree cases, prepare, run and record, before/after images, restore, write up and hand over. User-invoked only. |
+| skill | `/ui-evidence:ui-evidence <ticket-or-label> [what to verify]` | The workflow: configure, agree cases, prepare, run and record, before/after images, restore, write up and hand over. Also loads on its own when you ask to verify UI behaviour in the browser or record evidence of it; the browser still opens only after you approve the cases. |
 | hook | `PreToolUse` on the Playwright MCP's `browser_run_code_unsafe` and `browser_evaluate` | Lets an evidence script run without a prompt, asks for any other Playwright code. |
 | reference | `references/recording.md` | The script harness, techniques by situation (appearance, virtualised content, drags, repeated components), the safe-video rules, README and timeline format. |
 | reference | `references/config.md` | `.claude/ui-evidence.json`: discovery, fields, defaults. |
