@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PreToolUse guard for the Playwright MCP's code-running tools.
+# PreToolUse guard for the Playwright MCP's code-running and devtools tools.
 #
 # browser_run_code_unsafe runs arbitrary JavaScript in the MCP's Node process.
 # This hook lets one narrow case through without a prompt: a script file kept
@@ -7,6 +7,13 @@
 # passes the lexical rules below. Every other call to the two tools asks.
 # browser_evaluate runs in the page; it asks only when it touches the network
 # or saves its result to a file.
+#
+# The native video tools (--caps devtools): browser_start_video is allowed
+# only with an absolute filename <root>/<evidenceRoot>/<folder>/<name>.webm;
+# stopping, chapters and action overlays are allowed. The other devtools tools
+# ask: tracing writes request headers and typed secret values in clear text,
+# annotate waits for a person in a dashboard it spawns, resume and recording
+# have no place in an evidence run.
 #
 # A lexical filter, not a sandbox: a deliberate bypass is possible. See the
 # plugin README for what it does not cover.
@@ -49,7 +56,19 @@ case "$tool" in
     fi
     emit allow "ui-evidence guard: page-only evaluate"
     ;;
-  browser_run_code_unsafe) ;;
+  browser_stop_video|browser_video_chapter|browser_video_show_actions|browser_video_hide_actions)
+    emit allow "ui-evidence guard: video control"
+    ;;
+  browser_start_tracing)
+    emit ask "ui-evidence guard: tracing writes request headers (bearer tokens) and typed values, secrets included, in clear text to the MCP's output folder"
+    ;;
+  browser_annotate)
+    emit ask "ui-evidence guard: browser_annotate opens the Playwright dashboard and waits for a person to draw"
+    ;;
+  browser_resume|browser_start_recording)
+    emit ask "ui-evidence guard: $tool is not part of an evidence run"
+    ;;
+  browser_run_code_unsafe|browser_start_video) ;;
   *) exit 0 ;;
 esac
 
@@ -110,13 +129,25 @@ case "$filename" in
   /*) ;;
   *) emit ask "ui-evidence guard: relative filename '$filename'; the MCP resolves it against its own workspace, so pass an absolute path" ;;
 esac
-[ -z "$config_problem" ] || emit ask "ui-evidence guard: $config_problem; every script asks"
+[ -z "$config_problem" ] || emit ask "ui-evidence guard: $config_problem; every script and video asks"
+
+evidence_base=$(realpath -m -- "$root/$evidence_root")
+
+if [ "$tool" = "browser_start_video" ]; then
+  video=$(realpath -m -- "$filename")
+  case "$video" in
+    "$evidence_base"/*) rest=${video#"$evidence_base"/} ;;
+    *) emit ask "ui-evidence guard: video $video is outside $evidence_base" ;;
+  esac
+  printf '%s' "$rest" | grep -qE '^[^/]+/[^/]+\.webm$' \
+    || emit ask "ui-evidence guard: video $video is not <evidence folder>/<name>.webm under $evidence_base"
+  emit allow "ui-evidence guard: video into evidence folder $(dirname "$video")"
+fi
 
 script=$(realpath -m -- "$filename")
 [ -f "$script" ] || emit ask "ui-evidence guard: script $filename does not exist"
 [ -r "$script" ] || emit ask "ui-evidence guard: script $filename is not readable"
 
-evidence_base=$(realpath -m -- "$root/$evidence_root")
 case "$script" in
   "$evidence_base"/*) rest=${script#"$evidence_base"/} ;;
   *) emit ask "ui-evidence guard: $script is outside $evidence_base" ;;

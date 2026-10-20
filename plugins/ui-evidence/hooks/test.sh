@@ -102,7 +102,7 @@ check "spread operator is not '..'" allow browser_run_code_unsafe \
 check "non-secret fill while recording" allow browser_run_code_unsafe \
   "$(run "$(write fill.js "$(harness "$DIR" "    await page.getByLabel('Search').fill('milk');")")")"
 # The harness exactly as documented, so the reference and the guard cannot drift apart.
-documented=$(awk '/^## The harness/{h=1} h&&/^```js/{c=1;next} c&&/^```/{exit} c' \
+documented=$(awk '/^#+ The harness/{h=1} h&&/^```js/{c=1;next} c&&/^```/{exit} c' \
   "$HERE/../skills/ui-evidence/references/recording.md" | sed "s#'/abs/evidence/folder'#'$DIR'#")
 [ -n "$documented" ] || { echo "FAIL could not extract the harness from recording.md"; fail=$((fail + 1)); }
 check "harness from references/recording.md" allow browser_run_code_unsafe \
@@ -245,9 +245,39 @@ check "evaluate with fetch" ask browser_evaluate '{"function":"() => fetch(\"/ap
 check "evaluate with sendBeacon" ask browser_evaluate '{"function":"() => navigator.sendBeacon(\"/x\")"}'
 check "evaluate saving to a file" ask browser_evaluate '{"function":"() => 1","filename":"out.json"}'
 
+# ---- native video and other devtools tools -------------------------------
+
+echo '{ "evidenceRoot": ".playwright-mcp/evidence" }' > "$ROOT/.claude/ui-evidence.json"
+vid() { jq -cn --arg f "$1" '{filename: $f, size: {width: 1280, height: 720}}'; }
+check "video into the evidence folder" allow browser_start_video "$(vid "$DIR/run-1.webm")"
+check "video from a nested cwd" allow browser_start_video "$(vid "$DIR/run-1-part2.webm")" "$ROOT/nested/repo"
+check "video, folder not created yet" allow browser_start_video "$(vid "$EV/2026-10-20-new/run-1.webm")"
+check "video without filename (lands in the output folder)" ask browser_start_video '{}'
+check "video, relative filename" ask browser_start_video \
+  "$(vid ".playwright-mcp/evidence/2026-10-19-demo-todo/run-1.webm")"
+check "video outside the evidence root" ask browser_start_video "$(vid "$ROOT/run-1.webm")"
+check "video directly in the evidence root" ask browser_start_video "$(vid "$EV/run-1.webm")"
+check "video in a subfolder of the evidence folder" ask browser_start_video "$(vid "$DIR/scripts/run-1.webm")"
+check "video, '..' escape" ask browser_start_video "$(vid "$DIR/../../../run-1.webm")"
+check "video, not .webm" ask browser_start_video "$(vid "$DIR/run-1.mp4")"
+ln -s "$TMP/outside" "$EV/linked-folder"
+check "video, symlinked folder escape" ask browser_start_video "$(vid "$EV/linked-folder/run-1.webm")"
+echo '{ "login": { "token": "x" } }' > "$ROOT/.claude/ui-evidence.json"
+check "video with a secret key in config" ask browser_start_video "$(vid "$DIR/run-1.webm")"
+echo '{}' > "$ROOT/.claude/ui-evidence.json"
+check "video stop" allow browser_stop_video '{}'
+check "video chapter" allow browser_video_chapter '{"title":"C1 – add a todo","duration":1500}'
+check "video show actions" allow browser_video_show_actions '{"duration":600}'
+check "video hide actions" allow browser_video_hide_actions '{}'
+check "tracing (headers and typed secrets in clear)" ask browser_start_tracing '{}'
+check "annotate (waits for a person)" ask browser_annotate '{}'
+check "resume" ask browser_resume '{}'
+check "action recording" ask browser_start_recording '{}'
+
 # ---- other tools ---------------------------------------------------------
 
 check "other Playwright tool is not ours" silent browser_snapshot '{}'
+check "stop tracing is not ours" silent browser_stop_tracing '{}'
 
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

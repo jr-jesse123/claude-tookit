@@ -2,13 +2,13 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "^mcp__.*playwright.*__browser_(run_code_unsafe|evaluate)$",
+        "matcher": "^mcp__.*playwright.*__browser_(run_code_unsafe|evaluate|start_video|stop_video|video_chapter|video_show_actions|video_hide_actions|start_tracing|annotate|resume|start_recording)$",
         "hooks": [
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/playwright-code-guard.sh\"",
             "timeout": 10,
-            "statusMessage": "Checking Playwright code"
+            "statusMessage": "Checking Playwright call"
           }
         ]
       }

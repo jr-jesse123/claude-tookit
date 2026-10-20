@@ -6,7 +6,7 @@ evidence a reviewer, QA or PM can trust without re-running it:
 - test cases agreed with you before the browser opens;
 - a WebM video per run, one chapter per case, recorded safely;
 - per-case screenshots, values read from the DOM before and after each
-  action, real timestamps;
+  action, timestamps;
 - a `README.md` with a PASS / FAIL / not covered table, and a `timeline.txt`;
 - on request, before/after images with highlights and comment text for a
   ticket or PR.
@@ -16,8 +16,8 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
 | Component | Name | What it does |
 | --- | --- | --- |
 | skill | `/ui-evidence:ui-evidence <ticket-or-label> [what to verify]` | The workflow: configure, agree cases, prepare, run and record, before/after images, restore, write up and hand over. Invoked by you, or by a workflow that hands it an approved case file (a delegated run, below); its description keeps it from triggering on a quick look at a page. |
-| hook | `PreToolUse` on the Playwright MCP's `browser_run_code_unsafe` and `browser_evaluate` | Lets an evidence script run without a prompt, asks for any other Playwright code. |
-| reference | `references/recording.md` | The script harness, techniques by situation (appearance, virtualised content, drags, repeated components), the safe-video rules, README and timeline format. |
+| hook | `PreToolUse` on the Playwright MCP's `browser_run_code_unsafe`, `browser_evaluate`, video tools and other `devtools` tools | Lets an evidence script or a video into the evidence folder through without a prompt, asks for any other Playwright code, video path, tracing or annotation. |
+| reference | `references/recording.md` | Native recording with the MCP's video tools (sequence, parts, what loses a recording, action titles, tabs), the script harness, techniques by situation (appearance, virtualised content, drags, repeated components), the safe-video rules, README and timeline format. |
 | reference | `references/config.md` | `.claude/ui-evidence.json`: discovery, fields, defaults. |
 | reference | `references/compose.md` | Before/after captures, compose page, comment text. |
 
@@ -28,6 +28,17 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
   `page.screencast`, which `@playwright/mcp@latest` provides today through
   Playwright 1.64.0-alpha (`@playwright/mcp@0.0.83`). For example
   `npx @playwright/mcp@0.0.83`.
+- For native recording, the default mode: `--caps devtools`. Without it the
+  video tools (`browser_start_video`, `browser_stop_video`,
+  `browser_video_chapter`, `browser_video_show_actions`,
+  `browser_video_hide_actions`) do not exist and only script mode works. The
+  same flag also turns on `browser_highlight`, `browser_hide_highlight`,
+  `browser_start_tracing`, `browser_stop_tracing`, `browser_annotate`,
+  `browser_resume`, `browser_start_recording` and `browser_stop_recording`;
+  the guard asks for tracing, annotate, resume and action recording (see
+  below). After moving the pin, start the new version with
+  `--caps devtools`, list its tools and compare the names with
+  `references/recording.md` before relying on it.
 - Recommended MCP options: `--secrets <dotenv file>` so `browser_type` can type
   a secret by name without its value entering the conversation, and
   `--output-dir <root>/.playwright-mcp` when sessions start in folders below
@@ -109,14 +120,30 @@ rather than copying its regexes. Changes since: word boundaries on bare
 identifiers, plus the obfuscation, browser-state and `constructor` rules,
 each motivated by a test in `hooks/test.sh`.
 
+### Native video and the other `devtools` tools
+
+| Call | Decision |
+| --- | --- |
+| `browser_start_video` with an absolute `filename` at `<root>/<evidenceRoot>/<folder>/<name>.webm`, resolved with `realpath` | allow |
+| `browser_start_video` with no `filename`, a relative one, another extension, or a path elsewhere (evidence root itself, a subfolder, `..`, a symlink out) | ask |
+| `browser_stop_video`, `browser_video_chapter`, `browser_video_show_actions`, `browser_video_hide_actions` | allow |
+| `browser_start_tracing` | ask: a trace keeps request headers (bearer tokens) and typed values, secrets from `--secrets` included, in clear text |
+| `browser_annotate` | ask: it spawns the Playwright dashboard and waits for a person |
+| `browser_resume`, `browser_start_recording` | ask: not part of an evidence run |
+
+`browser_highlight`, `browser_hide_highlight` and `browser_stop_tracing` are
+left to the normal permission flow.
+
 ### Honest limits
 
 A lexical filter, not a sandbox; a deliberate bypass is possible (for example
 building a token from pieces in a way the rules do not anticipate). Not
 covered: `page.goto` to any host; the file changing between the check and the
-run; MCP tools other than the two (`browser_file_upload`,
-`browser_take_screenshot`'s own output, `browser_route`, the cookie and storage
-tools, the `devtools` video tools). Hardening left for later: a host allowlist
+run; MCP tools other than the ones above (`browser_file_upload`,
+`browser_take_screenshot`'s and `browser_snapshot`'s own `filename`,
+`browser_route`, the cookie and storage tools); what a native run types while
+action titles are on (the skill's rule, not the guard, keeps secrets off
+camera). Hardening left for later: a host allowlist
 from `environments[].url`; trusting the hook input's `mcp_server.source`
 (Claude Code 2.1.274+) instead of the tool-name prefix; a separate browser
 profile or container for the MCP.
@@ -127,14 +154,30 @@ profile or container for the MCP.
 bash plugins/ui-evidence/hooks/test.sh
 ```
 
-135 checks in a temp dir with a temp config, each under both tool-name shapes
+177 checks in a temp dir with a temp config, each under both tool-name shapes
 (`mcp__playwright__…` and `mcp__plugin_playwright_playwright__…`): the
 regression (inline `require("fs")` under the Claude Code name used to pass
 silently, now asks), the documented harness taken straight from
 `recording.md` (allow, with `hookEventName` present), every token, every
 evidence-path, sink, stop and secret rule with passing and asking fixtures,
 `..` and symlink escapes, relative `filename`, invalid stdin JSON, config
-discovery and config sanity. Runs in CI.
+discovery and config sanity; for the video tools, every allowed and asking
+path shape, the control tools, and the `devtools` tools that ask. Runs in
+CI.
+
+## Troubleshooting
+
+- `Browser is already in use for …/.playwright-mcp/profile, use --isolated`
+  after restarting the MCP (`/mcp`): the previous Chromium is still running
+  and holds the profile. Find it (`ps -eo pid,etime,cmd | grep chromium`),
+  check that it is this workspace's Playwright browser, and end it.
+- `Executable doesn't exist at …/ffmpeg-<rev>/ffmpeg-linux` from
+  `browser_start_video`: Playwright's ffmpeg is not installed for the
+  MCP's Playwright version (`npx playwright install ffmpeg` with that
+  version). The stop after it still lists a file; there is none.
+- Playwright's own ffmpeg can extract a frame to check a video
+  (`ffmpeg -ss <seconds> -i run-1.webm -frames:v 1 frame.png`); it lacks
+  most filters.
 
 ## Verified facts
 
@@ -178,6 +221,42 @@ Answers to the questions this plugin was built on, with how each was settled.
    paid ones (Playwright's reference). Jira Cloud: 1 GB per file by default,
    adjustable by a site admin up to 2 GB (Atlassian docs).
 
+9. **Native video tools.** `@playwright/mcp@0.0.83` has `browser_start_video`
+   (`filename`, `size`, `fps`, `cursor`), `browser_stop_video`,
+   `browser_video_chapter`, `browser_video_show_actions` and
+   `browser_video_hide_actions`, listed only with `--caps devtools`. The
+   recording covers the whole browser context: a popup or new tab gets its
+   own file (`<name>-1.webm`, ...) without action titles; chapters and titles
+   act on the selected tab. Without `size` the video is scaled to 800 pixels
+   wide. `cursor: true` draws a pointer and hides action titles. A second
+   start errors; a stop with nothing recording answers `No videos were
+   recorded.`. `filename` goes through the same roots check as item 6, and
+   its extension is not checked. Source: the MCP's source and runs over
+   stdio, below.
+10. **When a native recording is saved.** Only at `browser_stop_video`: the
+    video is kept in a temporary folder and copied to `filename` then. A
+    killed browser leaves nothing; an MCP that exits mid-recording leaves a
+    0-byte file; `browser_close` saves the file but the next stop answers
+    `No videos were recorded.`; after a failed start, the stop still lists a
+    file that does not exist. Source: runs below. A script records the same
+    way, so its `finally` covers script errors, not a dead browser (read in
+    the source, not run).
+11. **Secrets in native action titles.** `browser_type` with the name of a
+    `--secrets` entry filled the real value, and with
+    `browser_video_show_actions` on the video showed `Fill "<value>"`, while
+    the tool's answer showed only the name. `browser_video_hide_actions` and
+    `style.title: "display: none"` removed the title. Source: frames of the
+    runs below, with a fake secret.
+12. **Tracing.** `browser_start_tracing` wrote, under
+    `.playwright-mcp/traces/`, the `Authorization: Bearer …` header of a page
+    request in the `.network` file and the value of a `--secrets` entry typed
+    with `browser_type` in the `.trace` file, both in clear text. Source: runs
+    below.
+13. **Annotations.** The MCP marks the video and tracing tools and
+    `browser_annotate` `readOnlyHint: true`; `browser_annotate` spawns a
+    detached dashboard process and waits for a person. Source: the MCP's tool
+    list and source.
+
 ## Acceptance status
 
 Run here, in a scratch workspace against a local page with
@@ -191,8 +270,16 @@ Run here, in a scratch workspace against a local page with
   left a finished `run-2.webm` (the `finally` stopped the recording);
 - a `filename` outside the MCP's roots was refused by the MCP.
 
+Native recording, run here with `@playwright/mcp@0.0.83 --caps devtools`
+over stdio from a small MCP client, headless Chromium 1194 (not the 1247 the
+pin expects; `--no-sandbox` because the container had no sandbox), against a
+local page with a popup, a new-tab link and an iframe: items 9 to 12 above.
+The guard's video decisions are covered by `hooks/test.sh`, not by a live
+session.
+
 Not run here: installing the plugin into a Claude Code session, the skill
 end to end with an agent (case table, approval, write-up), and the prompt
 behaviour per permission mode (`default` and `auto`); item 2 above rests on the
-docs. Run those once on a public demo page such as
+docs; a subagent preloading the skill and loading the deferred video tools
+through `ToolSearch`. Run those once on a public demo page such as
 `https://demo.playwright.dev/todomvc` after installing.
