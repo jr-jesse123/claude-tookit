@@ -333,7 +333,7 @@
     {
       "name": "ui-evidence",
       "source": "./plugins/ui-evidence",
-      "description": "Verifies UI behaviour in a browser through the Playwright MCP and leaves evidence a reviewer can trust: agreed test cases, safe WebM video with a chapter per case, DOM reads before and after each action, screenshots, a PASS / FAIL / not covered README and a timeline. Ships a guard hook that lets evidence scripts run without a prompt and asks for any other Playwright code.",
+      "description": "Verifies UI behaviour in a browser through the Playwright MCP and leaves evidence a reviewer can trust: agreed test cases, safe WebM video with a chapter per case, DOM reads before and after each action, screenshots, a PASS / FAIL / not covered README and a timeline. Records natively with the MCP's video tools or through a script. Ships a guard hook that lets evidence videos and scripts through without a prompt and asks for any other Playwright code, tracing or annotation.",
       "category": "quality",
       "keywords": [
         "playwright",

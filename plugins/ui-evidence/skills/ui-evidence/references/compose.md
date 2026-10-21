@@ -22,7 +22,9 @@ only when the user asks.
   await style.evaluate((el) => el.remove());
   ```
 
-  Prefer `outline` (it does not shift layout) over `border`. For a region with
+  Prefer `outline` (it does not shift layout) over `border`. With
+  `--caps devtools`, `browser_highlight` on the element and
+  `browser_hide_highlight` after do the same without a script. For a region with
   no single element, inject an absolutely positioned overlay `div` at the
   element's bounding box and remove it the same way.
 - Mask `maskSelectors` in both captures.

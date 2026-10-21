@@ -1,6 +1,6 @@
 ---
 name: ui-evidence
-description: "Verifies UI behaviour in a browser through the Playwright MCP and leaves evidence a reviewer, QA or PM can trust: test cases agreed before the browser opens, a WebM video with one chapter per case recorded safely (after login, secrets never typed on camera, PII masked, recording always stopped), per-case screenshots, values read from the DOM before and after each action with real timestamps, a README with a PASS / FAIL / not covered table and a timeline. Optional before/after images with highlights for a ticket or PR comment. Never uploads or posts anything. Use only when the user asks for UI evidence or a recorded verification, or when a calling workflow hands over an approved case file; not for a quick look at a page."
+description: "Verifies UI behaviour in a browser through the Playwright MCP and leaves evidence a reviewer, QA or PM can trust: test cases agreed before the browser opens, a WebM video with one chapter per case recorded safely (after login, secrets never typed on camera, PII masked, recording always stopped), per-case screenshots, values read from the DOM before and after each action with timestamps, a README with a PASS / FAIL / not covered table and a timeline. Optional before/after images with highlights for a ticket or PR comment. Never uploads or posts anything. Use only when the user asks for UI evidence or a recorded verification, or when a calling workflow hands over an approved case file; not for a quick look at a page."
 argument-hint: "<ticket-or-label> [what to verify] | <approved case file>"
 ---
 
@@ -36,6 +36,9 @@ talked to the user, never by this run. It holds:
 
 - the cases table and probes, as in step 1, and the environment and data
   each case uses;
+- the recording mode (step 3) and, per case, the steps in plain words with
+  the selectors or test ids they use, so the run does not have to guess
+  them; a script-mode run may instead name its script;
 - every write the run may make, one line each: environment, what is written,
   on which entity;
 - an approval line: who approved, when (ISO time), and that the approval
@@ -55,6 +58,8 @@ In a delegated run:
   out to touch different data: stop before it and return.
 - **A login that needs a person** (MFA, a code by email, an expired session
   with no `--secrets` entry): stop and return.
+- **Stop the recording before returning**, on every path, and list each
+  video file with its size.
 - **Hand over to the caller** (step 6): the same content, returned instead of
   told, with the folder's absolute path. The caller decides what reaches the
   user.
@@ -83,7 +88,7 @@ the folder that holds that `.claude/`.
 The evidence folder is `<root>/<evidenceRoot>/<folderPattern>` with `{date}`
 (today, `YYYY-MM-DD`), `{label}` (the ticket id or label) and `{slug}` (two to
 four words from what is verified). Reuse an existing folder for the same
-ticket or label. Create it with `scripts/` inside.
+ticket or label. Create it, with `scripts/` inside for script mode.
 
 ## 1. Agree the cases (before the browser opens)
 
@@ -120,26 +125,45 @@ delegated run the approved case file is that yes (see "Delegated runs").
 ## 3. Run and record
 
 Read `${CLAUDE_PLUGIN_ROOT}/skills/ui-evidence/references/recording.md` and
-follow it. In short:
+follow it. Two modes:
 
-- One script per group of cases in `<evidence>/scripts/<run>-<what>.js`,
-  built on the harness there, with `EVIDENCE_DIR` set to the evidence folder.
-  Run it with `browser_run_code_unsafe` and an **absolute** `filename`; never
-  inline `code`. The plugin's guard lets such a script run without a prompt
-  and asks for anything else (see the plugin README).
-- One video per run, one chapter per case, screenshots per case, DOM reads
-  before and after each action, ISO timestamps returned by the script.
+- **Native** (default, needs the MCP with `--caps devtools`): drive the page
+  with the standard tools and record with `browser_start_video`
+  (absolute `filename` `<evidence>/<run>.webm`, `size` equal to the viewport
+  set with `browser_resize`, `cursor: true`), one `browser_video_chapter`
+  per case, `browser_stop_video` at the end. A failing step does not end the
+  recording: report it and go on or stop.
+- **Script**: one script per group of cases in
+  `<evidence>/scripts/<run>-<what>.js`, built on the harness there, with
+  `EVIDENCE_DIR` set to the evidence folder, run with
+  `browser_run_code_unsafe` and an **absolute** `filename`, never inline
+  `code`. For an identical re-run before and after a fix, for masked
+  screenshots, or without `--caps devtools`. A script error ends in the
+  harness's `finally`, which stops the recording; report the error, do not
+  retry blindly.
+
+The plugin's guard lets an evidence video or script through without a prompt
+and asks for anything else (see the plugin README). In both modes:
+
+- One chapter per case, screenshots per case, reads before and after each
+  action, a time for each.
 - **A screenshot shows; a returned value proves.** Each verdict rests on a
-  value the script returned. When a read and a later screenshot disagree,
-  re-read after a longer wait before concluding.
+  value a tool or the script returned. When a read and a later screenshot
+  disagree, re-read after a longer wait before concluding.
+- Check every selector on the live page before the recording that uses it,
+  above all the reads after a write; an irreversible write gets a part of
+  its own.
 - Safe video: start recording only after login; never type a secret while
-  recording; `hideActions()` around any fill whose text must not be filmed
-  (action titles show typed text, even in password fields); mask
-  `maskSelectors` in screenshots; prefer test entities to real customer data.
-- If the session expires mid-run: stop the recording, log in outside it, and
-  start a new part (`run-1-part2.webm`).
-- A script error ends in the harness's `finally`, which stops the recording;
-  report the error, do not retry blindly.
+  recording; action titles show typed text in clear, even in password
+  fields and for `--secrets` values, so keep them off around any typing;
+  no tracing; mask `maskSelectors` in screenshots; prefer test entities to
+  real customer data.
+- Record in short parts and do not record long waits. If the session
+  expires mid-run: stop the recording, log in outside it, and start a new
+  part (`run-1-part2.webm`).
+- **The recording is saved only when stopped**, and is lost if the browser
+  dies. Stop it before ending the turn, then check that each listed file
+  exists and is not empty.
 
 ## 4. Before/after images (only when asked)
 
