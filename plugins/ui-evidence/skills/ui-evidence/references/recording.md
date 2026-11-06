@@ -13,9 +13,6 @@ How step 3 of the skill records a run. Two modes, same evidence:
   screenshots that need `mask`, and when the MCP runs without
   `--caps devtools`.
 
-The guard lets both through without a prompt when files stay in the
-evidence folder, and asks otherwise (see the plugin README).
-
 ## Native recording
 
 What follows was observed on `@playwright/mcp@0.0.83` (Playwright
@@ -36,8 +33,8 @@ after changing the pinned version, check that the tools below still exist
    and log `start recording`.
 4. `browser_start_video` with:
    - `filename`: the **absolute** path `<evidence>/<run>.webm`, for example
-     `<evidence>/run-1.webm` or `<evidence>/run-1-part2.webm`. The guard
-     allows only `<evidence folder>/<name>.webm` and asks for anything else.
+     `<evidence>/run-1.webm` or `<evidence>/run-1-part2.webm`. Keep it
+     directly in the evidence folder.
    - `size`: equal to the viewport set in step 2. Without `size` the video is
      scaled down to 800 pixels wide; with a size larger than the viewport the
      page fills only part of the frame and the rest is grey.
@@ -135,7 +132,7 @@ page and are filmed with it.
 - Appearance cases (colour, weight, visibility) need computed styles, which
   only code reads: `browser_evaluate` with a page-only function
   (`() => getComputedStyle(...).color`). It is code: say what it reads before
-  using it. The guard allows it without network access or `filename`.
+  using it. Keep it free of network access and `filename`.
 - Times: the clock taken through the Bash tool right after a read is close
   to it, not from it; timeline lines from native runs are marked `~`. The
   clock taken at step 3 gives video offsets (offset = time − start).
@@ -152,10 +149,10 @@ either mode.
 | Tool | What it does | In an evidence run |
 | --- | --- | --- |
 | `browser_highlight` / `browser_hide_highlight` | A persistent outline on an element, also on video. | Allowed by the MCP's normal permissions; declare it in the README and remove it after. |
-| `browser_start_tracing` / `browser_stop_tracing` | A Playwright trace in `.playwright-mcp/traces/`. | Do not use. It wrote the `Authorization` header (bearer token) and values typed through `--secrets` in clear text. The guard asks. |
-| `browser_annotate` | Opens the Playwright dashboard and waits for a person to draw on the page. | Do not use; the guard asks. |
-| `browser_start_recording` / `browser_stop_recording` | Records a person's actions as Playwright code. Not video. | Not needed; the guard asks. |
-| `browser_resume` | Resumes a paused Playwright debugger. | Not needed; the guard asks. |
+| `browser_start_tracing` / `browser_stop_tracing` | A Playwright trace in `.playwright-mcp/traces/`. | Do not use. It wrote the `Authorization` header (bearer token) and values typed through `--secrets` in clear text. |
+| `browser_annotate` | Opens the Playwright dashboard and waits for a person to draw on the page. | Do not use. |
+| `browser_start_recording` / `browser_stop_recording` | Records a person's actions as Playwright code. Not video. | Not needed. |
+| `browser_resume` | Resumes a paused Playwright debugger. | Not needed. |
 
 ## Script recording
 
@@ -178,16 +175,14 @@ either mode.
 
 ### The harness
 
-Copy it into each script and fill in the cases. Keep it free of the tokens the
-guard asks on: `require(`, `import`, `process`, `Buffer`, `globalThis`,
-`eval(`, `Function(`, `module`, `__dirname`, `constructor`, `fetch`,
-`method:`, `newContext`, `.route(`, `storageState`, `cookies`, `saveAs(`,
-`setInputFiles(`, `..`, and `obj['name']` access. The word `path` may appear
-only as `path: \`${EVIDENCE_DIR}/...\`` (or `path: EVIDENCE_DIR + '/...'`).
+Copy it into each script and fill in the cases. Keep it to the page: no
+network calls, no cookies or storage state, no downloads or uploads, and
+derive every `path` from `EVIDENCE_DIR`
+(`path: \`${EVIDENCE_DIR}/...\``).
 
 ```js
 async (page) => {
-  // Must equal this script's evidence folder (the parent of scripts/). The guard checks it.
+  // Must equal this script's evidence folder (the parent of scripts/).
   const EVIDENCE_DIR = '/abs/evidence/folder';
   const RUN = 'run-1';
   // maskSelectors from the config, plus any case-specific ones.
