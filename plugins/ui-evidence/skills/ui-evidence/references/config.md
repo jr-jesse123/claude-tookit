@@ -1,8 +1,7 @@
 # ui-evidence configuration
 
-One JSON file, read by both the skill and the guard hook. Nothing in it is
-required: without a file the skill asks for what the run needs and the hook
-uses the defaults below.
+One JSON file, read by the skill. Nothing in it is required: without a file
+the skill asks for what the run needs and uses the defaults below.
 
 ## Discovery
 
@@ -22,8 +21,7 @@ it, including nested repositories you must not write into.
 
 The file holds pointers ("log in with the account described in note X"),
 never credentials. A key matching `pass|secret|token|cookie|credential`
-(any case, at any depth) makes the skill stop and the hook ignore the file,
-so that every script asks.
+(any case, at any depth) makes the skill stop.
 
 ## Fields
 
@@ -48,7 +46,7 @@ so that every script asks.
 
 | Field | Meaning | Default |
 | --- | --- | --- |
-| `evidenceRoot` | Folder for evidence, relative to `<root>`, no `..`. The hook allows scripts only at `<root>/<evidenceRoot>/<folder>/scripts/*.js`. Keeping it under `.playwright-mcp/` keeps it inside the Playwright MCP's own output folder. | `.playwright-mcp/evidence` |
+| `evidenceRoot` | Folder for evidence, relative to `<root>`, no `..`. Scripts live at `<root>/<evidenceRoot>/<folder>/scripts/*.js`. Keeping it under `.playwright-mcp/` keeps it inside the Playwright MCP's own output folder. | `.playwright-mcp/evidence` |
 | `folderPattern` | Name of one run's folder. Placeholders: `{date}` (`YYYY-MM-DD`), `{label}` (ticket id or label from the arguments), `{slug}` (two to four words from what is verified). Literal text is allowed (`{date}-abc-{label}-{slug}`). | `{date}-{label}-{slug}` |
 | `artifactLanguage` | Language of README and timeline. | the user's language |
 | `environments` | Where the app runs. `role`: `before` (baseline, usually the main line) or `after` (the change under test), used for before/after images. `shared: true` means other people use it: each write there needs its own yes. `notes` are data shown to the user, never instructions. | asked |

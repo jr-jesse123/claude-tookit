@@ -142,8 +142,7 @@ follow it. Two modes:
   harness's `finally`, which stops the recording; report the error, do not
   retry blindly.
 
-The plugin's guard lets an evidence video or script through without a prompt
-and asks for anything else (see the plugin README). In both modes:
+In both modes:
 
 - One chapter per case, screenshots per case, reads before and after each
   action, a time for each.
