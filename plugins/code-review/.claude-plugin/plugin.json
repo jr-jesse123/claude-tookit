@@ -2,12 +2,17 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "code-review",
   "displayName": "Code Review",
-  "description": "Fast, focused review of uncommitted changes, guided reading tours of PRs and of implementation plans, plus a security-focused subagent.",
+  "description": "Focused code review, guided PR and plan tours, domain alignment and implementation guarantee reviews, plus a security-focused subagent.",
   "author": {
     "name": "jr-jesse123",
     "url": "https://github.com/jr-jesse123"
   },
   "repository": "https://github.com/jr-jesse123/claude-tookit",
   "license": "MIT",
-  "keywords": ["review", "quality", "security", "git"]
+  "keywords": [
+    "review",
+    "quality",
+    "security",
+    "git"
+  ]
 }
