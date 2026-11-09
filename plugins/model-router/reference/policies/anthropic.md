@@ -1,6 +1,6 @@
 # Anthropic provider policy
 
-Last reviewed: 2026-10-07
+Last reviewed: 2026-11-09
 
 This file is the **routing data for the Anthropic provider**. The shared
 `routing-core.md` owns the rubric and the tier layer, and the skills own their
@@ -14,12 +14,12 @@ own logged evidence contradicts it — see `../calibration.md`.
 
 | Tier | Model | Notes |
 | --- | --- | --- |
-| mechanical | `haiku` | Current alias target: Haiku 5.5; 200K context — disqualified when input approaches it |
+| mechanical | `haiku` | Current alias target: Haiku 5.5; 1M context — assess effective retrieval at high fill |
 | workhorse | `sonnet` | Current alias target: Sonnet 5.5; keep scoped long-running work here when judgment/oracle/risk remain favorable |
 | frontier | `opus` | Current alias target: Opus 5.5 |
 | exceptional | `opus` | Opus 5.5 at `xhigh`/`max`; long horizon alone no longer promotes to Fable |
 
-`fable` (Fable 5.1) sits **outside the normal tier ladder** as an evidence-gated
+`fable` (Fable 5.2) sits **outside the normal tier ladder** as an evidence-gated
 escape hatch. Route to it only when project calibration, a task-specific eval,
 or a serious Opus 5.5 attempt demonstrates a capability advantage worth the
 premium.
@@ -31,20 +31,19 @@ with an already-evaluated workflow, and the documented refusal fallback only.
 
 | `--model` | Role | Default `--effort` | Context | $/MTok in-out |
 | --- | --- | --- | --- | --- |
-| `haiku` | Haiku 5.5: bounded, high-volume, latency-sensitive work and focused subagent coding | `low` (policy default; raise when the task remains mechanical but needs more persistence) | 200K | $0.10 / $0.50 up to 100K prompt; $0.50 / $2.50 over 100K |
+| `haiku` | Haiku 5.5: bounded, high-volume, latency-sensitive work and focused subagent coding | `low` (policy default; raise when the task remains mechanical but needs more persistence) | 1M | $0.10 / $0.50 up to 100K prompt; $0.50 / $2.50 over 100K |
 | `sonnet` | Sonnet 5.5: default for daily implementation, bug fixing, review, and scoped agentic coding | `medium` (policy default; Claude Code/apps default `medium`, Claude Platform default `high`) | 1M | $2 / $10 |
 | `opus` | Opus 5.5: careful judgment, architecture, investigation, weak-oracle and high-risk work | `medium` (vendor default; raise from evidence) | 1M | $4 / $20 |
-| `fable` | Fable 5.1: calibration-only escape hatch, not a normal escalation tier | `high` | 1M | $10 / $50 |
+| `fable` | Fable 5.2: evidence-gated reasoning and long-horizon agentic work | `high` (platform default) | 1M | $8 / $40 |
 | `claude-opus-4-8` | Regression and compatibility only | `high` | 1M | $5 / $25 |
 
-Prices reviewed 2026-10-07. Haiku 5.5 is $0.10/$0.50 for prompts up to 100K and $0.50/$2.50 over 100K, with cache reads at $0.01/$0.05; Anthropic reports about 75% lower cost per workload than Haiku 4.5. Sonnet 5.5 remains $2/$10, but cache reads dropped from $0.20 to $0.10/MTok on 2026-10-07; Anthropic estimates this makes most agentic work about 20% cheaper. Opus 5.5 is $4/$20, with $0.20/MTok cache reads and $5/MTok cache writes. Fable 5.1 remains $10/$50 with $0.25/MTok cache reads.
+Prices reviewed 2026-11-09. Haiku 5.5 is $0.10/$0.50 for prompts up to 100K and $0.50/$2.50 over 100K, with cache reads at $0.01/$0.05; Anthropic reports about 75% lower cost per workload than Haiku 4.5. Sonnet 5.5 remains $2/$10, but cache reads dropped from $0.20 to $0.10/MTok on 2026-10-07; Anthropic estimates this makes most agentic work about 20% cheaper. Opus 5.5 is $4/$20, with $0.20/MTok cache reads and $5/MTok cache writes. Fable 5.2 is $8/$40 with $0.20/MTok cache reads.
 
 > **Haiku 5.5 supports adjustable effort.** It is the first Haiku-class model to
 > expose the same cost/intelligence control. Use `low` by default for mechanical
 > work; raise effort only while the task still belongs in the mechanical tier.
 
-> **Haiku's context is 200K, not 1M.** A task whose input alone approaches that
-> ceiling is disqualified from Haiku regardless of how mechanical it is.
+> **Haiku 5.5 has a 1M context window.** The old 200K hard cap was incorrect; assess effective context quality separately.
 
 ## Effort ladder
 
@@ -172,7 +171,12 @@ instead of buying more Sonnet effort.
 - Autonomous work across code, tests, CI, infrastructure, and documentation.
 - Long agent runs that must repeatedly validate and correct themselves.
 
-### Fable 5.1 — evidence-gated escape hatch
+### Fable 5.2 — evidence-gated escape hatch
+
+Anthropic's 2026-11-09 launch reports FrontierCode 2.0 49.1% versus Opus 5.5 45.5% at highest effort, and FrontierSWE v2 69.9% versus 62.3%. At `high`, Fable 5.2 reaches 45.3% FrontierCode 2.0 versus Opus `max` 45.5% at roughly half the cost per task (vendor eval). Its token price is 20% below Fable 5.1. Compare Fable `high` against Opus `xhigh`/`max` for difficult, weak-oracle work; promote only when project evals show improved quality or total cost. Anthropic still advises starting most workloads on Opus.
+
+Fable 5.2 uses adaptive thinking (always on). Forced tool choice (`any`/`tool`) and sampling parameters can return HTTP 400. Preserved thinking requires an append-only prefix; a Fable 5.2 executor using Advisor Tool requires a Fable 5.2 or Mythos 5.2 advisor.
+
 
 Fable is no longer a task-category destination. Do **not** route to it from task
 size, duration, multi-repository scope, cache shape, or "hardest model" intuition
@@ -241,14 +245,13 @@ Seeded 2026-08-05; same provenance tags as the OpenAI policy (`[vendor]` =
 Anthropic's claims/evals, `[reported]` = independent sources). Calibration
 entries confirm or demote these like any prior.
 
-- **Hard limits.** Haiku 200K (the disqualifier above); Sonnet, Opus, and
-  Fable 1M — **at flat pricing, with no long-context surcharge** since
+- **Hard limits.** Haiku, Sonnet, Opus, and Fable 1M — **at flat pricing, with no long-context surcharge** since
   Opus 4.7. `[vendor]` That is a structural advantage over OpenAI's reported
   >~270K surcharge (see `openai.md` → Baseline) when comparing prices on
   context-heavy work.
 - **Effective vs. advertised.** Industry-wide long-context evals (NVIDIA
   RULER family) put most models' *effective* context at ~50–65% of nominal —
-  a model advertising 200K typically turns unreliable around 130K.
+  nominal context does not guarantee reliable retrieval at high fill.
   `[reported]` This is a cross-model prior, not a Claude-specific
   measurement. Practical rule: when dimension 5 scores 3 **and** the input
   alone fills more than about half the candidate's window, treat the
@@ -272,7 +275,7 @@ entries confirm or demote these like any prior.
   judgment, context fidelity, ambiguity, or risk is what makes the long run hard.
 - **Opus 5.5 still owns the harder tail.** Anthropic reports successful
   multi-repository runs lasting more than 18 hours and a C→Rust migration that
-  finished in 9.5 hours versus 12 hours for Fable 5.1 at 51% lower cost. Fable
+  finished in 9.5 hours versus 12 hours for Fable 5.2 at 51% lower cost. Fable
   therefore still requires category-specific evidence.
 
 ## Token economics (input)
@@ -290,13 +293,13 @@ tie-break (`routing-core.md` → tie-break rule 2) uses real counts:
   When price decides a cross-provider or cross-tier tie on an input-heavy
   task, run the actual input through each candidate's counter before
   comparing — one API call per candidate beats any multiplier.
-- **Caching bends the effective input rate, but not uniformly.** Haiku 5.5 cache reads are $0.01/MTok up to 100K prompt and $0.05 above 100K. Sonnet 5.5 cache reads are now $0.10/MTok, while Opus 5.5 remains $0.20/MTok. Warm, input-heavy sessions therefore make Haiku especially cheap for repeated mechanical/subagent work and narrow the fresh-input gap between Sonnet and Opus; output/tool volume and task completion efficiency still matter more than sticker input price. Fable 5.1 cache reads cost $0.25/MTok, so cache-heavy work is still not a direct Fable signal. Compare effective workload cost and let calibration decide any remaining capability premium.
+- **Caching bends the effective input rate, but not uniformly.** Haiku 5.5 cache reads are $0.01/MTok up to 100K prompt and $0.05 above 100K. Sonnet 5.5 cache reads are now $0.10/MTok, while Opus 5.5 remains $0.20/MTok. Warm, input-heavy sessions therefore make Haiku especially cheap for repeated mechanical/subagent work and narrow the fresh-input gap between Sonnet and Opus; output/tool volume and task completion efficiency still matter more than sticker input price. Fable 5.2 cache reads cost $0.20/MTok, so cache-heavy work is still not a direct Fable signal. Compare effective workload cost and let calibration decide any remaining capability premium.
 - **No long-context surcharge** at 1M (see Context behavior) — the input rate
   is flat where OpenAI's is reportedly not.
 
 ## Refusals on security-adjacent work
 
-Sonnet 5.5, Opus 5.5, and Fable 5.1 ship cyber safeguards/fallbacks for a narrow
+Sonnet 5.5, Opus 5.5, and Fable 5.2 ship cyber safeguards/fallbacks for a narrow
 set of high-risk requests. Sonnet 5.5 is the first Sonnet release to receive
 these stronger cyber safeguards because Anthropic measures its cybersecurity
 capability near Opus 5. Routine software development is intended to be
@@ -309,7 +312,7 @@ fallback mechanism rather than assuming a single hard-coded target. For Opus 5.5
 to Opus 4.8; biology and other safeguarded categories can use different fallback
 models. Do not hard-code a universal fallback target.
 
-Fable 5.1 requires 30-day data retention and is unavailable under ZDR unless
+Fable 5.2 requires 30-day data retention and is unavailable under ZDR unless
 Anthropic expressly authorizes it.
 
 ## Execution-shape notes
@@ -319,7 +322,7 @@ provider/harness switch is required.
 
 **Model switches and effort changes are different cache events.** Switching the
 model of a running conversation still invalidates the prompt cache. Haiku 5.5, Sonnet 5.5,
-Opus 5.5, and Fable 5.1 support adjustable effort; current API/harness support for cache-preserving per-message changes must be checked per model before relying on it. Sonnet 5.5, Opus 5.5, and Fable 5.1 support per-message effort via `output_config` (beta),
+Opus 5.5, and Fable 5.2 support adjustable effort; current API/harness support for cache-preserving per-message changes must be checked per model before relying on it. Sonnet 5.5, Opus 5.5, and Fable 5.2 support per-message effort via `output_config` (beta),
 which preserves the prompt cache when the model's compatible thinking mode is
 used. On Sonnet 5.5, per-message effort changes require adaptive thinking;
 `between_tools` cannot change effort mid-conversation. In Claude Code,
@@ -342,8 +345,8 @@ Two Opus 5.5 behaviors change which shape is worth recommending:
 - **Fresh-context review follows `review-escalation.md`.** Opus self-verification
   satisfies R0; it does not satisfy R1–R4 because those levels exist to buy
   de-anchoring or model/provider diversity.
-- **Fable 5.1 is valid as a peer reviewer/advisor without being a higher routing
-  tier.** Anthropic's Advisor Tool explicitly allows Fable 5.1 to advise Opus
+- **Fable 5.2 is valid as a peer reviewer/advisor without being a higher routing
+  tier.** Anthropic's Advisor Tool explicitly allows Fable 5.2 to advise Opus
   5.5. Treat that as evidence that Fable can be a same-provider diversity peer,
   not as evidence that normal Opus work should escalate to Fable.
 - **Advisor Tool is in-flight advice, not independent review.** The advisor sees
@@ -440,6 +443,12 @@ What it changes for routing:
 Switching the model of a running conversation invalidates its prompt cache and
 re-reads the history at full price. Prefer a new session or a subagent over
 repeatedly switching a long-running main conversation. Do **not** apply that
-warning mechanically to a Sonnet 5.5, Opus 5.5, or Fable 5.1 effort-only change
+warning mechanically to a Sonnet 5.5, Opus 5.5, or Fable 5.2 effort-only change
 when the harness is using the model's supported per-message effort path; that
 path preserves the cache.
+
+## Fable 5.2 sources
+
+- https://www.anthropic.com/claude-fable-and-mythos-5-2
+- https://platform.claude.com/docs/en/models/fable-5-2/overview
+- https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2
