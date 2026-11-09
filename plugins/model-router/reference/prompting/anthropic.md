@@ -1,6 +1,6 @@
 # Anthropic prompting policy
 
-Last reviewed: 2026-10-07
+Last reviewed: 2026-11-09
 
 Apply **Common** plus exactly one selected-model section. These are prompt
 adaptation deltas, not routing rules; model and effort are already chosen.
@@ -9,7 +9,7 @@ Primary sources:
 - https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
 - https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5-5
 - https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5
-- https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-1
+- https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2
 - https://platform.claude.com/docs/en/build-with-claude/effort
 
 ## Common
@@ -35,7 +35,7 @@ tool/search behavior only if the harness exposes it.
 - `haiku` -> Haiku 5.5
 - `sonnet` -> Sonnet 5.5
 - `opus` -> Opus 5.5
-- `fable` -> Fable 5.1
+- `fable` -> Fable 5.2
 
 Exact version IDs use the matching section when recognizable.
 
@@ -166,13 +166,17 @@ repeated reminders to continue; one crisp completion contract is preferable.
 Opus 5.5 supports per-message effort via `output_config` while preserving prompt
 cache. Keep this as harness/API configuration, not task prose.
 
-## Fable 5.1
+## Fable 5.2
 
 Source:
-https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-1
+https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2
 
-Fable is evidence-gated in the routing policy. If it has already been selected,
+Fable is evidence-gated in the routing policy. Fable 5.2 uses adaptive thinking that cannot be disabled; effort, not prompt instructions, controls reasoning depth. Its default API effort is `high`. If it has already been selected,
 adapt the prompt for the documented behavior; do not second-guess routing.
+
+### Compatibility and preserved thinking
+
+Keep the conversation prefix append-only when preserving thinking: do not rewrite earlier messages, tools, or system instructions. Avoid forced tool choice and unsupported sampling parameters. A Fable 5.2 executor's Advisor Tool advisor must be Fable 5.2 or Mythos 5.2. These are harness constraints, not prompt prose.
 
 ### Long-task completion
 
@@ -182,7 +186,7 @@ deliverable unless genuinely blocked.
 
 ### Progress updates
 
-Fable 5.1 can provide little user-facing text between tool calls. Add a request
+Fable 5.2 can provide little user-facing text between tool calls. Add a request
 for concise progress updates only when the user will be watching a long run and
 those updates are useful. Do not force commentary into short tasks.
 
@@ -203,6 +207,6 @@ Do not add style constraints merely to counter a general model tendency.
 
 ### Per-message effort and cache
 
-Fable 5.1 supports per-message effort changes that preserve prompt cache. Keep
+Fable 5.2 supports per-message effort changes that preserve prompt cache. Keep
 that configuration outside the normal task prompt unless the user is explicitly
 asking for API request construction.
