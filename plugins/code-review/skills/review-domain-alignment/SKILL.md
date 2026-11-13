@@ -1,6 +1,6 @@
 ---
 name: review-domain-alignment
-description: Review a feature, bug, implementation plan, or diff for alignment between business commitments, domain concepts, and implementation guarantees. Use when a change challenges domain rules or system responsibilities, or introduces technical choices with observable business consequences and potentially unaccepted limitations.
+description: Review a feature, bug, implementation plan, or diff for alignment between business commitments, domain concepts, and implementation guarantees. Use when a change challenges domain rules or system responsibilities, or introduces technical choices with observable business consequences and potentially unaccepted limitations, or when technically representable states create unnecessary business decisions.
 argument-hint: [request, plan, PR, branch, or paths to review]
 ---
 
@@ -89,10 +89,68 @@ design or commitment must be reconsidered. Do not silently relax the requirement
 Keep already authorized technical choices within that authorization. Ask only
 about unresolved choices that materially change the judgment.
 
+## Review the decision space before escalating questions
+
+For each material output, boundary, or combination that would require a new
+business decision, first ask whether the state is reachable in the composed
+implementation and whether it is legitimate under the evidenced domain contract.
+Prioritize states whose uncertainty fans out across multiple consumers or
+combinations. Do not exhaustively enumerate every theoretical combination.
+
+Distinguish four kinds of evidence:
+
+- **Domain invariant** — an agreed business rule excludes or requires a state
+  within a stated scope.
+- **Implementation guarantee** — a verified algorithm, contract, validation, or
+  component configuration excludes or requires a state at a specified boundary.
+- **Empirical observation** — sampled or historical data has or has not shown a
+  state; document dataset, filters, period, and coverage where available.
+- **Unknown** — evidence does not establish reachability or impossibility.
+
+Never infer impossibility solely from an empty query result, passing tests, a
+non-null annotation, or a developer's expectation. Conversely, do not escalate
+hypothetical edge cases as business decisions before checking relevant producers,
+guards, schemas, tests, data, and integration boundaries. Distinguish a state
+that cannot be produced today from one forbidden by the domain: future changes,
+migration, deserialization, external inputs, and races may invalidate a local
+implementation guarantee.
+
+For each material implementation choice, report its **decision-space delta**:
+
+- **Opened questions** — new decisions caused by the selected mechanism,
+  guarantees, missing guarantees, or their composition.
+- **Closed questions** — questions made unnecessary by evidenced guarantees,
+  with the exact scope and boundary where the guarantee holds.
+- **Residual questions** — legitimate uncertainty, including questions that
+  remain visible to consumers because a guarantee has not been propagated.
+
+Check whether a closed question is actually closed for downstream consumers.
+A producer returning only nonempty successful forecasts internally while
+publishing an unconstrained list may leave the empty-success question open for
+UI, persistence, and messaging. Recommend the smallest suitable contract, type,
+validation, test, or decision record to preserve a verified guarantee; do not
+assume every guarantee deserves a new type.
+
+Before asking stakeholders to choose behavior for an edge case, state the
+reachability evidence, the potential business impact, and why the question
+cannot be eliminated. If evidence is incomplete, recommend bounded
+investigation, defensive handling, or an explicit pending decision according to
+risk. Do not silently discard an unknown state or claim a proof that has not
+been established.
+
+Example: a forecast output is combined with three other outputs. Before
+asking for behavior for every empty-forecast combination, trace the forecast
+producer and completion contract. If successful empty forecasts are impossible
+by a verified guarantee, close those combinations within that boundary and
+check that consumers can rely on it. If only historical data contains no empty
+forecasts, record an observation, not an invariant, and keep appropriate
+residual handling or verification.
+
 ## Deliver a bounded review
 
 Start with the reviewed target and the commitment you could establish. Summarize
-the domain change, then show only material findings in a compact table.
+the domain change and material decision-space changes (opened, closed, and
+residual questions), then show only material findings in a compact table.
 
 | Commitment and evidence | Decision or mechanism | Observable consequence | Status and next step |
 | --- | --- | --- | --- |
@@ -104,8 +162,10 @@ Suggest the smallest compensating mechanism or decision needed without expanding
 the current scope. Include the relevant success/boundary examples as candidate
 acceptance criteria, clearly marked as proposed until agreed.
 
-End with the few unresolved questions that materially affect the result and the
-limits of verification. If no material delta exists, say so briefly with the
+For each claimed closed question, cite the evidence and boundary; flag any
+consumer that still exposes the eliminated state. Do not manufacture questions
+for unreachable combinations. End with the few unresolved questions that
+materially affect the result and the limits of verification. If no material delta exists, say so briefly with the
 review boundary. Do not manufacture findings or enumerate generic risks.
 
 When revisiting an implemented plan, compare promised and delivered guarantees,
