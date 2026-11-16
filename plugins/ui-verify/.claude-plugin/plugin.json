@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ui-verify",
+  "displayName": "UI Verify",
+  "description": "Plans, runs and judges a UI verification (bug repro or feature check) on a named target environment: an Opus planner writes a staged, named plan the user approves, cheap executor agents run it stage by stage with a Playwright trace each, the controller checks the account after every switch, and the run ends with facts, a verdict, packed traces and trimmed videos. Project specifics (targets, accounts, UI catalog, domain rules) stay in the project.",
+  "author": {
+    "name": "jr-jesse123",
+    "url": "https://github.com/jr-jesse123"
+  },
+  "repository": "https://github.com/jr-jesse123/claude-tookit",
+  "license": "MIT",
+  "keywords": ["playwright", "ui", "verification", "repro", "qa", "agents", "trace"]
+}
