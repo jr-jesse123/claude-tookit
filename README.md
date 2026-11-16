@@ -17,6 +17,7 @@ skills, agents, commands, hooks e MCP servers.
 /plugin install execution-router@jr-claude-toolkit
 /plugin install knowledge@jr-claude-toolkit
 /plugin install ui-evidence@jr-claude-toolkit
+/plugin install ui-verify@jr-claude-toolkit
 ```
 
 Depois de instalado, tudo fica sob o namespace do plugin:
@@ -546,6 +547,25 @@ MCP; fixe a versão do `@playwright/mcp` que você usa. Respostas verificadas (p
 e o que foi testado de ponta a ponta estão em
 [`plugins/ui-evidence/README.md`](plugins/ui-evidence/README.md).
 
+### `ui-verify`
+
+| Componente | Nome | O que faz |
+| --- | --- | --- |
+| skill | `/ui-verify:ui-verify <ticket-ou-descrição> [repro\|verify] [<alvo>]` | Planeja, executa e julga uma verificação de UI num ambiente nomeado (int, local, staging...). `repro` reproduz um bug (o resultado real do ticket é o desfecho esperado); `verify` confere uma feature contra os critérios de aceite. Roda na sessão principal, porque só ela pergunta ao usuário: enquadra, planeja, pergunta, roda os estágios só de leitura, replaneja se a medição contradiz uma pré-condição, aprova as escritas, roda os estágios de escrita e gravação (via `ui-evidence`), dá o veredito e fecha com README, traces empacotados e vídeos aparados. Confere a conta depois de cada troca de usuário. Tudo é referido por nomes hierárquicos (verificação › estágio › passo), nunca por `S7` ou `W4`. |
+| agente | `ui-verify:ui-planner` | Opus. Expande as pré-condições a partir do código, do catálogo de UI e das notas de planejamento do projeto; escolhe estágios, o tier de executor de cada escrita e as leituras do oráculo; escreve `plan.md`. Nunca abre navegador. |
+| agente | `ui-verify:ui-browser`, `ui-verify:ui-browser-measure` | Sonnet ou Haiku, como o plano manda. Executam um estágio aprovado pelo Playwright MCP, dentro de um trace, e devolvem fatos. O `measure` acrescenta leituras `evaluate` somente-leitura, só com a expressão exata listada no plano. |
+| script | `scripts/pack-trace.py`, `trim-idle-video.py`, `trace-summary.py`, `session-usage.py` | Empacota um trace por id sem misturar os da sessão; apara os trechos parados de uma gravação e junta as partes de um caso; resume um trace Jaeger por span; mede o consumo de tokens de uma sessão por papel, com janela `--since`/`--until`. |
+| referência | `references/plan-format.md`, `target-profile.md`, `project-config.md`, `catalog-contract.md` | O contrato do plano, o que o projeto escreve por ambiente, a config `.claude/ui-verify.json` e o catálogo de UI opcional. |
+
+O que é do projeto fica no projeto: perfis de alvo (hosts, login, conferência de
+conta, política de escrita com autor e data da decisão, evidência de backend,
+checagem de build), catálogo de UI, notas de planejamento e, se houver, um
+agente que lê logs e traces. Um perfil pode declarar o alvo como sandbox: as
+escritas são anunciadas e rodam sem parada de aprovação, e o que o perfil
+reserva (resets, apagar dados existentes) continua pedindo um sim. Detalhes,
+requisitos (Playwright MCP com `--caps devtools`, plugin `ui-evidence`) e o que
+não foi verificado estão em [`plugins/ui-verify/README.md`](plugins/ui-verify/README.md).
+
 ## Estrutura do repositório
 
 ```
@@ -700,6 +720,14 @@ claude-tookit/
 │               ├── recording.md     # harness + vídeo seguro + formato do README/timeline
 │               ├── config.md        # .claude/ui-evidence.json
 │               └── compose.md       # imagens antes/depois
+│   └── ui-verify/
+│       ├── .claude-plugin/plugin.json
+│       ├── README.md                # o que fica no projeto, requisitos, origem
+│       ├── agents/                  # ui-planner (Opus), ui-browser, ui-browser-measure
+│       ├── scripts/                 # pack-trace, trim-idle-video, trace-summary, session-usage
+│       └── skills/ui-verify/
+│           ├── SKILL.md             # enquadrar → planejar → perguntar → estágios → veredito → fechar
+│           └── references/          # plan-format, target-profile, project-config, catalog-contract
 ├── scripts/validate-marketplace.mjs  # validação local e no CI
 ├── scripts/validate-diagrams.mjs     # valida os diagramas mermaid dos plugins
 └── .github/workflows/validate.yml

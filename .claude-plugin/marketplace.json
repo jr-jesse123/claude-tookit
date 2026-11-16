@@ -346,6 +346,25 @@
       "author": {
         "name": "jr-jesse123"
       }
+    },
+    {
+      "name": "ui-verify",
+      "source": "./plugins/ui-verify",
+      "description": "Plans, runs and judges a UI verification (bug repro or feature check) on a named target environment: a planner agent writes a staged, named plan, cheap executor agents run it with one Playwright trace per stage, the account is checked after every switch, and the run ends with facts, a verdict, packed traces and trimmed videos. Targets, accounts, UI catalog and domain rules stay in the project. Uses ui-evidence for recorded stages.",
+      "category": "quality",
+      "keywords": [
+        "playwright",
+        "ui",
+        "verification",
+        "repro",
+        "qa",
+        "agents",
+        "trace"
+      ],
+      "license": "MIT",
+      "author": {
+        "name": "jr-jesse123"
+      }
     }
   ]
 }

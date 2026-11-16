@@ -25,6 +25,7 @@
     "execution-router@jr-claude-toolkit": true,
     "knowledge@jr-claude-toolkit": true,
     "mutation-testing@jr-claude-toolkit": true,
-    "ui-evidence@jr-claude-toolkit": true
+    "ui-evidence@jr-claude-toolkit": true,
+    "ui-verify@jr-claude-toolkit": true
   }
 }
