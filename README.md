@@ -84,6 +84,13 @@ ficam em `skills/pr-tour/html.md`, compartilhado pelos dois tours.
   remota (`CLAUDE_CODE_REMOTE=true`), sem `npx`, ou quando o tour vai para o
   GitHub, a skill volta para o markdown e diz por quê.
 - Não depende do plugin `lavish` instalado: os tours chamam o CLI direto.
+- Tema claro ou escuro: `--theme light`, `--theme dark` ou `--theme auto`
+  (padrão, segue o sistema). O tema padrão da página fica num único atributo,
+  `data-theme` no `<html>`. Para trocar depois que o tour está pronto, basta
+  pedir ("deixa escuro"): a sessão edita só esse atributo, sem refazer a
+  página nem os diagramas, e o Lavish recarrega sozinho. Na página, um botão
+  no canto superior direito alterna claro/escuro só para quem está vendo; se
+  o padrão do arquivo mudar, todo mundo volta ao novo padrão.
 
 ### `mutation-testing`
 
