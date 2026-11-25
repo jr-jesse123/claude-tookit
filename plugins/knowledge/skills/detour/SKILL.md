@@ -1,6 +1,6 @@
 ---
 name: detour
-description: "Step back from a codebase when concepts or APIs block understanding. The user names what is unclear and this session helps them build the map of what must be understood: the base concepts (technology-independent), how the specific technology at the version this repo pins models them, how this repo actually uses those APIs, and a short picture of the project (domain, entities, constraints) to build examples from. The map is drafted with the user, then packaged as a self-contained handoff for another agent that already knows the user, which teaches, challenges and bridges as it sees fit. A PR, file or area can be given as context. --return reloads the map and reopens the spots in the code once the user feels ready."
+description: "Step back from a codebase when concepts or APIs block understanding. The user names what is unclear; this session interviews them, anchored on the code, to find where their understanding is clear and where it blurs (concept, technology, this repo's usage, or how pieces interact), then helps them build the map of what must be understood, with several subjects as connected threads when needed: the base concepts (technology-independent), how the specific technology at the version this repo pins models them, how this repo actually uses those APIs, and a short picture of the project (domain, entities, constraints) to build examples from. The map is drafted with the user, then packaged as a self-contained handoff for another agent that already knows the user, which teaches, challenges and bridges as it sees fit. A PR, file or area can be given as context. --return reloads the map and reopens the spots in the code once the user feels ready."
 argument-hint: "<what is not clear, in your words> [--pr <number|url|branch>] [paths or areas as context] | --return <slug>"
 disable-model-invocation: true
 allowed-tools:
@@ -31,9 +31,11 @@ an agent that already knows the user and how they learn.
 
 The work splits in two:
 
-- **This session maps.** It researches the code and the technology and
-  drafts the map. The user shapes the map, because they know what they
-  are missing.
+- **This session plots the route.** It interviews the user to find where
+  their understanding is clear and where it blurs. It researches the code
+  and the technology, then drafts the map with the user. A badly plotted
+  route is expensive: the destination will follow it. So the effort goes
+  here, where the code is at hand and the conversation can adjust.
 - **The destination teaches.** It knows the user, so it skips what they
   already understand, builds bridges from fields they master, and decides
   whether and how to check understanding or set challenges.
@@ -62,7 +64,58 @@ once they understand it (read this module, judge a PR, change a flow), keep
 that: it sets the scope. When they do not say, infer it from the
 conversation, or leave it open. Do not hold the work up for it.
 
-## 2. Research the layers
+Then do a quick reconnaissance, enough to ask concrete questions: read the
+spots, see which technology and constructs are involved, and see which
+other pieces of the code they lean on. The full research comes after the
+interview, aimed where the interview points.
+
+## 2. Find the edges: interview the user
+
+The destination knows the user in general. Only this session can find out
+where their understanding stops *in this code*, and that is what decides
+the route. Interview the user before researching in depth.
+
+**Ask about the code, not about the topic.** "Do you know change tracking?"
+gets a yes or no that says little. Anchor each question on a spot and ask
+the user to explain it or to predict it: "in `ApproveOrderHandler.cs:41`,
+what do you expect `SaveChangesAsync` to write, and why?" A prediction
+shows where the edge is faster than any self-rating.
+
+**Place each blur in a layer.** For every item, find out where it sits:
+
+- the **concept** itself (the idea is new or hazy);
+- the **technology's modeling** (the idea is clear, but this API's
+  defaults or guarantees are not);
+- **this repo's usage** (the API is clear, but the wrapper, the config or
+  the convention here is not);
+- the **interaction** between pieces (each part is clear alone, but the
+  combination is not).
+
+Also note what is solidly clear: the route should not spend time there.
+When it helps the destination build bridges, note the neighboring
+knowledge the user mentions ("I know this from Hibernate", "like
+React's reconciliation").
+
+**Adapt, and stop when the edges are found.**
+
+- Ask at most three questions per message.
+- Follow up where an answer is vague. Move on where it is solid.
+- Stop when every item has a located edge, or when the user says to go
+  ahead. There is no fixed number of rounds: one more question costs less
+  here than a wrong route.
+- When the user's words already place an item ("I get the API, what
+  confuses me is why the repo wraps it"), do not ask about it again.
+
+**Locate, do not evaluate.** Do not correct the user or teach during the
+interview. A wrong prediction is an edge you found, not a mistake to fix.
+Record it in the user's words, and it goes on the map. Correcting it is
+the destination's job.
+
+**Record the result** as one line per item: `clear`, `blurry in <layer>`
+or `new`, with the user's own words or prediction. The research and the
+handoff are built from this record.
+
+## 3. Research the layers
 
 Keep the layers apart. Mixing them is exactly what makes learning inside a
 codebase slow.
@@ -132,13 +185,40 @@ in `${CLAUDE_PLUGIN_ROOT}/reference/claims.md`. `seen` means the cited
 source was opened and says it. The destination cannot reopen the sources;
 the markers tell it which statements are solid.
 
+**Several subjects at once.** Understanding often needs several things
+together: a persistence API, the transaction behavior wrapped around it,
+and the outbox that depends on both. Keep the map flexible without losing
+focus:
+
+- Each subject is a **thread**, anchored on a spot the user flagged or the
+  interview surfaced. A subject with no spot in the code does not get a
+  thread.
+- Concepts that several threads need are written once, in the shared
+  concepts list, in dependency order. Each thread points to the ones it
+  uses.
+- When the threads touch each other, add a **how they connect** part:
+  which piece calls, wraps or depends on which, and the order in which
+  things happen at runtime. When the interview placed a blur in
+  *interaction*, this part is where it lands, and it gets its own
+  comprehension targets.
+- Threads that share no concept and no code path are separate detours.
+  Propose splitting them into one handoff each. Separate subjects in one
+  brief dilute both.
+- Order the threads by dependency, the one the others need first. When
+  there are more than three threads, ask the user which ones block them
+  now, and leave the rest for a later detour.
+
+The interview record steers the depth: an item marked `clear` gets a line
+of context at most, a `blurry in <layer>` item gets depth in that layer,
+and a `new` item gets the full treatment.
+
 **Budget.** Research inline for one technology and a few dozen call
 sites. When the sweep is wide (several technologies, call sites spread
 across many modules), hand the call-site inventory of layer c to an
 `Explore` agent. Give it the pinned version, the constructs to find and the
 grouping you want. Keep layers a, b and d and all the writing here.
 
-## 3. What must be understood
+## 4. What must be understood
 
 From the layers, write the **comprehension targets**: the points the user
 needs to grasp to read this code with confidence, usually three to six.
@@ -151,16 +231,21 @@ Each target:
   passed to `SaveChanges` writes nothing (`ApproveOrderHandler.cs:41`)".
   Trivia about the API alone does not qualify;
 - names the trap, when there is one: the default or the departure that
-  makes the code behave differently from what the concept alone suggests.
+  makes the code behave differently from what the concept alone suggests;
+- when the interview caught a wrong prediction, starts from it: that
+  prediction is exactly what the destination has to move.
 
 This list is the core of the map. The destination uses it however it sees
 fit: as a syllabus, as the source of challenges, or as its own test of
 when the user is ready.
 
-## 4. Draft the map with the user
+## 5. Draft the map with the user
 
 Before writing the handoff, show the map as a compact outline:
 
+- the interview record, one line per item, so the user can correct how
+  they were placed;
+- the threads, if more than one, with how they connect;
 - the concepts, in order, with the *assumed known* line;
 - the technology and its version, with the constructs that will go in the
   table;
@@ -173,16 +258,17 @@ they are missing. You know what the code needs. The map takes from both.
 Revise it and research what they add, then show it again only when it
 changed in substance. When they say it is right, write the handoff.
 
-## 5. Package the handoff
+## 6. Package the handoff
 
 Write one self-contained markdown file to `.detour/<slug>.md` in the
 working directory (`mkdir -p .detour` first). The slug comes from the
 subject and is short (`ef-change-tracking`). If `.detour/` is not in
 `.gitignore`, say so in the closing line, and do not edit `.gitignore`.
 
-Structure, in the user's language (see
-`${CLAUDE_SKILL_DIR}/examples/handoff.md` for a full one, and size the real
-one to the real subject):
+Structure, in the user's language. See
+`${CLAUDE_SKILL_DIR}/examples/handoff.md` for a full single-thread one and
+`${CLAUDE_SKILL_DIR}/examples/multi-thread.md` for how several threads fit
+together. Size the real one to the real subject.
 
 1. **For the destination agent**: a short preamble with these points.
    - Who is learning and why. The person is working in `<project, one
@@ -203,13 +289,20 @@ one to the real subject):
      reported back.
 2. **Project context** (layer d).
 3. **Where it showed up**: the spots, quoted.
-4. **Base concepts**, in dependency order, plus *assumed known*.
-5. **How `<technology>@<version>` models them**: the mapping table,
-   defaults, guarantees and departures, with markers and sources.
-6. **How this repo uses it**: patterns with counts, wrappers and config,
+4. **Where the person stands**: the interview record, item by item, in
+   their own words: what is clear, what is blurry and in which layer, the
+   predictions they made, and the neighboring knowledge they mentioned.
+   Mark it as their own account, not an assessment.
+5. **Base concepts**, in dependency order, plus *assumed known*. With
+   several threads, this is the shared list.
+6. **How `<technology>@<version>` models them**: the mapping table,
+   defaults, guarantees and departures, with markers and sources. With
+   several threads, give one block per thread here and in the next item.
+7. **How this repo uses it**: patterns with counts, wrappers and config,
    unusual uses, and minimal excerpts.
-7. **What must be understood**: the comprehension targets.
-8. **Sources**, with versions.
+8. **How they connect**, only with several threads that touch each other.
+9. **What must be understood**: the comprehension targets.
+10. **Sources**, with versions.
 
 **What leaves the repo.** The handoff goes to another agent, possibly in
 another product or account. Quote the minimum code that makes each point.
@@ -246,8 +339,11 @@ came back when they were confident.
 
 - Do not teach in this session: no tutorial, no analogies chosen for the
   user, no assumed level. Those belong to the destination.
-- Do not evaluate the user or write answers to the comprehension targets
-  into the handoff. The destination decides how to check.
+- Do not evaluate the user, in the interview or after it, and do not
+  write answers to the comprehension targets into the handoff. The
+  interview locates edges; the destination decides how to check.
+- Do not skip the interview because the topic seems obvious. The route
+  depends on where *this* user's edges are in *this* code.
 - Do not widen the map to "everything about `<technology>`". What the user
   is missing and what the code needs set its edges.
 - Do not report findings. An unusual use of an API is a fact on the map;

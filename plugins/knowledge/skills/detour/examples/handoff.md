@@ -1,6 +1,6 @@
 # Example — a detour handoff
 
-A format reference for step 4 of the `detour` skill, not a template: size the
+A single-thread format reference for step 6 of the `detour` skill, not a template: size the
 real handoff to the real subject. The repo, paths and counts below are
 illustrative. The facts about EF Core are real, for the version named. A real
 handoff is written in the language the user is speaking. This one is in
@@ -74,6 +74,23 @@ await _db.SaveChangesAsync(ct);
 ```
 
 
+## Where the person stands
+
+This is their own account, from the interview in the repo session. It is
+not an assessment.
+
+- **Unit of work, transactions:** `clear`. "I know this from Hibernate
+  sessions."
+- **Change tracking:** `blurry in technology`. Asked what
+  `ApproveOrderHandler.cs:41` writes after the PR, they predicted: "the
+  status change, since `SaveChanges` saves the order". They had not
+  connected tracking to the query.
+- **`Update()` and re-attaching:** `new`. "Never used it. I thought
+  attaching was just bookkeeping."
+- **`RowVersion` with detached entities:** `blurry in interaction`. "I
+  know what a rowversion is. I don't know what happens to it if the entity
+  isn't tracked."
+
 ## Base concepts (in dependency order)
 
 1. **Unit of work.** A session collects every change made during one
@@ -131,8 +148,9 @@ await _db.SaveChangesAsync(ct);
 1. **Why the approval no longer saves.** In `ApproveOrderHandler.cs:41`,
    the order now comes from a no-tracking query, and `SaveChangesAsync`
    runs right after `Approve(...)`. To see why nothing is written, the
-   person needs unit of work and snapshot tracking, plus the EF fact that
-   tracking is chosen per query.
+   person needs snapshot tracking plus the EF fact that tracking is chosen
+   per query. This starts from their prediction that "`SaveChanges` saves
+   the order".
 2. **What re-attaching costs.** The obvious repair is `_db.Update(order)`.
    It marks *every* property as modified, so the `UPDATE` writes the whole
    row. It also marks the `Include`d lines as modified, so each of them is
