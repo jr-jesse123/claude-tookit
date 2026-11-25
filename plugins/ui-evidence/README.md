@@ -34,7 +34,7 @@ Nothing is uploaded, attached or posted. You get files and text; you post them.
   same flag also turns on `browser_highlight`, `browser_hide_highlight`,
   `browser_start_tracing`, `browser_stop_tracing`, `browser_annotate`,
   `browser_resume`, `browser_start_recording` and `browser_stop_recording`;
-  the skill does not use tracing, annotate, resume or action recording. After moving the pin, start the new version with
+  the skill may use tracing (test environments only) and does not use annotate, resume or action recording. After moving the pin, start the new version with
   `--caps devtools`, list its tools and compare the names with
   `references/recording.md` before relying on it.
 - Recommended MCP options: `--secrets <dotenv file>` so `browser_type` can type
