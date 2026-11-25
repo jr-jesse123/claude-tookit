@@ -13,27 +13,27 @@ English so it can serve as a reference for any language.
 
 ## For you, the destination agent
 
-The person you are talking to is reviewing a pull request in an
-order-management API (.NET 8, EF Core 8.0.11, SQL Server). They got stuck
-on `AsNoTracking` and on what EF Core does, or fails to do, when entities
-are changed and saved. Their goal is to go back to the PR able to decide
-whether moving the order loader to `AsNoTracking` is safe.
+The person you are talking to is working in an order-management API
+(.NET 8, EF Core 8.0.11, SQL Server), around a pull request that changes
+how orders are loaded. In their words, they got stuck on "what
+`AsNoTracking` actually changes, and why it matters when we save". They
+want to come back able to judge that PR.
 
-You know this person and how they learn. This brief covers *what* to
-cover and *when they are done*, not *how* to teach it.
+You know this person. Skip what they already understand, bridge from
+fields they master, and check understanding or set challenges as you judge
+best. This brief maps *what* must be understood. It does not say *how* to
+teach it.
 
 - In scope: the base concepts below, how EF Core 8 models them, and the
   repo excerpts in this brief.
-- Out of scope: the rest of the project, and judging the PR. Both happen
-  back in the repo.
+- Out of scope: the rest of the project, and any judgment of the code.
+  Both happen back in the repo.
 - When examples help, take them from *Project context*. The person will
   meet these same entities again in the code.
-- They are done when they can answer the *Exit questions* in their own
-  words. Then help them fill in the *Return note* at the end, which they
-  will paste back into the repo session.
-
-Markers: `seen` means the source was opened and says it; `inferred` means
-a conclusion drawn from what was opened.
+- Markers: `seen` means the source was opened and says it; `inferred`
+  means a conclusion drawn from what was opened.
+- The person goes back to the repo when they feel confident. Nothing needs
+  to be reported back.
 
 ## Project context
 
@@ -73,8 +73,6 @@ order.Approve(cmd.OperatorId);         // sets Status and ApprovedBy
 await _db.SaveChangesAsync(ct);
 ```
 
-**Decision waiting:** whether this change is safe for the approval flow,
-and what else would have to change with it.
 
 ## Base concepts (in dependency order)
 
@@ -128,20 +126,28 @@ and what else would have to change with it.
   named `...ForEdit` that does not track. (inferred, from the naming
   pattern in `OrderRepository.cs`)
 
-## Exit questions
+## What must be understood
 
-1. In `ApproveOrderHandler.cs:41`, the order now comes from a no-tracking
-   query and `SaveChangesAsync` runs right after `Approve(...)`. What is
-   written to the database, and why?
-2. Suppose the fix is to call `_db.Update(order)` before saving. What does
-   the `UPDATE` statement contain, and what does that mean for the order
-   lines loaded through `Include`?
-3. Two operators approve the same order at the same moment, with that fix
-   in place. Does the `RowVersion` still protect them? What has to be true
-   about the `order` instance for it to work?
-4. The PR description says it was done "for performance". On the approval
-   flow, which loads one order with its lines, where does the cost of
-   tracking actually come from?
+1. **Why the approval no longer saves.** In `ApproveOrderHandler.cs:41`,
+   the order now comes from a no-tracking query, and `SaveChangesAsync`
+   runs right after `Approve(...)`. To see why nothing is written, the
+   person needs unit of work and snapshot tracking, plus the EF fact that
+   tracking is chosen per query.
+2. **What re-attaching costs.** The obvious repair is `_db.Update(order)`.
+   It marks *every* property as modified, so the `UPDATE` writes the whole
+   row. It also marks the `Include`d lines as modified, so each of them is
+   rewritten too. This is the trap: in
+   the general concept, "re-attach" sounds free.
+3. **When the `RowVersion` still protects.** With a detached entity, the
+   concurrency check uses whatever token value the instance carries. So
+   protection depends on that instance holding the value *as read*. This
+   needs optimistic concurrency plus how EF picks "original values" after
+   `Update()`.
+4. **Where tracking actually costs.** The PR says it was done "for
+   performance". On a flow that loads one order with its lines, the person
+   should be able to place where the tracking overhead lives (snapshotting
+   and identity resolution), and why it shows up in the 37 read queries
+   rather than here.
 
 ## Sources
 
@@ -151,17 +157,4 @@ and what else would have to change with it.
   - `saving/concurrency`
   - `saving/transactions`
 - Repo files quoted above, at the PR head commit.
-
-## Return note
-
-Fill this in together, then paste it back into the repo session with
-`/knowledge:detour --return`.
-
-```
-# Return: change tracking in EF Core (ef-change-tracking)
-- In my words: <the idea, 3–5 lines>
-- Exit answers: Q1 → … / Q2 → … / Q3 → … / Q4 → …
-- What I now assume about this code: <statements to check>
-- Still fuzzy: <what is left>
-```
 ````

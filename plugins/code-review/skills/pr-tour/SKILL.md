@@ -331,9 +331,10 @@ When, during or after the tour, the reviewer says they do not understand a
 concept or an API the diff relies on (not this PR's logic, but the idea or
 the library underneath it), answer briefly if one or two lines settle it.
 When it needs real study, offer `/knowledge:detour <concept> --pr <ref>`
-(from the `knowledge` plugin, if installed). It maps the concept, the
-technology's modeling and the repo's usage into a handoff for an agent that
-knows the reviewer, and `--return` brings them back to this tour's spots.
+(from the `knowledge` plugin, if installed). There the reviewer and the
+session map what must be understood (the concept, the technology's
+modeling, the repo's usage) into a handoff for an agent that knows the
+reviewer, and `--return` brings them back to this tour's spots.
 Do not turn the tour into a lesson.
 
 ## What not to do
