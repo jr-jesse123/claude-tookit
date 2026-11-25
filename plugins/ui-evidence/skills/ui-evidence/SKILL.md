@@ -155,7 +155,8 @@ In both modes:
 - Safe video: start recording only after login; never type a secret while
   recording; action titles show typed text in clear, even in password
   fields and for `--secrets` values, so keep them off around any typing;
-  no tracing; mask `maskSelectors` in screenshots; prefer test entities to
+  tracing is allowed (test environments only: a trace keeps headers and
+  typed values in clear text); mask `maskSelectors` in screenshots; prefer test entities to
   real customer data.
 - Record in short parts and do not record long waits. If the session
   expires mid-run: stop the recording, log in outside it, and start a new

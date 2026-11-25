@@ -149,7 +149,7 @@ either mode.
 | Tool | What it does | In an evidence run |
 | --- | --- | --- |
 | `browser_highlight` / `browser_hide_highlight` | A persistent outline on an element, also on video. | Allowed by the MCP's normal permissions; declare it in the README and remove it after. |
-| `browser_start_tracing` / `browser_stop_tracing` | A Playwright trace in `.playwright-mcp/traces/`. | Do not use. It wrote the `Authorization` header (bearer token) and values typed through `--secrets` in clear text. |
+| `browser_start_tracing` / `browser_stop_tracing` | A Playwright trace in `.playwright-mcp/traces/`. | Allowed. The skill runs in test environments whose data is public; the trace keeps request headers (including `Authorization`) and typed values in clear text, so attach it only where that holds. Declare it in the README. |
 | `browser_annotate` | Opens the Playwright dashboard and waits for a person to draw on the page. | Do not use. |
 | `browser_start_recording` / `browser_stop_recording` | Records a person's actions as Playwright code. Not video. | Not needed. |
 | `browser_resume` | Resumes a paused Playwright debugger. | Not needed. |
@@ -261,7 +261,7 @@ knowledge: put it in a project reference (see `config.md`).
 | --- | --- |
 | Credentials on video | Start recording only after login. If the session expires mid-run, stop the recording, log in outside it, start a new part (`run-1-part2.webm`). Never type a secret while recording. |
 | Typed text in action titles | Titles render the typed value in clear text, `Fill "<value>"` and `Type "<value>"`, even for `type=password` fields and for values taken from the MCP's `--secrets` file (seen on Playwright 1.64). Natively: no titles by default; with titles on, `browser_video_hide_actions` before every typing tool. In a script: `page.screencast.hideActions()` before any fill whose text must not be filmed and `showActions(...)` again after, or `style: { title: 'display: none' }`. Secrets are never typed from a script at all: only `browser_type`, outside the recording. |
-| Secrets and tokens in a trace | No tracing in an evidence run: a trace keeps request headers and typed values in clear text. |
+| Secrets and tokens in a trace | Tracing is allowed in test environments, where the data is public. A trace keeps request headers and typed values in clear text: do not trace against an environment with real credentials or customer data. |
 | PII in screenshots and video | Screenshots: the script's `mask` with the config's `maskSelectors`; natively, frame with `target` to leave them out. Video cannot be masked: prefer test entities, and never film real customer data when a test entity exists. |
 | Files written anywhere | Script: every `path:` derives from `EVIDENCE_DIR`. Native: absolute `filename`s in the evidence folder. |
 | Recording left running or lost | Script: `screencast.stop()` in `finally`; errors returned, not swallowed. Native: stop before ending the turn or returning; short parts; check each file after the stop. Neither mode saves a recording when the browser dies. |
